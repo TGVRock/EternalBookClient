@@ -1,5 +1,5 @@
 import type { SSSWindow } from "sss-module";
-import type { NetworkType } from "symbol-sdk";
+import type { NetworkType, SignedTransaction, Transaction } from "symbol-sdk";
 declare const window: SSSWindow;
 
 const sss = window.SSS;
@@ -35,4 +35,14 @@ export function getNetworkType(): NetworkType | undefined {
     return undefined;
   }
   return sss.activeNetworkType as NetworkType;
+}
+
+export async function requestTxSign(
+  tx: Transaction
+): Promise<SignedTransaction | undefined> {
+  if (!isSSSEnable()) {
+    return undefined;
+  }
+  sss.setTransaction(tx);
+  return sss.requestSign();
 }

@@ -9,6 +9,22 @@ export function b2s(b: boolean): string {
 }
 
 /**
+ * string to boolean
+ *
+ * @param s target string
+ * @returns boolean
+ */
+export function s2b(s: string): boolean {
+  switch (s) {
+    case "true":
+    case "1":
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
  * timestamp to Date
  *
  * @param b target timestamp
@@ -21,4 +37,8 @@ export function t2d(t: number): string {
     " " +
     dateTime.toLocaleTimeString("ja-JP")
   );
+}
+
+export function ConvertHumanReadableByteDataSize(size: number): string {
+  return size.toLocaleString("en");
 }

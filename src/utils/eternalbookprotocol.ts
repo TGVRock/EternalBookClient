@@ -7,7 +7,12 @@ import {
 } from "symbol-sdk";
 import { getTransactionInfo, getTransactions } from "@/apis/transaction";
 import { decryptoHeader, getHash } from "./crypto";
-import { PROTOCOL_NAME, HEADER_TX_IDX, DATA_TX_START_IDX } from "./consts";
+import {
+  PROTOCOL_NAME,
+  PROTOCOL_VERSION,
+  HEADER_TX_IDX,
+  DATA_TX_START_IDX,
+} from "./consts";
 import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
 import { useEnvironmentStore } from "@/stores/environment";
 import { getMimeFromBase64 } from "./mime";
@@ -130,7 +135,10 @@ export async function getEBPOnChainData(
         onChainDataList.push({
           title: data.title,
           description: data.description || "N/A",
-          date: dateTime.toLocaleDateString('ja-JP') + ' ' + dateTime.toLocaleTimeString('ja-JP'),
+          date:
+            dateTime.toLocaleDateString("ja-JP") +
+            " " +
+            dateTime.toLocaleTimeString("ja-JP"),
           mime: getMimeFromBase64(data.data),
           base64: data.data,
         });
@@ -151,7 +159,7 @@ function getAggregateTxData(
     header: EternalBookProtocolHeader;
     aggregateTx: AggregateTransaction;
   }
-): {data: string, title: string, description: string} {
+): { data: string; title: string; description: string } {
   // 1つのアグリゲートに記録されているデータを抽出
   let innerData = "";
   for (
@@ -166,7 +174,11 @@ function getAggregateTxData(
 
   // 先頭データの場合は終了
   if (null === aggTx.header.prevTx) {
-    return {data: innerData, title: aggTx.header.title || "N/A", description: aggTx.header.description || "N/A"};
+    return {
+      data: innerData,
+      title: aggTx.header.title || "N/A",
+      description: aggTx.header.description || "N/A",
+    };
   }
 
   // 1つ前のアグリゲートトランザクションを検索
@@ -177,7 +189,11 @@ function getAggregateTxData(
   );
   if (0 === prevAggTx.length) {
     // 存在しない場合は復元終了
-    return {data: innerData, title: aggTx.header.title || "N/A", description: aggTx.header.description || "N/A"};
+    return {
+      data: innerData,
+      title: aggTx.header.title || "N/A",
+      description: aggTx.header.description || "N/A",
+    };
   } else if (1 < prevAggTx.length) {
     // ありえないはずのため、ログ出力のみ
     console.log("transaction duplicated!");
@@ -185,4 +201,29 @@ function getAggregateTxData(
   const prevData = getAggregateTxData(aggTxList, prevAggTx[0]);
   prevData.data += innerData;
   return prevData;
+}
+
+export function createHeader(
+  mosaicIdStr: string,
+  ownerAddress: string,
+  prevTx: string,
+  title: string,
+  description: string,
+  hash: string
+): EternalBookProtocolHeader {
+  const header: EternalBookProtocolHeader = {
+    version: PROTOCOL_NAME + " " + PROTOCOL_VERSION,
+    mosaicId: mosaicIdStr,
+    address: ownerAddress,
+    prevTx: prevTx.length > 0 ? prevTx : null,
+  };
+  if (prevTx.length === 0) {
+    header.multipul = true;
+    header.title = title;
+    header.description = description;
+  }
+  if (hash.length > 0) {
+    header.hash = hash;
+  }
+  return header;
 }

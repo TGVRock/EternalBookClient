@@ -12,6 +12,15 @@ export function isAudio(mime: string): boolean {
   return false;
 }
 
+export function isHtml(mime: string): boolean {
+  // FIXME: セキュリティ的に問題ないことを確認した上で解放する
+  return false;
+  if (mime.startsWith("text/html")) {
+    return true;
+  }
+  return false;
+}
+
 export function getMimeFromBase64(base64: string): string {
   const startIdx = "string" === typeof base64 ? base64.indexOf("data:") : -1;
   const endIdx = -1 < startIdx ? base64.indexOf("base64", startIdx) : -1;

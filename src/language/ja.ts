@@ -15,4 +15,12 @@ export default {
     restrictable: "制限可能",
     revokable: "取消可能",
   },
+  preview: {
+    byte: "バイト",
+    dataSize: "データサイズ",
+    entire: "全体",
+    predictFee: "手数料(予測値)",
+    title: "タイトル",
+    message: "メッセージ",
+  },
 };

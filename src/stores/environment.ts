@@ -1,6 +1,11 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import { NetworkType, RepositoryFactoryHttp } from "symbol-sdk";
+import {
+  NetworkType,
+  RepositoryFactoryHttp,
+  type AccountRepository,
+  type MultisigRepository,
+} from "symbol-sdk";
 import type {
   TransactionRepository,
   BlockRepository,
@@ -29,6 +34,9 @@ export const useEnvironmentStore = defineStore("environment", () => {
   const blockRepo = ref<BlockRepository | undefined>(undefined);
   const mosaicRepo = ref<MosaicRepository | undefined>(undefined);
   const namespaceRepo = ref<NamespaceRepository | undefined>(undefined);
+  const accountRepo = ref<AccountRepository | undefined>(undefined);
+  const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+  const wsEndpoint = ref("");
 
   watch(
     networkType,
@@ -36,20 +44,25 @@ export const useEnvironmentStore = defineStore("environment", () => {
       switch (networkType.value) {
         case NetworkType.TEST_NET:
           repo.value = new RepositoryFactoryHttp(nodeListTest[0]);
+          wsEndpoint.value = nodeListTest[0].replace("http", "ws") + "/ws";
           break;
 
         case NetworkType.MAIN_NET:
           repo.value = new RepositoryFactoryHttp(nodeListMain[0]);
+          wsEndpoint.value = nodeListMain[0].replace("http", "ws") + "/ws";
           break;
 
         default:
           generationHash.value = "N/A";
           epochAdjustment.value - 1;
+          wsEndpoint.value = "";
           repo.value = undefined;
           txRepo.value = undefined;
           blockRepo.value = undefined;
           mosaicRepo.value = undefined;
           namespaceRepo.value = undefined;
+          accountRepo.value = undefined;
+          multisigRepo.value = undefined;
           return;
       }
       repo.value.getGenerationHash().subscribe((value) => {
@@ -62,6 +75,8 @@ export const useEnvironmentStore = defineStore("environment", () => {
       blockRepo.value = repo.value.createBlockRepository();
       mosaicRepo.value = repo.value.createMosaicRepository();
       namespaceRepo.value = repo.value.createNamespaceRepository();
+      accountRepo.value = repo.value.createAccountRepository();
+      multisigRepo.value = repo.value.createMultisigRepository();
     },
     { immediate: true }
   );
@@ -70,10 +85,13 @@ export const useEnvironmentStore = defineStore("environment", () => {
     networkType,
     generationHash,
     epochAdjustment,
+    wsEndpoint,
     repo,
     txRepo,
     blockRepo,
     mosaicRepo,
     namespaceRepo,
+    accountRepo,
+    multisigRepo,
   };
 });

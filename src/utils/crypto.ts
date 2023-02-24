@@ -1,4 +1,4 @@
-import { createHash, createDecipheriv } from "crypto";
+import { createHash, createDecipheriv, createCipheriv } from "crypto";
 import { HASH_ALGORITHM, CHIPER_ALGORITHM, DEFAULT_IV } from "@/utils/consts";
 import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
 import { Buffer } from "buffer";
@@ -6,6 +6,23 @@ import { Buffer } from "buffer";
 export function getHash(onChainData: string): string {
   const hashsum = createHash(HASH_ALGORITHM);
   return hashsum.update(onChainData).digest("hex");
+}
+
+export function cryptoHeader(
+  mosaicIdStr: string,
+  header: EternalBookProtocolHeader,
+  iv: string = DEFAULT_IV
+): string | undefined {
+  try {
+    const cipher = createCipheriv(CHIPER_ALGORITHM, iv, mosaicIdStr);
+    const cipherData = cipher.update(JSON.stringify(header));
+    const encryptedData = Buffer.concat([cipherData, cipher.final()]);
+    return encryptedData.toString("hex", 0, encryptedData.length);
+  } catch (error) {
+    // 暗号化失敗
+    // console.log(error);
+  }
+  return undefined;
 }
 
 export function decryptoHeader(

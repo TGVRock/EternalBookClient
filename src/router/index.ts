@@ -31,6 +31,16 @@ const router = createRouter({
       name: "WriterTop",
       component: () => import("../views/Writer/TopView.vue"),
     },
+    {
+      path: "/writer/processing",
+      name: "WriteProcessing",
+      component: () => import("../views/Writer/ProcessingView.vue"),
+    },
+    {
+      path: "/writer/onchain",
+      name: "WriteOnChainData",
+      component: () => import("../views/Writer/OnChainDataProcessingView.vue"),
+    },
   ],
 });
 

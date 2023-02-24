@@ -15,4 +15,12 @@ export default {
     restrictable: "Restrictable",
     revokable: "Revokable",
   },
+  preview: {
+    byte: "Byte",
+    dataSize: "Data Size",
+    entire: "Entire",
+    predictFee: "Fee (Predict)",
+    title: "Title",
+    message: "Message",
+  },
 };

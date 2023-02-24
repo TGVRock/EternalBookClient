@@ -1,4 +1,12 @@
-import { Address, TransactionGroup, Transaction } from "symbol-sdk";
+import {
+  Address,
+  TransactionGroup,
+  Transaction,
+  TransferTransaction,
+  PlainMessage,
+  AccountInfo,
+  Deadline,
+} from "symbol-sdk";
 import type { TransactionType } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
 
@@ -47,5 +55,22 @@ async function getTransactionsOnePage(
   }
   return pageTxes.data.concat(
     await getTransactionsOnePage(address, txType, page + 1)
+  );
+}
+
+export function createTxTransfer(
+  accountInfo: AccountInfo,
+  message: string
+): TransferTransaction | undefined {
+  if (undefined === environmentStore.txRepo) {
+    return undefined;
+  }
+
+  return TransferTransaction.create(
+    Deadline.create(environmentStore.epochAdjustment),
+    accountInfo.address,
+    [],
+    PlainMessage.create(message),
+    environmentStore.networkType
   );
 }
