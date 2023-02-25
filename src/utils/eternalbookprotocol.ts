@@ -36,68 +36,67 @@ export async function getEBPOnChainData(
     header: EternalBookProtocolHeader;
     aggregateTx: AggregateTransaction;
   }> = [];
-  await Promise.all(
-    allAggTxes.map(async (aggTx) => {
-      if (
-        undefined === aggTx.transactionInfo ||
-        undefined === aggTx.transactionInfo.hash
-      ) {
-        return;
-      }
+  for (let index = 0; index < allAggTxes.length; index++) {
+    const aggTx = allAggTxes[index];
+    if (
+      undefined === aggTx.transactionInfo ||
+      undefined === aggTx.transactionInfo.hash
+    ) {
+      continue;
+    }
 
-      const aggTxInfo = (await getTransactionInfo(
-        aggTx.transactionInfo.hash
-      )) as AggregateTransaction;
-      if (undefined === aggTxInfo) {
-        return;
-      }
-      // アグリゲート内にトランザクションが存在しない場合は無効データ
-      if (0 === aggTxInfo.innerTransactions.length) {
-        return;
-      }
+    const aggTxInfo = (await getTransactionInfo(
+      aggTx.transactionInfo.hash
+    )) as AggregateTransaction;
+    if (undefined === aggTxInfo) {
+      continue;
+    }
+    // アグリゲート内にトランザクションが存在しない場合は無効データ
+    if (0 === aggTxInfo.innerTransactions.length) {
+      continue;
+    }
 
-      // アグリゲート内の全てのトランザクションがモザイク所有者への転送トランザクションではない場合は無効データ
-      const txes = aggTxInfo.innerTransactions.filter(
-        (tx) =>
-          tx.type === TransactionType.TRANSFER &&
-          mosaicInfo.ownerAddress.equals(
-            (tx as TransferTransaction).recipientAddress
-          )
-      );
-      if (aggTxInfo.innerTransactions.length !== txes.length) {
-        return;
-      }
+    // アグリゲート内の全てのトランザクションがモザイク所有者への転送トランザクションではない場合は無効データ
+    const txes = aggTxInfo.innerTransactions.filter(
+      (tx) =>
+        tx.type === TransactionType.TRANSFER &&
+        mosaicInfo.ownerAddress.equals(
+          (tx as TransferTransaction).recipientAddress
+        )
+    );
+    if (aggTxInfo.innerTransactions.length !== txes.length) {
+      continue;
+    }
 
-      // ヘッダ復号
-      const dataHeader = decryptoHeader(
-        mosaicInfo.id.toHex(),
-        (aggTxInfo.innerTransactions[HEADER_TX_IDX] as TransferTransaction)
-          .message.payload
-      );
-      if (undefined === dataHeader) {
-        return;
-      }
-      // ヘッダ検証
-      if (
-        PROTOCOL_NAME !== dataHeader.version.substring(0, PROTOCOL_NAME.length)
-      ) {
-        // プロトコル不一致
-        return;
-      }
-      if (
-        mosaicInfo.id.toHex() !== dataHeader.mosaicId ||
-        mosaicInfo.ownerAddress.plain() !== dataHeader.address
-      ) {
-        // モザイク情報不一致
-        return;
-      }
+    // ヘッダ復号
+    const dataHeader = decryptoHeader(
+      mosaicInfo.id.toHex(),
+      (aggTxInfo.innerTransactions[HEADER_TX_IDX] as TransferTransaction)
+        .message.payload
+    );
+    if (undefined === dataHeader) {
+      continue;
+    }
+    // ヘッダ検証
+    if (
+      PROTOCOL_NAME !== dataHeader.version.substring(0, PROTOCOL_NAME.length)
+    ) {
+      // プロトコル不一致
+      continue;
+    }
+    if (
+      mosaicInfo.id.toHex() !== dataHeader.mosaicId ||
+      mosaicInfo.ownerAddress.plain() !== dataHeader.address
+    ) {
+      // モザイク情報不一致
+      continue;
+    }
 
-      onChainDataAggTxes.push({
-        header: dataHeader,
-        aggregateTx: aggTxInfo,
-      });
-    })
-  );
+    onChainDataAggTxes.push({
+      header: dataHeader,
+      aggregateTx: aggTxInfo,
+    });
+  }
   // オンチェーンデータアグリゲートが存在しない場合は終了
   if (0 === onChainDataAggTxes.length) {
     return [];
@@ -109,44 +108,41 @@ export async function getEBPOnChainData(
   );
 
   const onChainDataList: Array<OnChainData> = [];
-  await Promise.all(
-    lastDataList.map(async (lastData) => {
-      console.log(lastData);
-      if (
-        undefined === lastData.aggregateTx.transactionInfo ||
-        undefined === lastData.aggregateTx.transactionInfo.timestamp
-      ) {
-        return;
-      }
+  for (let index = 0; index < lastDataList.length; index++) {
+    const lastData = lastDataList[index];
+    if (
+      undefined === lastData.aggregateTx.transactionInfo ||
+      undefined === lastData.aggregateTx.transactionInfo.timestamp
+    ) {
+      continue;
+    }
 
-      const verifyHash = lastData.header.hash;
-      const timestamp =
-        environmentStore.epochAdjustment * 1000 +
-        Number(lastData.aggregateTx.transactionInfo.timestamp.toString());
-      const dateTime = new Date(timestamp);
+    const verifyHash = lastData.header.hash;
+    const timestamp =
+      environmentStore.epochAdjustment * 1000 +
+      Number(lastData.aggregateTx.transactionInfo.timestamp.toString());
+    const dateTime = new Date(timestamp);
 
-      // 末尾のデータから遡ってオンチェーンデータを復元
-      const data = getAggregateTxData(onChainDataAggTxes, lastData);
+    // 末尾のデータから遡ってオンチェーンデータを復元
+    const data = getAggregateTxData(onChainDataAggTxes, lastData);
 
-      // 復元したデータのハッシュとトランザクションに保持しているハッシュを検証
-      const hash = getHash(data.data);
-      if (hash === verifyHash) {
-        // ハッシュが一致する場合のみ正しいオンチェーンデータとして扱う
-        onChainDataList.push({
-          title: data.title,
-          description: data.description || "N/A",
-          date:
-            dateTime.toLocaleDateString("ja-JP") +
-            " " +
-            dateTime.toLocaleTimeString("ja-JP"),
-          mime: getMimeFromBase64(data.data),
-          base64: data.data,
-        });
-      }
-    })
-  );
+    // 復元したデータのハッシュとトランザクションに保持しているハッシュを検証
+    const hash = getHash(data.data);
+    if (hash === verifyHash) {
+      // ハッシュが一致する場合のみ正しいオンチェーンデータとして扱う
+      onChainDataList.push({
+        title: data.title,
+        description: data.description || "N/A",
+        date:
+          dateTime.toLocaleDateString("ja-JP") +
+          " " +
+          dateTime.toLocaleTimeString("ja-JP"),
+        mime: getMimeFromBase64(data.data),
+        base64: data.data,
+      });
+    }
+  }
 
-  console.log(onChainDataList);
   return onChainDataList;
 }
 
