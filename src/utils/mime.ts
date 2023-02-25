@@ -32,6 +32,6 @@ export function getMimeFromBase64(base64: string): string {
   const startIdx = "string" === typeof base64 ? base64.indexOf("data:") : -1;
   const endIdx = -1 < startIdx ? base64.indexOf("base64", startIdx) : -1;
   return -1 < startIdx && -1 < endIdx
-    ? base64.substring(startIdx + "data:".length, endIdx)
+    ? base64.substring(startIdx + "data:".length, endIdx - 1)
     : "N/A";
 }
