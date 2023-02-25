@@ -12,6 +12,13 @@ export function isAudio(mime: string): boolean {
   return false;
 }
 
+export function isMovie(mime: string): boolean {
+  if (mime.startsWith("video/mp4")) {
+    return true;
+  }
+  return false;
+}
+
 export function isHtml(mime: string): boolean {
   // FIXME: セキュリティ的に問題ないことを確認した上で解放する
   return false;

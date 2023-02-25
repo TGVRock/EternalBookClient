@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isImage, isAudio, isHtml } from "@/utils/mime";
+import { isImage, isAudio, isHtml, isMovie } from "@/utils/mime";
 
 defineProps<{
   base64: string;
@@ -26,6 +26,13 @@ defineProps<{
     v-bind:src="base64"
     sandbox="allow-scripts allow-popups"
   ></iframe>
+  <video
+    v-else-if="isMovie(mime)"
+    v-bind:src="base64"
+    v-bind:type="mime"
+    class="w-100"
+    controls="true"
+  ></video>
   <img
     v-else
     class="img-fluid w-100 border border-4 rounded-2 border-light"
