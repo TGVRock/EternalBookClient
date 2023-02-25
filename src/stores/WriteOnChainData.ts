@@ -25,29 +25,44 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   const title = ref("");
   const message = ref("");
   const relatedMosaicIdStr = ref("");
+  const relatedMosaicInfo = ref<MosaicInfo | undefined>(undefined);
   const dataBase64 = ref("");
   const state = ref("prepare");
   const processedSize = ref(0);
   const prevTxHash = ref("");
 
+  watch(
+    relatedMosaicIdStr,
+    (): void => {
+      getMosaicInfo(relatedMosaicIdStr.value)
+        .then((value): void => {
+          relatedMosaicInfo.value = value;
+        })
+        .catch(() => {
+          relatedMosaicInfo.value = undefined;
+        });
+    },
+    { immediate: true }
+  );
+
   async function writeOnChain(): Promise<void> {
     state.value = "prepare";
     processedSize.value = 0;
-    console.log("sss");
     // データ設定チェック
     if (dataBase64.value.length === 0) {
       return;
     }
-    const mosaicInfo = await getMosaicInfo(relatedMosaicIdStr.value);
-    writeOnChainOneComponent(mosaicInfo);
+    writeOnChainOneComponent();
   }
 
-  async function writeOnChainOneComponent(mosaicInfo: MosaicInfo | undefined): Promise<void> {
+  async function writeOnChainOneComponent(): Promise<void> {
+    console.log(processedSize.value);
     // 書き込み済データサイズチェック
     if (processedSize.value >= dataBase64.value.length) {
       return;
     }
     // モザイク設定チェック
+    const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
     if (mosaicInfo === undefined) {
       return;
     }
@@ -90,15 +105,16 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       if (processedSize.value >= dataBase64.value.length) {
         break;
       }
-      const txHeader = createTxTransfer(
-        accountInfo,
-        dataBase64.value.substr(processedSize.value, DATASIZE_PER_TX)
+      const sendData = dataBase64.value.substring(
+        processedSize.value,
+        processedSize.value + DATASIZE_PER_TX
       );
+      const txHeader = createTxTransfer(accountInfo, sendData);
       if (txHeader === undefined) {
         return;
       }
       txList.push(txHeader.toAggregate(accountInfo.publicAccount));
-      processedSize.value += DATASIZE_PER_TX;
+      processedSize.value += sendData.length;
     }
 
     const aggTx = AggregateTransaction.createComplete(
@@ -136,6 +152,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
         .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
         .subscribe(async () => {
           state.value = "complete";
+          if (processedSize.value < dataBase64.value.length) {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            writeOnChainOneComponent();
+          }
           // リスナーをクローズ
           txListener.close();
         });
