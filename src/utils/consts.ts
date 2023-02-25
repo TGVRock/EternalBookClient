@@ -20,3 +20,5 @@ export const DATASIZE_PER_TX = 1023; // 1トランザクションに含めるこ
 export const OVERHEAD_SIZE_PER_TX = 80; // トランザクションのオーバーヘッドサイズ
 export const MAX_FEE_PRE_AGG_TX = 22; // 1アグリゲートトランザクションの最大手数料(実際値)
 export const XYM_DIVISIBILITY = 6; // XYM の可分性
+
+export const UNDEFINED_DISPLAY_STR = "N/A"; // XYM の可分性

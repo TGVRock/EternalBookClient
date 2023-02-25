@@ -26,7 +26,7 @@ watch(mosaicInfo, (): void => {
     onChainDataList.value = undefined;
     return;
   }
-  getEBPOnChainData(mosaicInfo.value).then((value) => {
+  getEBPOnChainData(mosaicInfo.value as MosaicInfo).then((value) => {
     onChainDataList.value = value;
   });
 });
@@ -35,14 +35,14 @@ watch(mosaicInfo, (): void => {
 <template>
   <LoadingComponent v-if="undefined === onChainDataList" />
   <OnChainDataComponent
-    v-bind:onChainDataList="onChainDataList"
     v-else
+    v-bind:onChainDataList="onChainDataList"
     class="container animate__animated animate__fadeIn text-break"
   />
   <LoadingComponent v-if="undefined === mosaicInfo" />
   <MosaicInfoComponent
-    v-bind:mosaic-info="mosaicInfo"
     v-else
+    v-bind:mosaic-info="(mosaicInfo as MosaicInfo)"
     class="container animate__animated animate__fadeIn text-break"
   />
 </template>
