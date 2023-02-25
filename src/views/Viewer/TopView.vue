@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useEnvironmentStore } from "@/stores/environment";
+import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 
 const environmentStore = useEnvironmentStore();
 const mosaicId = ref("");
@@ -11,7 +12,13 @@ const linkMosaicId = computed((): string => {
 
 <template>
   <section class="container" id="inputArea">
-    <input type="text" v-model="mosaicId" placeholder="Input Mosaic ID..." />
+    <TextAreaComponent
+      v-bind:item-name="$t('mosaicInfo.id')"
+      v-bind:placeholder="
+        $t('writer.pleaseInputItem', { item: $t('mosaicInfo.id') })
+      "
+      v-model:value="mosaicId"
+    />
     <RouterLink
       v-bind:to="{
         name: 'ViewerResult',

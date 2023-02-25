@@ -23,4 +23,11 @@ export default {
     title: "タイトル",
     message: "メッセージ",
   },
+  writer: {
+    mosaicFlags: "モザイクフラグ",
+    pleaseInputItem: "{item}を入力してください...",
+    fileSelect: "ファイル選択",
+    createMosaic: "モザイク作成",
+    writeOnChain: "オンチェーン書き込み",
+  },
 };
