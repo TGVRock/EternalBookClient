@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { MosaicInfo } from "symbol-sdk";
-import { UNDEFINED_DISPLAY_STR } from "@/utils/consts";
+import CONSTS from "@/utils/consts";
 import { b2s, t2d } from "@/utils/converter";
 import { getBlockTimestamp } from "@/apis/block";
 import { getMosaicName } from "@/apis/namespace";
@@ -13,8 +13,8 @@ const props = defineProps<{
 }>();
 
 // Reactives
-const timestamp = ref(UNDEFINED_DISPLAY_STR);
-const alias = ref(UNDEFINED_DISPLAY_STR);
+const timestamp = ref<string>(CONSTS.STR_NA);
+const alias = ref<string>(CONSTS.STR_NA);
 
 // Watch
 watch(
@@ -22,18 +22,18 @@ watch(
   async (): Promise<void> => {
     // モザイク情報設定チェック
     if (typeof props.mosaicInfo === "undefined") {
-      timestamp.value = UNDEFINED_DISPLAY_STR;
-      alias.value = UNDEFINED_DISPLAY_STR;
+      timestamp.value = CONSTS.STR_NA;
+      alias.value = CONSTS.STR_NA;
       return;
     }
     // モザイク情報が更新された場合、タイムスタンプとエイリアスを取得して設定する
     getBlockTimestamp(props.mosaicInfo.startHeight).then((value) => {
       timestamp.value =
-        typeof value !== "undefined" ? t2d(value) : UNDEFINED_DISPLAY_STR;
+        typeof value !== "undefined" ? t2d(value) : CONSTS.STR_NA;
     });
     getMosaicName(props.mosaicInfo.id.toHex()).then((value) => {
       alias.value =
-        typeof value !== "undefined" ? value : UNDEFINED_DISPLAY_STR;
+        typeof value !== "undefined" ? value : CONSTS.STR_NA;
     });
   },
   {

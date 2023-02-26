@@ -7,12 +7,7 @@ import {
 } from "symbol-sdk";
 import { getTransactionInfo, getTransactions } from "@/apis/transaction";
 import { decryptoHeader, getHash } from "./crypto";
-import {
-  PROTOCOL_NAME,
-  PROTOCOL_VERSION,
-  HEADER_TX_IDX,
-  DATA_TX_START_IDX,
-} from "./consts";
+import CONSTS from "./consts";
 import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
 import { useEnvironmentStore } from "@/stores/environment";
 import { getMimeFromBase64 } from "./mime";
@@ -71,7 +66,7 @@ export async function getEBPOnChainData(
     // ヘッダ復号
     const dataHeader = decryptoHeader(
       mosaicInfo.id.toHex(),
-      (aggTxInfo.innerTransactions[HEADER_TX_IDX] as TransferTransaction)
+      (aggTxInfo.innerTransactions[CONSTS.TX_HEADER_IDX] as TransferTransaction)
         .message.payload
     );
     if (undefined === dataHeader) {
@@ -79,7 +74,8 @@ export async function getEBPOnChainData(
     }
     // ヘッダ検証
     if (
-      PROTOCOL_NAME !== dataHeader.version.substring(0, PROTOCOL_NAME.length)
+      CONSTS.PROTOCOL_NAME !==
+      dataHeader.version.substring(0, CONSTS.PROTOCOL_NAME.length)
     ) {
       // プロトコル不一致
       continue;
@@ -132,7 +128,7 @@ export async function getEBPOnChainData(
       // ハッシュが一致する場合のみ正しいオンチェーンデータとして扱う
       onChainDataList.push({
         title: data.title,
-        description: data.description || "N/A",
+        description: data.description || CONSTS.STR_NA,
         date:
           dateTime.toLocaleDateString("ja-JP") +
           " " +
@@ -159,7 +155,7 @@ function getAggregateTxData(
   // 1つのアグリゲートに記録されているデータを抽出
   let innerData = "";
   for (
-    let idx = DATA_TX_START_IDX;
+    let idx = CONSTS.TX_DATA_IDX;
     idx < aggTx.aggregateTx.innerTransactions.length;
     idx++
   ) {
@@ -172,8 +168,8 @@ function getAggregateTxData(
   if (null === aggTx.header.prevTx) {
     return {
       data: innerData,
-      title: aggTx.header.title || "N/A",
-      description: aggTx.header.description || "N/A",
+      title: aggTx.header.title || CONSTS.STR_NA,
+      description: aggTx.header.description || CONSTS.STR_NA,
     };
   }
 
@@ -187,8 +183,8 @@ function getAggregateTxData(
     // 存在しない場合は復元終了
     return {
       data: innerData,
-      title: aggTx.header.title || "N/A",
-      description: aggTx.header.description || "N/A",
+      title: aggTx.header.title || CONSTS.STR_NA,
+      description: aggTx.header.description || CONSTS.STR_NA,
     };
   } else if (1 < prevAggTx.length) {
     // ありえないはずのため、ログ出力のみ
@@ -208,7 +204,7 @@ export function createHeader(
   hash: string
 ): EternalBookProtocolHeader {
   const header: EternalBookProtocolHeader = {
-    version: PROTOCOL_NAME + " " + PROTOCOL_VERSION,
+    version: CONSTS.PROTOCOL_NAME + " " + CONSTS.PROTOCOL_VERSION,
     mosaicId: mosaicIdStr,
     address: ownerAddress,
     prevTx: prevTx.length > 0 ? prevTx : null,

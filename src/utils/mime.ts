@@ -1,3 +1,5 @@
+import CONSTS from "./consts";
+
 export function isImage(mime: string): boolean {
   if (mime.startsWith("image/png") || mime.startsWith("image/jpeg")) {
     return true;
@@ -33,5 +35,5 @@ export function getMimeFromBase64(base64: string): string {
   const endIdx = -1 < startIdx ? base64.indexOf("base64", startIdx) : -1;
   return -1 < startIdx && -1 < endIdx
     ? base64.substring(startIdx + "data:".length, endIdx - 1)
-    : "N/A";
+    : CONSTS.STR_NA;
 }

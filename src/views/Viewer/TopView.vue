@@ -2,11 +2,12 @@
 import { ref, computed } from "vue";
 import { useEnvironmentStore } from "@/stores/environment";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
+import CONSTS from "@/utils/consts";
 
 const environmentStore = useEnvironmentStore();
 const mosaicId = ref("");
 const linkMosaicId = computed((): string => {
-  return "" !== mosaicId.value ? mosaicId.value : "NA";
+  return "" !== mosaicId.value ? mosaicId.value : CONSTS.STR_NA;
 });
 </script>
 

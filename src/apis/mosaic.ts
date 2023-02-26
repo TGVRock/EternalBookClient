@@ -12,7 +12,7 @@ import {
   UInt64,
 } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
-import { AGGREGATE_FEE_MULTIPLIER } from "@/utils/consts";
+import CONSTS from "@/utils/consts";
 
 const environmentStore = useEnvironmentStore();
 
@@ -68,7 +68,7 @@ export function createAggTxMosaicDefine(
       ],
       environmentStore.networkType,
       []
-    ).setMaxFeeForAggregate(AGGREGATE_FEE_MULTIPLIER, 0);
+    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
   } else {
     return AggregateTransaction.createComplete(
       Deadline.create(environmentStore.epochAdjustment),
@@ -78,6 +78,6 @@ export function createAggTxMosaicDefine(
       ],
       environmentStore.networkType,
       []
-    ).setMaxFeeForAggregate(AGGREGATE_FEE_MULTIPLIER, 0);
+    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
   }
 }

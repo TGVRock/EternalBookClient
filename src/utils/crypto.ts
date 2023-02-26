@@ -1,20 +1,24 @@
 import { createHash, createDecipheriv, createCipheriv } from "crypto";
-import { HASH_ALGORITHM, CHIPER_ALGORITHM, DEFAULT_IV } from "@/utils/consts";
+import CONSTS from "@/utils/consts";
 import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
 import { Buffer } from "buffer";
 
 export function getHash(onChainData: string): string {
-  const hashsum = createHash(HASH_ALGORITHM);
+  const hashsum = createHash(CONSTS.CRYPTO_HASH_ALGORITHM);
   return hashsum.update(onChainData).digest("hex");
 }
 
 export function cryptoHeader(
   mosaicIdStr: string,
   header: EternalBookProtocolHeader,
-  iv: string = DEFAULT_IV
+  iv: string = CONSTS.CRYPTO_IV_DEFAULT
 ): string | undefined {
   try {
-    const cipher = createCipheriv(CHIPER_ALGORITHM, iv, mosaicIdStr);
+    const cipher = createCipheriv(
+      CONSTS.CRYPTO_CHIPER_ALGORITHM,
+      iv,
+      mosaicIdStr
+    );
     const cipherData = cipher.update(JSON.stringify(header));
     const encryptedData = Buffer.concat([cipherData, cipher.final()]);
     return encryptedData.toString("hex", 0, encryptedData.length);
@@ -28,11 +32,15 @@ export function cryptoHeader(
 export function decryptoHeader(
   mosaicIdStr: string,
   encryptoDataStr: string,
-  iv: string = DEFAULT_IV
+  iv: string = CONSTS.CRYPTO_IV_DEFAULT
 ): EternalBookProtocolHeader | undefined {
   try {
     const encryptedData = Buffer.from(encryptoDataStr, "hex");
-    const decipher = createDecipheriv(CHIPER_ALGORITHM, iv, mosaicIdStr);
+    const decipher = createDecipheriv(
+      CONSTS.CRYPTO_CHIPER_ALGORITHM,
+      iv,
+      mosaicIdStr
+    );
     const decipherData = decipher.update(encryptedData);
     const decryptedData = Buffer.concat([decipherData, decipher.final()]);
     return JSON.parse(decryptedData.toString());

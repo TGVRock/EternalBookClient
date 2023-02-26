@@ -12,11 +12,7 @@ import { createHeader } from "@/utils/eternalbookprotocol";
 import { cryptoHeader, getHash } from "@/utils/crypto";
 import { createTxTransfer } from "@/apis/transaction";
 import { useEnvironmentStore } from "./environment";
-import {
-  AGGREGATE_MAX_NUM,
-  DATASIZE_PER_TX,
-  AGGREGATE_FEE_MULTIPLIER,
-} from "@/utils/consts";
+import CONSTS from "@/utils/consts";
 import { requestTxSign } from "@/utils/sss";
 
 export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
@@ -101,13 +97,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     txList.push(txHeader.toAggregate(accountInfo.publicAccount));
 
     // データトランザクションの作成
-    for (; txList.length < AGGREGATE_MAX_NUM; ) {
+    for (; txList.length < CONSTS.TX_AGGREGATE_INNER_NUM; ) {
       if (processedSize.value >= dataBase64.value.length) {
         break;
       }
       const sendData = dataBase64.value.substring(
         processedSize.value,
-        processedSize.value + DATASIZE_PER_TX
+        processedSize.value + CONSTS.TX_DATASIZE_PER_TRANSFER
       );
       const txHeader = createTxTransfer(accountInfo, sendData);
       if (txHeader === undefined) {
@@ -122,7 +118,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       txList,
       environmentStore.networkType,
       []
-    ).setMaxFeeForAggregate(AGGREGATE_FEE_MULTIPLIER, 0);
+    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
 
     const signedAggTx = await requestTxSign(aggTx);
     if (signedAggTx === undefined) {
@@ -153,7 +149,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
         .subscribe(async () => {
           state.value = "complete";
           if (processedSize.value < dataBase64.value.length) {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await new Promise((resolve) =>
+              setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
+            );
             writeOnChainOneComponent();
           }
           // リスナーをクローズ

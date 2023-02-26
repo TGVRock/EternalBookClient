@@ -11,6 +11,7 @@ import { useEnvironmentStore } from "./environment";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";
 import { createAggTxMosaicDefine } from "@/apis/mosaic";
 import { requestTxSign } from "@/utils/sss";
+import CONSTS from "@/utils/consts";
 
 export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
   const environmentStore = useEnvironmentStore();
@@ -86,7 +87,9 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
       // ハッシュロックトランザクションの承認検知
       txListener.confirmed(owner, signedAggTx.hash).subscribe(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) =>
+          setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
+        );
         writeOnChainDataStore.relatedMosaicIdStr = (
           aggTx.innerTransactions[0] as MosaicDefinitionTransaction
         ).mosaicId.toHex();

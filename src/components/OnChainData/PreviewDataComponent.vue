@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import {
-  DATASIZE_PER_TX,
-  DATA_TX_SIZE,
-  OVERHEAD_SIZE_PER_TX,
-  XYM_DIVISIBILITY,
-  AGGREGATE_FEE_MULTIPLIER,
-} from "@/utils/consts";
+import CONSTS from "@/utils/consts";
 import { ConvertHumanReadableByteDataSize } from "@/utils/converter";
 import MosaicInfoRowComponent from "../MosaicInfo/MosaicInfoRowComponent.vue";
 import DataAreaComponent from "./DataAreaComponent.vue";
@@ -19,20 +13,21 @@ const props = defineProps<{
 
 // Reactives
 const innerTxNum = computed(() => {
-  return Math.ceil(props.base64.length / DATASIZE_PER_TX);
+  return Math.ceil(props.base64.length / CONSTS.TX_DATASIZE_PER_TRANSFER);
 });
 const aggTxNum = computed(() => {
-  return Math.ceil(innerTxNum.value / DATA_TX_SIZE);
+  return Math.ceil(innerTxNum.value / CONSTS.TX_DATA_TX_NUM);
 });
 const predictFee = computed(() => {
   // 手数料は トランザクションサイズ x 乗数 [μXYM] で計算
   // トランザクションサイズ : [データサイズ] ＋ [インナートランザクションごとのオーバーヘッド] ＋ [ヘッダサイズ(オーバーヘッド含む)]
   return (
     (props.base64.length +
-      innerTxNum.value * OVERHEAD_SIZE_PER_TX +
-      aggTxNum.value * (DATASIZE_PER_TX + OVERHEAD_SIZE_PER_TX)) *
-    AGGREGATE_FEE_MULTIPLIER *
-    Math.pow(10, -1 * XYM_DIVISIBILITY)
+      innerTxNum.value * CONSTS.TX_OVERHEAD_SIZE_PER_INNER +
+      aggTxNum.value *
+        (CONSTS.TX_DATASIZE_PER_TRANSFER + CONSTS.TX_OVERHEAD_SIZE_PER_INNER)) *
+    CONSTS.TX_FEE_MULTIPLIER_DEFAULT *
+    Math.pow(10, -1 * CONSTS.TX_DIVISIBILITY_XYM)
   );
 });
 </script>
