@@ -19,6 +19,9 @@ export async function getBlockTimestamp(
     return undefined;
   }
   const mosaicBlockInfo = await getBlockInfo(startHeight);
+  if (undefined === mosaicBlockInfo) {
+    return undefined;
+  }
   return (
     environmentStore.epochAdjustment * 1000 +
     Number(mosaicBlockInfo?.timestamp.toString())
