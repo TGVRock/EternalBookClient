@@ -6,20 +6,20 @@ const environmentStore = useEnvironmentStore();
 export async function getMosaicName(
   mosaicIdStr: string
 ): Promise<string | undefined> {
-  if (undefined === environmentStore.namespaceRepo) {
+  if (typeof environmentStore.namespaceRepo === "undefined") {
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
   const mosaicNames = await environmentStore.namespaceRepo
     .getMosaicsNames([mosaicId])
     .toPromise();
-  if (undefined === mosaicNames) {
+  if (typeof mosaicNames === "undefined") {
     return undefined;
   }
   const names = mosaicNames.find(
     (name) => name.mosaicId.toHex() === mosaicIdStr
   );
-  if (undefined === names) {
+  if (typeof names === "undefined") {
     return undefined;
   }
   if (0 < names.names.length) {

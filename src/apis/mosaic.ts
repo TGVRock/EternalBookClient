@@ -19,7 +19,7 @@ const environmentStore = useEnvironmentStore();
 export async function getMosaicInfo(
   mosaicIdStr: string
 ): Promise<MosaicInfo | undefined> {
-  if (undefined === environmentStore.mosaicRepo) {
+  if (typeof environmentStore.mosaicRepo === "undefined") {
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
@@ -32,7 +32,7 @@ export function createAggTxMosaicDefine(
   mosaicFlags: MosaicFlags,
   isMultiSig: boolean
 ): AggregateTransaction | undefined {
-  if (undefined === environmentStore.mosaicRepo) {
+  if (typeof environmentStore.mosaicRepo === "undefined") {
     return undefined;
   }
 

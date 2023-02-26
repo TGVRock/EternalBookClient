@@ -16,7 +16,11 @@ const emit = defineEmits<{
 const onChange = (e: Event): void => {
   // ファイル選択確認
   const target = (e.target as HTMLInputElement).files || null;
-  if (target === null || target.length === undefined || target.length < 1) {
+  if (
+    target === null ||
+    typeof target.length === "undefined" ||
+    target.length < 1
+  ) {
     return;
   }
   // ファイル読み込み

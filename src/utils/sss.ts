@@ -10,7 +10,7 @@ const sss = window.SSS;
  * @returns true : SSS linked, false : no SSS linked
  */
 export function isSSSEnable(): boolean {
-  return undefined !== sss;
+  return typeof sss !== "undefined";
 }
 
 /**

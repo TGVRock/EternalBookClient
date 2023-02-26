@@ -7,8 +7,8 @@ export async function getMultisigAddresses(
   address: string
 ): Promise<Address[]> {
   if (
-    undefined === environmentStore.accountRepo ||
-    undefined === environmentStore.multisigRepo
+    typeof environmentStore.accountRepo === "undefined" ||
+    typeof environmentStore.multisigRepo === "undefined"
   ) {
     return [];
   }
@@ -16,13 +16,13 @@ export async function getMultisigAddresses(
   const accountInfo = await environmentStore.accountRepo
     .getAccountInfo(rawAddress)
     .toPromise();
-  if (undefined === accountInfo) {
+  if (typeof accountInfo === "undefined") {
     return [];
   }
   const multisigInfo = await environmentStore.multisigRepo
     .getMultisigAccountInfo(accountInfo.address)
     .toPromise();
-  if (undefined === multisigInfo || multisigInfo.isMultisig()) {
+  if (typeof multisigInfo === "undefined" || multisigInfo.isMultisig()) {
     return [];
   }
   return multisigInfo.multisigAddresses;

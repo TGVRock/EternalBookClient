@@ -22,7 +22,7 @@ getMosaicInfo(props.mosaicId).then((value) => {
   mosaicInfo.value = value;
 });
 watch(mosaicInfo, (): void => {
-  if (undefined === mosaicInfo.value) {
+  if (typeof mosaicInfo.value === "undefined") {
     onChainDataList.value = undefined;
     return;
   }

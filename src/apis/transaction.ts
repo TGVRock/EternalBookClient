@@ -15,7 +15,7 @@ const environmentStore = useEnvironmentStore();
 export async function getTransactionInfo(
   txHash: string
 ): Promise<Transaction | undefined> {
-  if (undefined === environmentStore.txRepo) {
+  if (typeof environmentStore.txRepo === "undefined") {
     return undefined;
   }
   return environmentStore.txRepo
@@ -35,7 +35,7 @@ async function getTransactionsOnePage(
   txType: Array<TransactionType>,
   page: number
 ): Promise<Transaction[]> {
-  if (undefined === environmentStore.txRepo) {
+  if (typeof environmentStore.txRepo === "undefined") {
     return [];
   }
   const pageTxes = await environmentStore.txRepo
@@ -47,7 +47,7 @@ async function getTransactionsOnePage(
       pageNumber: page,
     })
     .toPromise();
-  if (undefined === pageTxes) {
+  if (typeof pageTxes === "undefined") {
     return [];
   }
   if (pageTxes.isLastPage) {
@@ -62,7 +62,7 @@ export function createTxTransfer(
   accountInfo: AccountInfo,
   message: string
 ): TransferTransaction | undefined {
-  if (undefined === environmentStore.txRepo) {
+  if (typeof environmentStore.txRepo === "undefined") {
     return undefined;
   }
 

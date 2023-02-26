@@ -16,7 +16,7 @@ const isSSSLinked = computed(() => {
   return isSSSEnable();
 });
 const netType = getNetworkType();
-if (netType !== undefined) {
+if (typeof netType !== "undefined") {
   environmentStore.networkType = netType;
 }
 </script>

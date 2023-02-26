@@ -6,7 +6,7 @@ const environmentStore = useEnvironmentStore();
 export async function getBlockInfo(
   startHeight: UInt64
 ): Promise<BlockInfo | undefined> {
-  if (undefined === environmentStore.blockRepo) {
+  if (typeof environmentStore.blockRepo === "undefined") {
     return undefined;
   }
   return environmentStore.blockRepo.getBlockByHeight(startHeight).toPromise();
@@ -15,11 +15,11 @@ export async function getBlockInfo(
 export async function getBlockTimestamp(
   startHeight: UInt64
 ): Promise<number | undefined> {
-  if (undefined === environmentStore.blockRepo) {
+  if (typeof environmentStore.blockRepo === "undefined") {
     return undefined;
   }
   const mosaicBlockInfo = await getBlockInfo(startHeight);
-  if (undefined === mosaicBlockInfo) {
+  if (typeof mosaicBlockInfo === "undefined") {
     return undefined;
   }
   return (

@@ -34,8 +34,8 @@ export async function getEBPOnChainData(
   for (let index = 0; index < allAggTxes.length; index++) {
     const aggTx = allAggTxes[index];
     if (
-      undefined === aggTx.transactionInfo ||
-      undefined === aggTx.transactionInfo.hash
+      typeof aggTx.transactionInfo === "undefined" ||
+      typeof aggTx.transactionInfo.hash === "undefined"
     ) {
       continue;
     }
@@ -43,7 +43,7 @@ export async function getEBPOnChainData(
     const aggTxInfo = (await getTransactionInfo(
       aggTx.transactionInfo.hash
     )) as AggregateTransaction;
-    if (undefined === aggTxInfo) {
+    if (typeof aggTxInfo === "undefined") {
       continue;
     }
     // アグリゲート内にトランザクションが存在しない場合は無効データ
@@ -69,7 +69,7 @@ export async function getEBPOnChainData(
       (aggTxInfo.innerTransactions[CONSTS.TX_HEADER_IDX] as TransferTransaction)
         .message.payload
     );
-    if (undefined === dataHeader) {
+    if (typeof dataHeader === "undefined") {
       continue;
     }
     // ヘッダ検証
@@ -107,8 +107,8 @@ export async function getEBPOnChainData(
   for (let index = 0; index < lastDataList.length; index++) {
     const lastData = lastDataList[index];
     if (
-      undefined === lastData.aggregateTx.transactionInfo ||
-      undefined === lastData.aggregateTx.transactionInfo.timestamp
+      typeof lastData.aggregateTx.transactionInfo === "undefined" ||
+      typeof lastData.aggregateTx.transactionInfo.timestamp === "undefined"
     ) {
       continue;
     }
@@ -173,7 +173,7 @@ function getAggregateTxData(
   // 1つ前のアグリゲートトランザクションを検索
   const prevAggTx = aggTxList.filter(
     (tx) =>
-      undefined !== tx.aggregateTx.transactionInfo &&
+      typeof tx.aggregateTx.transactionInfo !== "undefined" &&
       aggTx.header.prevTx === tx.aggregateTx.transactionInfo.hash
   );
   if (0 === prevAggTx.length) {

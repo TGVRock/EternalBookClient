@@ -25,7 +25,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
   async function createMosaic(): Promise<void | undefined> {
     state.value = undefined;
-    if (environmentStore.multisigRepo === undefined) {
+    if (typeof environmentStore.multisigRepo === "undefined") {
       return undefined;
     }
 
@@ -33,7 +33,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     const multisigInfo = await environmentStore.multisigRepo
       .getMultisigAccountInfo(owner)
       .toPromise();
-    if (multisigInfo === undefined) {
+    if (typeof multisigInfo === "undefined") {
       return undefined;
     }
     return multisigInfo.isMultisig()
@@ -43,16 +43,16 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
   async function createMosaicForAccount(owner: Address): Promise<void> {
     if (
-      environmentStore.accountRepo === undefined ||
-      environmentStore.namespaceRepo === undefined ||
-      environmentStore.txRepo === undefined
+      typeof environmentStore.accountRepo === "undefined" ||
+      typeof environmentStore.namespaceRepo === "undefined" ||
+      typeof environmentStore.txRepo === "undefined"
     ) {
       return undefined;
     }
     const accountInfo = await environmentStore.accountRepo
       .getAccountInfo(owner)
       .toPromise();
-    if (accountInfo === undefined) {
+    if (typeof accountInfo === "undefined") {
       return undefined;
     }
     const aggTx = createAggTxMosaicDefine(
@@ -61,11 +61,11 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       mosaicFlags.value,
       false
     );
-    if (aggTx === undefined) {
+    if (typeof aggTx === "undefined") {
       return undefined;
     }
     const signedAggTx = await requestTxSign(aggTx);
-    if (signedAggTx === undefined) {
+    if (typeof signedAggTx === "undefined") {
       return undefined;
     }
 

@@ -27,7 +27,7 @@ setTimeout(() => {
     <h3>Complete !</h3>
   </div>
   <ProcessingComponent
-    v-if="undefined === mosaicInfo"
+    v-if="typeof mosaicInfo === 'undefined'"
     v-bind:message="$t('message.loading')"
   />
   <MosaicInfoComponent

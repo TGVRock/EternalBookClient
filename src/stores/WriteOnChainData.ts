@@ -59,13 +59,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     }
     // モザイク設定チェック
     const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
-    if (mosaicInfo === undefined) {
+    if (typeof mosaicInfo === "undefined") {
       return;
     }
     if (
-      environmentStore.accountRepo === undefined ||
-      environmentStore.namespaceRepo === undefined ||
-      environmentStore.txRepo === undefined
+      typeof environmentStore.accountRepo === "undefined" ||
+      typeof environmentStore.namespaceRepo === "undefined" ||
+      typeof environmentStore.txRepo === "undefined"
     ) {
       return;
     }
@@ -73,7 +73,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     const accountInfo = await environmentStore.accountRepo
       .getAccountInfo(mosaicInfo.ownerAddress)
       .toPromise();
-    if (accountInfo === undefined) {
+    if (typeof accountInfo === "undefined") {
       return;
     }
 
@@ -87,11 +87,11 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       getHash(dataBase64.value)
     );
     const encryptHeader = cryptoHeader(mosaicInfo.id.toHex(), header);
-    if (encryptHeader === undefined) {
+    if (typeof encryptHeader === "undefined") {
       return;
     }
     const txHeader = createTxTransfer(accountInfo, encryptHeader);
-    if (txHeader === undefined) {
+    if (typeof txHeader === "undefined") {
       return;
     }
     txList.push(txHeader.toAggregate(accountInfo.publicAccount));
@@ -106,7 +106,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
         processedSize.value + CONSTS.TX_DATASIZE_PER_TRANSFER
       );
       const txHeader = createTxTransfer(accountInfo, sendData);
-      if (txHeader === undefined) {
+      if (typeof txHeader === "undefined") {
         return;
       }
       txList.push(txHeader.toAggregate(accountInfo.publicAccount));
@@ -121,7 +121,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
 
     const signedAggTx = await requestTxSign(aggTx);
-    if (signedAggTx === undefined) {
+    if (typeof signedAggTx === "undefined") {
       return undefined;
     }
 

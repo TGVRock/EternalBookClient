@@ -23,7 +23,7 @@ watch(
   async (): Promise<void> => {
     multisigAddresses.value = [];
     const linkedAddress = getAddress();
-    if (undefined === linkedAddress) {
+    if (typeof linkedAddress === "undefined") {
       return;
     }
     writeMosaicStore.linkedAddress = linkedAddress;
