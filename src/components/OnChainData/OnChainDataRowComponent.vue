@@ -20,3 +20,9 @@ defineProps<{
     </div>
   </div>
 </template>
+
+<style scoped>
+.description {
+  white-space: pre-wrap;
+}
+</style>
