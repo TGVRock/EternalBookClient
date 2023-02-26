@@ -1,12 +1,16 @@
 <script setup lang="ts">
+// TODO: コード整理
 import { ref, computed, watch } from "vue";
-import { useWriteMosaicStore } from "@/stores/WriteMosaic";
-import { isSSSEnable, getAddress } from "@/utils/sss";
 import type { Address } from "symbol-sdk";
+import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { getMultisigAddresses } from "@/apis/account";
+import { isSSSEnable, getAddress } from "@/utils/sss";
 
+// Stores
 const writeMosaicStore = useWriteMosaicStore();
 
+// Reactives
+const multisigAddresses = ref<Array<Address>>([]);
 const isSSSLinked = computed(() => {
   return isSSSEnable();
 });
@@ -14,7 +18,6 @@ const sssLinkedAddress = computed(() => {
   return getAddress();
 });
 
-const multisigAddresses = ref<Array<Address>>([]);
 watch(
   isSSSLinked,
   async (): Promise<void> => {

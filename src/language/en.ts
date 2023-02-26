@@ -1,4 +1,5 @@
 export default {
+  lang: "English",
   mosaicInfo: {
     title: "Mosaic Information",
     id: "Mosaic ID",
@@ -29,5 +30,12 @@ export default {
     fileSelect: "Select File",
     createMosaic: "Create Mosaic",
     writeOnChain: "Write On Chain",
+  },
+  message: {
+    loading: "Now Loading...",
+    prepare: "Now Preparing...",
+    waitSign: "Wait Signing...",
+    processing: "Now Processing...",
+    complete: "Complete !",
   },
 };

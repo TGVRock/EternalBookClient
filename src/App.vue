@@ -2,8 +2,8 @@
 import { computed } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 import { isSSSEnable, getAddress } from "@/utils/sss";
-import LocaleMenu from "@/components/LocaleMenu.vue";
-import NetworkTypeMenu from "@/components/NetworkTypeMenu.vue";
+import LocaleMenuComponent from "@/components/LocaleMenuComponent.vue";
+import NetworkTypeMenuComponent from "@/components/NetworkTypeMenuComponent.vue";
 
 const isSSSLinked = computed(() => {
   return isSSSEnable();
@@ -45,13 +45,13 @@ const linkedAddress = computed(() => {
             </li>
           </ul>
           <div class="d-flex me-2">
-            <NetworkTypeMenu />
+            <NetworkTypeMenuComponent />
           </div>
           <div v-if="isSSSLinked" class="d-flex me-2">
             {{ linkedAddress }}
           </div>
           <div class="d-flex me-2">
-            <LocaleMenu />
+            <LocaleMenuComponent />
           </div>
         </div>
       </div>

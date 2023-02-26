@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import WritePrepareComponent from "@/components/WritePrepareComponent.vue";
-import WriteProcessingComponent from "@/components/WriteProcessingComponent.vue";
+import ProcessingComponent from "@/components/ProcessingComponent.vue";
 import WriteCompleteComponent from "@/components/WriteCompleteComponent.vue";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { TransactionGroup } from "symbol-sdk";
@@ -10,11 +9,12 @@ writeMosaicStore.createMosaic();
 </script>
 
 <template>
-  <WriteProcessingComponent
+  <ProcessingComponent
     v-if="writeMosaicStore.state === TransactionGroup.Unconfirmed"
+    v-bind:message="$t('message.processing')"
   />
   <WriteCompleteComponent
     v-else-if="writeMosaicStore.state === TransactionGroup.Confirmed"
   />
-  <WritePrepareComponent v-else />
+  <ProcessingComponent v-else v-bind:message="$t('message.prepare')" />
 </template>

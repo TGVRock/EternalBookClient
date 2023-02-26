@@ -1,11 +1,12 @@
 <script setup lang="ts">
+// TODO: コード整理
 import { ref } from "vue";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import { useRouter } from "vue-router";
 import { getMosaicInfo } from "@/apis/mosaic";
 import type { MosaicInfo } from "symbol-sdk";
-import LoadingComponent from "./LoadingComponent.vue";
+import ProcessingComponent from "./ProcessingComponent.vue";
 
 const writeOnChainDataStore = useWriteOnChainDataStore();
 const router = useRouter();
@@ -25,7 +26,10 @@ setTimeout(() => {
   <div class="text-center my-5">
     <h3>Complete !</h3>
   </div>
-  <LoadingComponent v-if="undefined === mosaicInfo" />
+  <ProcessingComponent
+    v-if="undefined === mosaicInfo"
+    v-bind:message="$t('message.loading')"
+  />
   <MosaicInfoComponent
     v-else
     v-bind:mosaic-info="(mosaicInfo as MosaicInfo)"

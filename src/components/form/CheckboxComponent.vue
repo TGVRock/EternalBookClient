@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from "vue";
+
 // Props
 const props = defineProps<{
   id: string; // Element id
@@ -11,7 +13,8 @@ const emit = defineEmits<{
   (e: "update:checked", checked: boolean): void;
 }>();
 
-const elemId = "cb" + props.id;
+// Reactives
+const elemId = ref("cb" + props.id);
 
 /**
  * 変更イベント処理

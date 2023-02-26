@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// TODO: 内容をツールの説明にする
 import { RouterLink } from "vue-router";
 </script>
 

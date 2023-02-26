@@ -18,7 +18,6 @@ export const DEFAULT_IV = "EternalBookProtocol-OnChainData."; // デフォルト
 export const AGGREGATE_FEE_MULTIPLIER = 300; // 手数料乗数
 export const DATASIZE_PER_TX = 1023; // 1トランザクションに含めることができるデータサイズ
 export const OVERHEAD_SIZE_PER_TX = 80; // トランザクションのオーバーヘッドサイズ
-export const MAX_FEE_PRE_AGG_TX = 22; // 1アグリゲートトランザクションの最大手数料(実際値)
 export const XYM_DIVISIBILITY = 6; // XYM の可分性
 
 export const UNDEFINED_DISPLAY_STR = "N/A"; // XYM の可分性

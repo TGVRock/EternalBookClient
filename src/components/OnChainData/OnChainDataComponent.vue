@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import OnChainDataRowComponent from "./OnChainDataRowComponent.vue";
 import type { OnChainData } from "@/models/OnChainDataModel";
+import OnChainDataRowComponent from "./OnChainDataRowComponent.vue";
 
+// Props
 defineProps<{
-  onChainDataList: OnChainData[] | undefined;
+  onChainDataList: OnChainData[]; // オンチェーンデータリスト
 }>();
 </script>
 

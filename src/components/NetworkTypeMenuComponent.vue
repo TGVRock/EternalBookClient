@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// TODO: コード整理
 import { ref, computed } from "vue";
 import { NetworkType } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";

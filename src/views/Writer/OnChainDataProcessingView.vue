@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import WritePrepareComponent from "@/components/WritePrepareComponent.vue";
-import WriteProcessingComponent from "@/components/WriteProcessingComponent.vue";
+import ProcessingComponent from "@/components/ProcessingComponent.vue";
 import WriteCompleteComponent from "@/components/WriteCompleteComponent.vue";
 import { TransactionGroup } from "symbol-sdk";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
@@ -10,11 +9,12 @@ writeOnChainDataStore.writeOnChain();
 </script>
 
 <template>
-  <WriteProcessingComponent
+  <ProcessingComponent
     v-if="writeOnChainDataStore.state === TransactionGroup.Unconfirmed"
+    v-bind:message="$t('message.processing')"
   />
   <WriteCompleteComponent
     v-else-if="writeOnChainDataStore.state === TransactionGroup.Confirmed"
   />
-  <WritePrepareComponent v-else />
+  <ProcessingComponent v-else v-bind:message="$t('message.prepare')" />
 </template>

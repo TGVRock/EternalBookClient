@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { isImage, isAudio, isHtml, isMovie } from "@/utils/mime";
 
+// Props
 defineProps<{
-  base64: string;
-  mime: string;
+  base64: string; // Base64データ
+  mime: string; // MIMEタイプ
 }>();
 </script>
 

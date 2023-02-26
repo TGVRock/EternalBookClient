@@ -2,6 +2,7 @@
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import CheckboxComponent from "@/components/form/CheckboxComponent.vue";
 
+// Stores
 const writeMosaicStore = useWriteMosaicStore();
 </script>
 

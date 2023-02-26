@@ -1,4 +1,5 @@
 export default {
+  lang: "日本語",
   mosaicInfo: {
     title: "モザイク情報",
     id: "モザイクID",
@@ -29,5 +30,12 @@ export default {
     fileSelect: "ファイル選択",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
+  },
+  message: {
+    loading: "読み込み中...",
+    prepare: "準備中...",
+    waitSign: "署名待ち...",
+    processing: "処理中...",
+    complete: "完了 !",
   },
 };

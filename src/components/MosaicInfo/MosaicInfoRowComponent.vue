@@ -1,7 +1,8 @@
 <script setup lang="ts">
+// Props
 defineProps<{
-  title: string;
-  data: string;
+  title: string; // 行タイトル
+  data: string; // データ
 }>();
 </script>
 

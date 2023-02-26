@@ -1,22 +1,23 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import {
   DATASIZE_PER_TX,
   DATA_TX_SIZE,
-  MAX_FEE_PRE_AGG_TX,
   OVERHEAD_SIZE_PER_TX,
   XYM_DIVISIBILITY,
   AGGREGATE_FEE_MULTIPLIER,
 } from "@/utils/consts";
+import { ConvertHumanReadableByteDataSize } from "@/utils/converter";
 import MosaicInfoRowComponent from "../MosaicInfo/MosaicInfoRowComponent.vue";
 import DataAreaComponent from "./DataAreaComponent.vue";
-import { ConvertHumanReadableByteDataSize } from "@/utils/converter";
-import { computed } from "vue";
 
+// Props
 const props = defineProps<{
-  base64: string;
-  mime: string;
+  base64: string; // Base64データ
+  mime: string; // MIMEタイプ
 }>();
 
+// Reactives
 const innerTxNum = computed(() => {
   return Math.ceil(props.base64.length / DATASIZE_PER_TX);
 });
@@ -24,20 +25,14 @@ const aggTxNum = computed(() => {
   return Math.ceil(innerTxNum.value / DATA_TX_SIZE);
 });
 const predictFee = computed(() => {
-  const countedInnerTxNum = Math.floor(innerTxNum.value / DATA_TX_SIZE);
-  const modInnerTxNum = innerTxNum.value % DATA_TX_SIZE;
-  const modDataLength =
-    props.base64.length - countedInnerTxNum * DATASIZE_PER_TX;
+  // 手数料は トランザクションサイズ x 乗数 [μXYM] で計算
+  // トランザクションサイズ : [データサイズ] ＋ [インナートランザクションごとのオーバーヘッド] ＋ [ヘッダサイズ(オーバーヘッド含む)]
   return (
-    countedInnerTxNum * MAX_FEE_PRE_AGG_TX +
-    Math.min(
-      (modDataLength +
-        modInnerTxNum * OVERHEAD_SIZE_PER_TX +
-        aggTxNum.value * (DATASIZE_PER_TX + OVERHEAD_SIZE_PER_TX)) *
-        AGGREGATE_FEE_MULTIPLIER *
-        Math.pow(10, -1 * XYM_DIVISIBILITY),
-      MAX_FEE_PRE_AGG_TX
-    )
+    (props.base64.length +
+      innerTxNum.value * OVERHEAD_SIZE_PER_TX +
+      aggTxNum.value * (DATASIZE_PER_TX + OVERHEAD_SIZE_PER_TX)) *
+    AGGREGATE_FEE_MULTIPLIER *
+    Math.pow(10, -1 * XYM_DIVISIBILITY)
   );
 });
 </script>

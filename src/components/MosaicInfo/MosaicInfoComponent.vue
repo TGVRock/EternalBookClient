@@ -20,12 +20,13 @@ const alias = ref(UNDEFINED_DISPLAY_STR);
 watch(
   props.mosaicInfo,
   async (): Promise<void> => {
-    // モザイク情報が更新された場合、タイムスタンプとエイリアスを取得して設定する
+    // モザイク情報設定チェック
     if (typeof props.mosaicInfo === "undefined") {
       timestamp.value = UNDEFINED_DISPLAY_STR;
       alias.value = UNDEFINED_DISPLAY_STR;
       return;
     }
+    // モザイク情報が更新された場合、タイムスタンプとエイリアスを取得して設定する
     getBlockTimestamp(props.mosaicInfo.startHeight).then((value) => {
       timestamp.value =
         typeof value !== "undefined" ? t2d(value) : UNDEFINED_DISPLAY_STR;

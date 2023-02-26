@@ -2,8 +2,9 @@
 import type { OnChainData } from "@/models/OnChainDataModel";
 import DataAreaComponent from "./DataAreaComponent.vue";
 
+// Props
 defineProps<{
-  data: OnChainData;
+  data: OnChainData; // オンチェーンデータ
 }>();
 </script>
 

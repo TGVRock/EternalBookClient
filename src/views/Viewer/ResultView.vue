@@ -4,7 +4,7 @@ import type { MosaicInfo, NetworkType } from "symbol-sdk";
 import type { OnChainData } from "@/models/OnChainDataModel";
 import { getMosaicInfo } from "@/apis/mosaic";
 import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
-import LoadingComponent from "@/components/LoadingComponent.vue";
+import ProcessingComponent from "@/components/ProcessingComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
 
@@ -33,13 +33,19 @@ watch(mosaicInfo, (): void => {
 </script>
 
 <template>
-  <LoadingComponent v-if="undefined === onChainDataList" />
+  <ProcessingComponent
+    v-if="undefined === onChainDataList"
+    v-bind:message="$t('message.loading')"
+  />
   <OnChainDataComponent
     v-else
     v-bind:onChainDataList="onChainDataList"
     class="container animate__animated animate__fadeIn text-break"
   />
-  <LoadingComponent v-if="undefined === mosaicInfo" />
+  <ProcessingComponent
+    v-if="undefined === mosaicInfo"
+    v-bind:message="$t('message.loading')"
+  />
   <MosaicInfoComponent
     v-else
     v-bind:mosaic-info="(mosaicInfo as MosaicInfo)"
