@@ -148,7 +148,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
         .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
         .subscribe(async () => {
           state.value = "complete";
+          prevTxHash.value = "";
           if (processedSize.value < dataBase64.value.length) {
+            prevTxHash.value = signedAggTx.hash;
             await new Promise((resolve) =>
               setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
             );
