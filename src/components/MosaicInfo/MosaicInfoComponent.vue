@@ -2,7 +2,7 @@
 import { ref, watch } from "vue";
 import type { MosaicInfo } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { b2s, t2d } from "@/utils/converter";
+import { b2s } from "@/utils/converter";
 import { getBlockTimestamp } from "@/apis/block";
 import { getMosaicName } from "@/apis/namespace";
 import MosaicInfoRowComponent from "./MosaicInfoRowComponent.vue";
@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 // Reactives
-const timestamp = ref<string>(CONSTS.STR_NA);
+const timestamp = ref(0);
 const alias = ref<string>(CONSTS.STR_NA);
 
 // Watch
@@ -22,18 +22,16 @@ watch(
   async (): Promise<void> => {
     // モザイク情報設定チェック
     if (typeof props.mosaicInfo === "undefined") {
-      timestamp.value = CONSTS.STR_NA;
+      timestamp.value = 0;
       alias.value = CONSTS.STR_NA;
       return;
     }
     // モザイク情報が更新された場合、タイムスタンプとエイリアスを取得して設定する
     getBlockTimestamp(props.mosaicInfo.startHeight).then((value) => {
-      timestamp.value =
-        typeof value !== "undefined" ? t2d(value) : CONSTS.STR_NA;
+      timestamp.value = typeof value !== "undefined" ? value : 0;
     });
     getMosaicName(props.mosaicInfo.id.toHex()).then((value) => {
-      alias.value =
-        typeof value !== "undefined" ? value : CONSTS.STR_NA;
+      alias.value = typeof value !== "undefined" ? value : CONSTS.STR_NA;
     });
   },
   {
@@ -66,8 +64,14 @@ watch(
       v-bind:data="mosaicInfo.startHeight.toString()"
     />
     <MosaicInfoRowComponent
+      v-if="timestamp > 0"
       v-bind:title="$t('mosaicInfo.date')"
-      v-bind:data="timestamp"
+      v-bind:data="$d(new Date(timestamp), 'long')"
+    />
+    <MosaicInfoRowComponent
+      v-else
+      v-bind:title="$t('mosaicInfo.date')"
+      v-bind:data="CONSTS.STR_NA"
     />
     <MosaicInfoRowComponent
       v-bind:title="$t('mosaicInfo.address')"

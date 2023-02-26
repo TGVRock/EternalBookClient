@@ -129,10 +129,7 @@ export async function getEBPOnChainData(
       onChainDataList.push({
         title: data.title,
         description: data.description || CONSTS.STR_NA,
-        date:
-          dateTime.toLocaleDateString("ja-JP") +
-          " " +
-          dateTime.toLocaleTimeString("ja-JP"),
+        date: dateTime,
         mime: getMimeFromBase64(data.data),
         base64: data.data,
       });

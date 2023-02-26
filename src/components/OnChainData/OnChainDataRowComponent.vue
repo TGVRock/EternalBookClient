@@ -14,9 +14,9 @@ defineProps<{
       <DataAreaComponent v-bind:base64="data.base64" v-bind:mime="data.mime" />
     </div>
     <div class="col-lg-6 align-self-center">
-      <h6 class="text-muted">{{ data.date }}</h6>
+      <h6 class="text-muted">{{ $d(data.date, "long") }}</h6>
       <h3>{{ data.title }}</h3>
-      <p>{{ data.description }}</p>
+      <p class="description">{{ data.description }}</p>
     </div>
   </div>
 </template>

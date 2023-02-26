@@ -24,21 +24,6 @@ export function s2b(s: string): boolean {
   }
 }
 
-/**
- * timestamp to Date
- *
- * @param b target timestamp
- * @returns "true" or "false"
- */
-export function t2d(t: number): string {
-  const dateTime = new Date(t);
-  return (
-    dateTime.toLocaleDateString("ja-JP") +
-    " " +
-    dateTime.toLocaleTimeString("ja-JP")
-  );
-}
-
 export function ConvertHumanReadableByteDataSize(size: number): string {
   return size.toLocaleString("en");
 }

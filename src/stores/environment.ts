@@ -12,6 +12,7 @@ import type {
   MosaicRepository,
   NamespaceRepository,
 } from "symbol-sdk";
+import CONSTS from "@/utils/consts";
 
 const nodeListTest: Array<string> = [
   "https://vmi831828.contaboserver.net:3001",
@@ -53,7 +54,7 @@ export const useEnvironmentStore = defineStore("environment", () => {
           break;
 
         default:
-          generationHash.value = "N/A";
+          generationHash.value = CONSTS.STR_NA;
           epochAdjustment.value - 1;
           wsEndpoint.value = "";
           repo.value = undefined;
