@@ -42,24 +42,37 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   );
 
   async function writeOnChain(): Promise<void> {
+    environmentStore.consoleLogger.debug("writeOnChain() start.");
     state.value = "prepare";
     processedSize.value = 0;
+    prevTxHash.value = "";
     // データ設定チェック
     if (dataBase64.value.length === 0) {
+      environmentStore.consoleLogger.debug(
+        "writeOnChain() error : data no setting."
+      );
       return;
     }
     writeOnChainOneComponent();
+    environmentStore.consoleLogger.debug("writeOnChain() end.");
   }
 
   async function writeOnChainOneComponent(): Promise<void> {
-    console.log(processedSize.value);
+    environmentStore.consoleLogger.debug("writeOnChainOneComponent() start.");
+    environmentStore.consoleLogger.debug("processed Size", processedSize.value);
     // 書き込み済データサイズチェック
     if (processedSize.value >= dataBase64.value.length) {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() : completed."
+      );
       return;
     }
     // モザイク設定チェック
     const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
     if (typeof mosaicInfo === "undefined") {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : mosaic no setting."
+      );
       return;
     }
     if (
@@ -67,6 +80,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       typeof environmentStore.namespaceRepo === "undefined" ||
       typeof environmentStore.txRepo === "undefined"
     ) {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : repository unavailable."
+      );
       return;
     }
 
@@ -74,6 +90,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       .getAccountInfo(mosaicInfo.ownerAddress)
       .toPromise();
     if (typeof accountInfo === "undefined") {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : get account info failed."
+      );
       return;
     }
 
@@ -88,10 +107,16 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     );
     const encryptHeader = cryptoHeader(mosaicInfo.id.toHex(), header);
     if (typeof encryptHeader === "undefined") {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : crypto header failed."
+      );
       return;
     }
     const txHeader = createTxTransfer(accountInfo, encryptHeader);
     if (typeof txHeader === "undefined") {
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : create header tx failed."
+      );
       return;
     }
     txList.push(txHeader.toAggregate(accountInfo.publicAccount));
@@ -107,6 +132,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       );
       const txHeader = createTxTransfer(accountInfo, sendData);
       if (typeof txHeader === "undefined") {
+        environmentStore.consoleLogger.debug(
+          "writeOnChainOneComponent() error : create data tx failed."
+        );
         return;
       }
       txList.push(txHeader.toAggregate(accountInfo.publicAccount));
@@ -122,7 +150,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     const signedAggTx = await requestTxSign(aggTx);
     if (typeof signedAggTx === "undefined") {
-      return undefined;
+      environmentStore.consoleLogger.debug(
+        "writeOnChainOneComponent() error : SSS request sign failed."
+      );
+      return;
     }
 
     // トランザクションリスナーオープン
@@ -140,6 +171,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       txListener
         .unconfirmedAdded(mosaicInfo.ownerAddress, signedAggTx.hash)
         .subscribe(() => {
+          environmentStore.consoleLogger.debug(
+            "on chain data listener : unconfirmed."
+          );
           state.value = "processing";
         });
 
@@ -147,6 +181,9 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       txListener
         .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
         .subscribe(async () => {
+          environmentStore.consoleLogger.debug(
+            "on chain data listener : confirmed."
+          );
           state.value = "complete";
           prevTxHash.value = "";
           if (processedSize.value < dataBase64.value.length) {
@@ -162,6 +199,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     }
 
     await environmentStore.txRepo.announce(signedAggTx).toPromise();
+    environmentStore.consoleLogger.debug("writeOnChainOneComponent() end.");
   }
 
   return {

@@ -14,6 +14,7 @@ import type {
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
 import { isSSSEnable } from "@/utils/sss";
+import { ConsoleLogger, ConsoleLogLevel } from "@/utils/consolelogger";
 
 const nodeListTest: Array<string> = [
   "https://vmi831828.contaboserver.net:3001",
@@ -40,6 +41,11 @@ export const useEnvironmentStore = defineStore("environment", () => {
   const multisigRepo = ref<MultisigRepository | undefined>(undefined);
   const wsEndpoint = ref("");
   const sssLinked = ref(isSSSEnable());
+  const consoleLogger = new ConsoleLogger(
+    process.env.NODE_ENV === "development"
+      ? ConsoleLogLevel.debug
+      : ConsoleLogLevel.error
+  );
 
   const checkSSSLinked = setInterval(() => {
     if (isSSSEnable()) {
@@ -107,5 +113,6 @@ export const useEnvironmentStore = defineStore("environment", () => {
     accountRepo,
     multisigRepo,
     sssLinked,
+    consoleLogger,
   };
 });
