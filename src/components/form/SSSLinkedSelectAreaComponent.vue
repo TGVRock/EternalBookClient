@@ -1,34 +1,44 @@
 <script setup lang="ts">
-// TODO: コード整理
-import { ref, computed, watch } from "vue";
-import type { Address } from "symbol-sdk";
-import { useWriteMosaicStore } from "@/stores/WriteMosaic";
+import { ref, watch } from "vue";
 import { getMultisigAddresses } from "@/apis/account";
-import { isSSSEnable, getAddress } from "@/utils/sss";
+import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import { useEnvironmentStore } from "@/stores/environment";
+import { useWriteMosaicStore } from "@/stores/WriteMosaic";
+import { getAddress } from "@/utils/sss";
+import SelectboxComponent from "./SelectboxComponent.vue";
 
 // Stores
+const environmentStore = useEnvironmentStore();
 const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
-const multisigAddresses = ref<Array<Address>>([]);
-const isSSSLinked = computed(() => {
-  return isSSSEnable();
-});
-const sssLinkedAddress = computed(() => {
-  return getAddress();
+const addresses = ref<Array<SelectboxItemModel>>([]);
+const attributes = ref<SelectboxAttributeModel>({
+  ariaLabel: "address",
 });
 
 watch(
-  isSSSLinked,
+  () => environmentStore.sssLinked,
   async (): Promise<void> => {
-    multisigAddresses.value = [];
+    // SSS 連携アドレスを追加
     const linkedAddress = getAddress();
-    if (typeof linkedAddress === "undefined") {
-      return;
-    }
+    addresses.value.push({
+      key: linkedAddress,
+      value: linkedAddress,
+      display: linkedAddress,
+    });
     writeMosaicStore.linkedAddress = linkedAddress;
     writeMosaicStore.ownerAddress = linkedAddress;
-    multisigAddresses.value = await getMultisigAddresses(linkedAddress);
+    // SSS 連携アドレスのマルチシグアドレスを追加
+    const multisigAddresses = await getMultisigAddresses(linkedAddress);
+    for (let idx = 0; idx < multisigAddresses.length; idx++) {
+      addresses.value.push({
+        key: multisigAddresses[idx].plain(),
+        value: multisigAddresses[idx].plain(),
+        display: "(multisig) " + multisigAddresses[idx].plain(),
+      });
+    }
   },
   {
     immediate: true,
@@ -42,22 +52,11 @@ watch(
       {{ $t("mosaicInfo.address") }}
     </label>
     <div class="col-md-9">
-      <select
-        v-model="writeMosaicStore.ownerAddress"
-        class="form-select"
-        aria-label="network-type"
-      >
-        <option v-bind:value="sssLinkedAddress">
-          {{ sssLinkedAddress }}
-        </option>
-        <option
-          v-for="value in multisigAddresses"
-          v-bind:key="`network-type-${value.plain()}`"
-          v-bind:value="value.plain()"
-        >
-          &ensp;(multisig) {{ value.plain() }}
-        </option>
-      </select>
+      <SelectboxComponent
+        v-bind:value="writeMosaicStore.ownerAddress"
+        v-bind:attributes="attributes"
+        v-bind:items="addresses"
+      />
     </div>
   </div>
 </template>

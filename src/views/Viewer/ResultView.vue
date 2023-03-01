@@ -34,7 +34,7 @@ watch(mosaicInfo, (): void => {
 
 <template>
   <ProcessingComponent
-    v-if="undefined === onChainDataList"
+    v-if="typeof onChainDataList === 'undefined'"
     v-bind:message="$t('message.loading')"
   />
   <OnChainDataComponent
@@ -43,7 +43,7 @@ watch(mosaicInfo, (): void => {
     class="container animate__animated animate__fadeIn text-break"
   />
   <ProcessingComponent
-    v-if="undefined === mosaicInfo"
+    v-if="typeof mosaicInfo === 'undefined'"
     v-bind:message="$t('message.loading')"
   />
   <MosaicInfoComponent

@@ -13,6 +13,7 @@ import type {
   NamespaceRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
+import { isSSSEnable } from "@/utils/sss";
 
 const nodeListTest: Array<string> = [
   "https://vmi831828.contaboserver.net:3001",
@@ -38,6 +39,17 @@ export const useEnvironmentStore = defineStore("environment", () => {
   const accountRepo = ref<AccountRepository | undefined>(undefined);
   const multisigRepo = ref<MultisigRepository | undefined>(undefined);
   const wsEndpoint = ref("");
+  const sssLinked = ref(isSSSEnable());
+
+  const checkSSSLinked = setInterval(() => {
+    if (isSSSEnable()) {
+      sssLinked.value = true;
+      clearInterval(checkSSSLinked);
+    }
+  }, 500);
+  setTimeout(() => {
+    clearInterval(checkSSSLinked);
+  }, 10000);
 
   watch(
     networkType,
@@ -94,5 +106,6 @@ export const useEnvironmentStore = defineStore("environment", () => {
     namespaceRepo,
     accountRepo,
     multisigRepo,
+    sssLinked,
   };
 });

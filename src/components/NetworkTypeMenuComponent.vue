@@ -1,39 +1,46 @@
 <script setup lang="ts">
-// TODO: コード整理
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { NetworkType } from "symbol-sdk";
+import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
-import { isSSSEnable, getNetworkType } from "@/utils/sss";
+import { getNetworkType } from "@/utils/sss";
+import CONSTS from "@/utils/consts";
+import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 
+// Stores
 const environmentStore = useEnvironmentStore();
 
-const networkTypeList = ref({
-  MAIN: NetworkType.MAIN_NET,
-  TEST: NetworkType.TEST_NET,
+// Reactives
+const networks = ref<Array<SelectboxItemModel>>([
+  {
+    key: "MAIN",
+    value: NetworkType.MAIN_NET,
+    display: "MAIN",
+  },
+  {
+    key: "TEST",
+    value: NetworkType.TEST_NET,
+    display: "TEST",
+  },
+]);
+const attributes = ref<SelectboxAttributeModel>({
+  ariaLabel: "network-type",
+  disabled: environmentStore.sssLinked,
 });
 
-const isSSSLinked = computed(() => {
-  return isSSSEnable();
-});
+// SSSで連携されているネットワークタイプを設定
 const netType = getNetworkType();
-if (typeof netType !== "undefined") {
+if (netType !== CONSTS.NETWORKTYPE_INVALID) {
   environmentStore.networkType = netType;
 }
 </script>
 
 <template>
-  <select
-    v-model="environmentStore.networkType"
-    v-bind:disabled="isSSSLinked"
-    class="form-select-sm"
-    aria-label="network-type"
-  >
-    <option
-      v-for="(value, key) in networkTypeList"
-      v-bind:key="`network-type-${value}`"
-      v-bind:value="value"
-    >
-      {{ key }}
-    </option>
-  </select>
+  <SelectboxComponent
+    v-bind:value="environmentStore.networkType"
+    v-bind:attributes="attributes"
+    v-bind:items="networks"
+    size="sm"
+  />
 </template>

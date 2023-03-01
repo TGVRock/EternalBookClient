@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { useEnvironmentStore } from "@/stores/environment";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
-import { isSSSEnable } from "@/utils/sss";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMimeFromBase64 } from "@/utils/mime";
 import PreviewDataComponent from "@/components/OnChainData/PreviewDataComponent.vue";
@@ -12,12 +11,9 @@ import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaC
 import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
+const environmentStore = useEnvironmentStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
-
-const isSSSLinked = computed(() => {
-  return isSSSEnable();
-});
 
 writeMosaicStore.linkedAddress = "";
 writeMosaicStore.ownerAddress = "";
@@ -26,15 +22,15 @@ writeMosaicStore.ownerAddress = "";
 <template>
   <article class="container">
     <section>
+      <SSSLinkedSelectAreaComponent v-if="environmentStore.sssLinked" />
       <TextAreaComponent
-        v-if="!isSSSLinked"
+        v-else
         v-bind:item-name="$t('mosaicInfo.address')"
         v-bind:placeholder="
           $t('writer.pleaseInputItem', { item: $t('mosaicInfo.address') })
         "
         v-model:value="writeMosaicStore.ownerAddress"
       />
-      <SSSLinkedSelectAreaComponent v-else />
 
       <FileSelectComponent v-model:base64="writeOnChainDataStore.dataBase64" />
       <PreviewDataComponent

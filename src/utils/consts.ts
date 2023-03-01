@@ -34,9 +34,11 @@ const constants = {
   // デフォルトのIV
   CRYPTO_IV_DEFAULT: "EternalBookProtocol-OnChainData.",
 
-  /* 文字列定数 */
+  /* その他定数 */
   // N/A
   STR_NA: "N/A",
+  // 不正なネットワークタイプ
+  NETWORKTYPE_INVALID: -1,
 };
 
 // 他の定数から算出される定数

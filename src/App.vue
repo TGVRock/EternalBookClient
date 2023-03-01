@@ -1,25 +1,33 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, watch } from "vue";
 import { RouterLink, RouterView } from "vue-router";
-import { isSSSEnable, getAddress } from "@/utils/sss";
+import { getAddress } from "@/utils/sss";
+import { useEnvironmentStore } from "@/stores/environment";
 import LocaleMenuComponent from "@/components/LocaleMenuComponent.vue";
 import NetworkTypeMenuComponent from "@/components/NetworkTypeMenuComponent.vue";
 
-const isSSSLinked = computed(() => {
-  return isSSSEnable();
-});
-const linkedAddress = computed(() => {
-  return getAddress();
-});
+// Stores
+const environmentStore = useEnvironmentStore();
+const linkedAddress = ref("");
+
+watch(
+  () => environmentStore.sssLinked,
+  async (): Promise<void> => {
+    linkedAddress.value = getAddress();
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>
   <header class="sticky-top">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <RouterLink class="navbar-brand" v-bind:to="{ name: 'home' }"
-          >EternalBookClient</RouterLink
-        >
+        <RouterLink class="navbar-brand" v-bind:to="{ name: 'home' }">
+          EternalBookClient
+        </RouterLink>
         <button
           class="navbar-toggler"
           type="button"
@@ -47,7 +55,7 @@ const linkedAddress = computed(() => {
           <div class="d-flex me-2">
             <NetworkTypeMenuComponent />
           </div>
-          <div v-if="isSSSLinked" class="d-flex me-2">
+          <div v-if="environmentStore.sssLinked" class="d-flex me-2">
             {{ linkedAddress }}
           </div>
           <div class="d-flex me-2">

@@ -1,8 +1,7 @@
 import type { SSSWindow } from "sss-module";
-import type { NetworkType, SignedTransaction, Transaction } from "symbol-sdk";
+import type { SignedTransaction, Transaction } from "symbol-sdk";
+import CONSTS from "./consts";
 declare const window: SSSWindow;
-
-const sss = window.SSS;
 
 /**
  * SSS Linked
@@ -10,39 +9,47 @@ const sss = window.SSS;
  * @returns true : SSS linked, false : no SSS linked
  */
 export function isSSSEnable(): boolean {
-  return typeof sss !== "undefined";
+  return typeof window.SSS !== "undefined";
 }
 
 /**
  * Get SSS Linked ActiveAddress
  *
- * @returns ActiveAddress
+ * @returns ActiveAddress. If unlinked, return empty string.
  */
-export function getAddress(): string | undefined {
-  if (!isSSSEnable()) {
-    return undefined;
-  }
-  return sss.activeAddress;
+export function getAddress(): string {
+  return window.SSS?.activeAddress || "";
 }
 
 /**
  * Get SSS Linked Account Network Type
  *
- * @returns ActiveNetworkType
+ * @returns ActiveNetworkType. If unlinked, return -1.
  */
-export function getNetworkType(): NetworkType | undefined {
-  if (!isSSSEnable()) {
-    return undefined;
-  }
-  return sss.activeNetworkType as NetworkType;
+export function getNetworkType(): number {
+  return window.SSS?.activeNetworkType || CONSTS.NETWORKTYPE_INVALID;
 }
 
+/**
+ * Request Sign to SSS.
+ *
+ * @param tx target transaction
+ * @returns Signed transaction. If unlinked or sign failed, return undefined.
+ */
 export async function requestTxSign(
   tx: Transaction
 ): Promise<SignedTransaction | undefined> {
   if (!isSSSEnable()) {
     return undefined;
   }
-  sss.setTransaction(tx);
-  return sss.requestSign();
+  window.SSS.setTransaction(tx);
+  return await window.SSS.requestSign()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      console.log("SSS Request Sign Error :");
+      console.log(error);
+      return undefined;
+    });
 }
