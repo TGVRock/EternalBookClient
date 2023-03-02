@@ -38,7 +38,7 @@ if (netType !== CONSTS.NETWORKTYPE_INVALID) {
 
 <template>
   <SelectboxComponent
-    v-bind:value="environmentStore.networkType"
+    v-model:value="environmentStore.networkType"
     v-bind:attributes="attributes"
     v-bind:items="networks"
     size="sm"

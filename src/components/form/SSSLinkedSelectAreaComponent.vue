@@ -53,7 +53,7 @@ watch(
     </label>
     <div class="col-md-9">
       <SelectboxComponent
-        v-bind:value="writeMosaicStore.ownerAddress"
+        v-model:value="writeMosaicStore.ownerAddress"
         v-bind:attributes="attributes"
         v-bind:items="addresses"
       />

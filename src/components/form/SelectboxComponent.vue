@@ -13,7 +13,7 @@ const props = defineProps<{
 
 // Emits
 const emit = defineEmits<{
-  (e: "update:value", value: string): void;
+  (e: "update:value", value: any): void;
 }>();
 
 // Reactives
