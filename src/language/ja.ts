@@ -36,6 +36,7 @@ export default {
     prepare: "準備中...",
     waitSign: "署名待ち...",
     processing: "処理中...",
+    processingOnChain: "{proceed} / {entire} 書き込み中...",
     complete: "完了 !",
   },
 };

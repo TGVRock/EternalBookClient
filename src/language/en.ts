@@ -36,6 +36,7 @@ export default {
     prepare: "Now Preparing...",
     waitSign: "Wait Signing...",
     processing: "Now Processing...",
+    processingOnChain: "{proceed} / {entire} Writing...",
     complete: "Complete !",
   },
 };

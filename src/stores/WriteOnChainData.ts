@@ -6,6 +6,7 @@ import {
   type InnerTransaction,
   type MosaicInfo,
   Listener,
+  TransactionGroup,
 } from "symbol-sdk";
 import { getMosaicInfo } from "@/apis/mosaic";
 import { createHeader } from "@/utils/eternalbookprotocol";
@@ -23,7 +24,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   const relatedMosaicIdStr = ref("");
   const relatedMosaicInfo = ref<MosaicInfo | undefined>(undefined);
   const dataBase64 = ref("");
-  const state = ref("prepare");
+  const state = ref<TransactionGroup | undefined>(undefined);
   const processedSize = ref(0);
   const prevTxHash = ref("");
 
@@ -43,7 +44,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
   async function writeOnChain(): Promise<void> {
     environmentStore.consoleLogger.debug("writeOnChain() start.");
-    state.value = "prepare";
+    state.value = undefined;
     processedSize.value = 0;
     prevTxHash.value = "";
     // データ設定チェック
@@ -174,7 +175,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
           environmentStore.consoleLogger.debug(
             "on chain data listener : unconfirmed."
           );
-          state.value = "processing";
+          state.value = TransactionGroup.Unconfirmed;
         });
 
       // ハッシュロックトランザクションの承認検知
@@ -184,7 +185,6 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
           environmentStore.consoleLogger.debug(
             "on chain data listener : confirmed."
           );
-          state.value = "complete";
           prevTxHash.value = "";
           if (processedSize.value < dataBase64.value.length) {
             prevTxHash.value = signedAggTx.hash;
@@ -192,6 +192,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
               setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
             );
             writeOnChainOneComponent();
+          } else {
+            state.value = TransactionGroup.Confirmed;
           }
           // リスナーをクローズ
           txListener.close();
@@ -208,6 +210,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     relatedMosaicIdStr,
     dataBase64,
     state,
+    processedSize,
     writeOnChain,
   };
 });

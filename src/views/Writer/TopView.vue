@@ -70,7 +70,7 @@ writeMosaicStore.ownerAddress = "";
         </div>
       </div>
       <TransitionButtonComponent
-        v-bind:next-route-name="`WriteProcessing`"
+        v-bind:next-route-name="`CreateMosaic`"
         v-bind:item-name="$t(`writer.createMosaic`)"
       />
     </section>

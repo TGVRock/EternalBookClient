@@ -32,9 +32,9 @@ const router = createRouter({
       component: () => import("../views/Writer/TopView.vue"),
     },
     {
-      path: "/writer/processing",
-      name: "WriteProcessing",
-      component: () => import("../views/Writer/ProcessingView.vue"),
+      path: "/writer/mosaic",
+      name: "CreateMosaic",
+      component: () => import("../views/Writer/CreateMosaicProcessingView.vue"),
     },
     {
       path: "/writer/onchain",
