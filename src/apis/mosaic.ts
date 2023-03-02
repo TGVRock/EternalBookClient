@@ -1,6 +1,5 @@
 import {
   AccountInfo,
-  AggregateTransaction,
   Deadline,
   MosaicDefinitionTransaction,
   MosaicFlags,
@@ -10,10 +9,11 @@ import {
   MosaicSupplyChangeAction,
   MosaicSupplyChangeTransaction,
   UInt64,
+  type InnerTransaction,
 } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
-import CONSTS from "@/utils/consts";
 
+// Stores
 const environmentStore = useEnvironmentStore();
 
 export async function getMosaicInfo(
@@ -26,16 +26,19 @@ export async function getMosaicInfo(
   return environmentStore.mosaicRepo.getMosaic(mosaicId).toPromise();
 }
 
-export function createAggTxMosaicDefine(
+/**
+ * モザイク作成の InnerTransaction 作成
+ *
+ * @param accountInfo アカウント情報
+ * @param amount 数量
+ * @param mosaicFlags モザイクフラグ
+ * @returns モザイク作成の InnerTransaction
+ */
+export function createInnerTxForMosaic(
   accountInfo: AccountInfo,
   amount: number,
-  mosaicFlags: MosaicFlags,
-  isMultiSig: boolean
-): AggregateTransaction | undefined {
-  if (typeof environmentStore.mosaicRepo === "undefined") {
-    return undefined;
-  }
-
+  mosaicFlags: MosaicFlags
+): Array<InnerTransaction> {
   // モザイク定義
   const nonce = MosaicNonce.createRandom();
   const mosaicDefTx = MosaicDefinitionTransaction.create(
@@ -57,27 +60,9 @@ export function createAggTxMosaicDefine(
     environmentStore.networkType
   );
 
-  // アグリゲートトランザクションを作成して返却
-  if (isMultiSig) {
-    // NOTE: マルチシグアカウントで作成するためアグリゲートボンデッド
-    return AggregateTransaction.createComplete(
-      Deadline.create(environmentStore.epochAdjustment),
-      [
-        mosaicDefTx.toAggregate(accountInfo.publicAccount),
-        mosaicChangeTx.toAggregate(accountInfo.publicAccount),
-      ],
-      environmentStore.networkType,
-      []
-    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
-  } else {
-    return AggregateTransaction.createComplete(
-      Deadline.create(environmentStore.epochAdjustment),
-      [
-        mosaicDefTx.toAggregate(accountInfo.publicAccount),
-        mosaicChangeTx.toAggregate(accountInfo.publicAccount),
-      ],
-      environmentStore.networkType,
-      []
-    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
-  }
+  // 2つのトランザクションを InnerTransaction に変換して返却
+  return [
+    mosaicDefTx.toAggregate(accountInfo.publicAccount),
+    mosaicChangeTx.toAggregate(accountInfo.publicAccount),
+  ];
 }

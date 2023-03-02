@@ -7,9 +7,16 @@ import {
   AccountInfo,
   Deadline,
   UInt64,
+  AggregateTransaction,
+  type InnerTransaction,
+  HashLockTransaction,
+  Mosaic,
+  NamespaceId,
+  SignedTransaction,
 } from "symbol-sdk";
 import type { TransactionType, TransactionSearchCriteria } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
+import CONSTS from "@/utils/consts";
 
 const environmentStore = useEnvironmentStore();
 
@@ -63,11 +70,7 @@ async function getTransactionsOnePage(
 export function createTxTransfer(
   accountInfo: AccountInfo,
   message: string
-): TransferTransaction | undefined {
-  if (typeof environmentStore.txRepo === "undefined") {
-    return undefined;
-  }
-
+): TransferTransaction {
   return TransferTransaction.create(
     Deadline.create(environmentStore.epochAdjustment),
     accountInfo.address,
@@ -75,4 +78,38 @@ export function createTxTransfer(
     PlainMessage.create(message),
     environmentStore.networkType
   );
+}
+
+export function createTxHashLock(
+  signedTx: SignedTransaction
+): HashLockTransaction {
+  return HashLockTransaction.create(
+    Deadline.create(environmentStore.epochAdjustment),
+    new Mosaic(new NamespaceId("symbol.xym"), UInt64.fromUint(10 * 1000000)), // 固定値:10XYM
+    UInt64.fromUint(480),
+    signedTx,
+    environmentStore.networkType
+  ).setMaxFee(CONSTS.TX_FEE_MULTIPLIER_DEFAULT) as HashLockTransaction;
+}
+
+export function createTxAggregateBonded(
+  txList: InnerTransaction[]
+): AggregateTransaction {
+  return AggregateTransaction.createBonded(
+    Deadline.create(environmentStore.epochAdjustment),
+    txList,
+    environmentStore.networkType,
+    []
+  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
+}
+
+export function createTxAggregateComplete(
+  txList: InnerTransaction[]
+): AggregateTransaction {
+  return AggregateTransaction.createComplete(
+    Deadline.create(environmentStore.epochAdjustment),
+    txList,
+    environmentStore.networkType,
+    []
+  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
 }
