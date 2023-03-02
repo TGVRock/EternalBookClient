@@ -18,10 +18,11 @@ export async function getEBPOnChainData(
   mosaicInfo: MosaicInfo
 ): Promise<OnChainData[]> {
   // アカウントのアグリゲートトランザクションを全て取得
-  const allAggTxes = await getTransactions(mosaicInfo.ownerAddress, [
-    TransactionType.AGGREGATE_COMPLETE,
-    TransactionType.AGGREGATE_BONDED,
-  ]);
+  const allAggTxes = await getTransactions(
+    mosaicInfo.ownerAddress,
+    [TransactionType.AGGREGATE_COMPLETE, TransactionType.AGGREGATE_BONDED],
+    mosaicInfo.startHeight
+  );
   // オンチェーンデータアグリゲートが存在しない場合は終了
   if (0 === allAggTxes.length) {
     return [];

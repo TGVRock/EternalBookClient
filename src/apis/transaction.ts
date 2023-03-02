@@ -6,8 +6,9 @@ import {
   PlainMessage,
   AccountInfo,
   Deadline,
+  UInt64,
 } from "symbol-sdk";
-import type { TransactionType } from "symbol-sdk";
+import type { TransactionType, TransactionSearchCriteria } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
 
 const environmentStore = useEnvironmentStore();
@@ -25,37 +26,38 @@ export async function getTransactionInfo(
 
 export async function getTransactions(
   address: Address,
-  txType: Array<TransactionType>
+  txType: Array<TransactionType>,
+  fromHeight?: UInt64
 ): Promise<Transaction[]> {
-  return getTransactionsOnePage(address, txType, 1);
+  const criteria: TransactionSearchCriteria = {
+    type: txType,
+    address: address,
+    group: TransactionGroup.Confirmed,
+    pageSize: 100,
+    pageNumber: 1,
+  };
+  if (typeof fromHeight != "undefined") {
+    criteria.fromHeight = fromHeight;
+  }
+  return getTransactionsOnePage(criteria);
 }
 
 async function getTransactionsOnePage(
-  address: Address,
-  txType: Array<TransactionType>,
-  page: number
+  criteria: TransactionSearchCriteria
 ): Promise<Transaction[]> {
   if (typeof environmentStore.txRepo === "undefined") {
     return [];
   }
-  const pageTxes = await environmentStore.txRepo
-    .search({
-      type: txType,
-      address: address,
-      group: TransactionGroup.Confirmed,
-      pageSize: 100,
-      pageNumber: page,
-    })
-    .toPromise();
+  const pageTxes = await environmentStore.txRepo.search(criteria).toPromise();
   if (typeof pageTxes === "undefined") {
     return [];
   }
   if (pageTxes.isLastPage) {
     return pageTxes.data;
   }
-  return pageTxes.data.concat(
-    await getTransactionsOnePage(address, txType, page + 1)
-  );
+  criteria.pageNumber =
+    typeof criteria.pageNumber === "undefined" ? 2 : criteria.pageNumber + 1;
+  return pageTxes.data.concat(await getTransactionsOnePage(criteria));
 }
 
 export function createTxTransfer(
