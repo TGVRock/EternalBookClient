@@ -5,12 +5,12 @@ import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMimeFromBase64 } from "@/utils/mime";
 import PreviewDataComponent from "@/components/OnChainData/PreviewDataComponent.vue";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
-import FileSelectComponent from "@/components/form/FileSelectButtonComponent.vue";
 import MosaicFlagAreaComponent from "@/components/form/MosaicFlagAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
 import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
+// Stores
 const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
@@ -32,12 +32,9 @@ writeMosaicStore.ownerAddress = "";
         "
         v-model:value="writeMosaicStore.ownerAddress"
       />
-
-      <FileSelectComponent v-model:base64="writeOnChainDataStore.dataBase64" />
-      <PreviewDataComponent
-        v-bind:base64="writeOnChainDataStore.dataBase64"
-        v-bind:mime="getMimeFromBase64(writeOnChainDataStore.dataBase64)"
-      />
+    </section>
+    <section>
+      <PreviewDataComponent />
       <TextAreaComponent
         v-bind:item-name="$t('preview.title')"
         v-bind:placeholder="
