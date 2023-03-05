@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// TODO: コード整理
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import type { MosaicInfo } from "symbol-sdk";

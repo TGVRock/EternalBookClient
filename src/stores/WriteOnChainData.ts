@@ -125,7 +125,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   }
 
   /**
-   * 通常アカウント用のオンチェーンデータ書き込み
+   * アグリゲートTx1つ分のオンチェーンデータ書き込み
    * @returns なし
    */
   async function writeOnChainOneAggregate(isBonded: boolean): Promise<void> {
@@ -215,7 +215,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       return;
     }
 
-    // オンチェーンデータTxリスナーオープン
+    // オンチェーンデータTxリスナー設定
+    // TODO: カスタムクラスか関数か、なんにせよ分離する（したい）
     const dataTxListener = new Listener(
       envStore.wsEndpoint,
       envStore.namespaceRepo,
@@ -277,7 +278,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       envStore.logger.error(logTitle, "sss sign failed.");
       return;
     }
-    // NOTE: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
+    // HACK: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
     const signerAddress = Address.createFromPublicKey(
       signedHashLockTx.signerPublicKey,
       envStore.networkType

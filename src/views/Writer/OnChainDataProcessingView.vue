@@ -13,6 +13,7 @@ const entire = Math.ceil(
     (CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM)
 );
 
+// FIXME: 進捗更新されない
 const proceed = computed(() => {
   return Math.ceil(
     writeOnChainDataStore.processedSize /
