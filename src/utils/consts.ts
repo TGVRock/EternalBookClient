@@ -23,6 +23,11 @@ const constants = {
   TX_XYM_DIVISIBILITY: 6,
   /** インナーTxのオーバーヘッドサイズ */
   TX_OVERHEAD_SIZE_PER_INNER: 80,
+  /**
+   * モザイク作成後の待ち時間(msec)
+   * @description 承認後すぐにモザイク情報を取得すると失敗する場合がある
+   */
+  SSS_AFTER_CREATE_MOSAIC_WAIT_MSEC: 5000,
 
   /* SSS */
   /** SSS初期化待ち時間(msec) */
@@ -30,7 +35,7 @@ const constants = {
   /** SSS初期化完了の確認間隔時間(msec) */
   SSS_CONFIRM_INTERVAL_MSEC: 500,
   /** 1署名後の待ち時間(msec) */
-  SSS_AFTER_SIGNED_WAIT_MSEC: 5000,
+  SSS_AFTER_SIGNED_WAIT_MSEC: 10000,
   /**
    * SSS署名待ち時間(msec)
    * @see https://github.com/SafelySignSymbol/SSS-Extension/wiki/requestSign

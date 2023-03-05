@@ -20,6 +20,7 @@ import CONSTS from "@/utils/consts";
 import { encryptHeader, getHash } from "@/utils/crypto";
 import { createHeader } from "@/utils/eternalbookprotocol";
 import { FetchState } from "@/models/FetchState";
+import { openTxListener } from "@/apis/listner";
 
 /**
  * オンチェーンデータ書き込みストア
@@ -221,50 +222,28 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     }
 
     // オンチェーンデータTxリスナー設定
-    // TODO: カスタムクラスか関数か、なんにせよ分離する（したい）
-    const dataTxListener = new Listener(
-      envStore.wsEndpoint,
-      envStore.namespaceRepo,
-      WebSocket
+    const dataTxListener = await openTxListener(
+      "write data",
+      mosaicInfo.ownerAddress,
+      signedAggTx.hash,
+      () => {
+        state.value = TransactionGroup.Unconfirmed;
+      },
+      async () => {
+        // 未処理データが存在する場合はデータ書き込みを再帰実行
+        if (processedSize.value < dataBase64.value.length) {
+          prevTxHash.value = signedAggTx.hash;
+          writeOnChainOneAggregate(isBonded);
+        } else {
+          prevTxHash.value = "";
+          state.value = TransactionGroup.Confirmed;
+        }
+      }
     );
-    await dataTxListener
-      .open()
-      .then(() => {
-        // 切断軽減のためのブロック生成検知
-        dataTxListener.newBlock();
-
-        // Tx未承認検知
-        dataTxListener
-          .unconfirmedAdded(mosaicInfo.ownerAddress, signedAggTx.hash)
-          .subscribe(() => {
-            envStore.logger.debug(logTitle, "write data tx unconfirmed");
-            state.value = TransactionGroup.Unconfirmed;
-          });
-
-        // Tx承認検知
-        dataTxListener
-          .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
-          .subscribe(async () => {
-            envStore.logger.debug(logTitle, "write data tx confirmed.");
-            // 未処理データが存在する場合はデータ書き込みを再帰実行
-            if (processedSize.value < dataBase64.value.length) {
-              prevTxHash.value = signedAggTx.hash;
-              writeOnChainOneAggregate(isBonded);
-            } else {
-              prevTxHash.value = "";
-              state.value = TransactionGroup.Confirmed;
-            }
-            // リスナーをクローズ
-            dataTxListener.close();
-          });
-      })
-      .catch((error) => {
-        envStore.logger.error(
-          logTitle,
-          "aggregate tx listener open failed",
-          error
-        );
-      });
+    if (typeof dataTxListener === "undefined") {
+      envStore.logger.error(logTitle, "open create mosaic tx listener failed.");
+      return;
+    }
 
     // アグリゲートコンプリートTxの場合はアナウンスして終了
     if (!isBonded) {
@@ -290,44 +269,22 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     );
 
     // ハッシュロックTxリスナー設定
-    // TODO: カスタムクラスか関数か、なんにせよ分離する（したい）
-    const hashLockTxListener = new Listener(
-      envStore.wsEndpoint,
-      envStore.namespaceRepo,
-      WebSocket
+    const hashlockTxlistener = await openTxListener(
+      "hash lock",
+      signerAddress,
+      signedHashLockTx.hash,
+      () => {
+        state.value = TransactionGroup.Unconfirmed;
+      },
+      async () => {
+        // アグリゲートTxをアナウンス
+        envStore.txRepo?.announceAggregateBonded(signedAggTx).toPromise();
+      }
     );
-    await hashLockTxListener
-      .open()
-      .then(() => {
-        // 切断軽減のためのブロック生成検知
-        hashLockTxListener.newBlock();
-
-        // Tx未承認検知
-        hashLockTxListener
-          .unconfirmedAdded(signerAddress, signedHashLockTx.hash)
-          .subscribe(() => {
-            envStore.logger.debug(logTitle, "hash lock tx unconfirmed");
-            state.value = TransactionGroup.Unconfirmed;
-          });
-
-        // Tx承認検知
-        hashLockTxListener
-          .confirmed(signerAddress, signedHashLockTx.hash)
-          .subscribe(async () => {
-            envStore.logger.debug(logTitle, "hash lock tx confirmed");
-            // アグリゲートTxをアナウンス
-            envStore.txRepo?.announceAggregateBonded(signedAggTx).toPromise();
-            // リスナーをクローズ
-            hashLockTxListener.close();
-          });
-      })
-      .catch((error) => {
-        envStore.logger.error(
-          logTitle,
-          "hash lock listener open failed",
-          error
-        );
-      });
+    if (typeof hashlockTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open hash lock tx listener failed.");
+      return;
+    }
 
     // Txアナウンス
     await envStore.txRepo.announce(signedHashLockTx).toPromise();

@@ -18,6 +18,7 @@ import {
   createTxAggregateComplete,
   createTxHashLock,
 } from "@/apis/transaction";
+import { openTxListener } from "@/apis/listner";
 
 /**
  * モザイク作成ストア
@@ -90,48 +91,30 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       return;
     }
 
-    // モザイク作成Txリスナー設定
-    // TODO: カスタムクラスか関数か、なんにせよ分離する（したい）
-    const mosaicTxListener = new Listener(
-      envStore.wsEndpoint,
-      envStore.namespaceRepo,
-      WebSocket
-    );
-    await mosaicTxListener
-      .open()
-      .then(() => {
-        // 切断軽減のためのブロック生成検知
-        mosaicTxListener.newBlock();
-
-        // Tx未承認検知
-        mosaicTxListener
-          .unconfirmedAdded(owner, signedAggTx.hash)
-          .subscribe(() => {
-            envStore.logger.debug(logTitle, "create mosaic tx unconfirmed");
-            state.value = TransactionGroup.Unconfirmed;
-          });
-
-        // Tx承認検知
-        mosaicTxListener
-          .confirmed(owner, signedAggTx.hash)
-          .subscribe(async () => {
-            envStore.logger.debug(logTitle, "create mosaic tx confirmed");
-            // モザイクIDを保存
-            writeOnChainDataStore.relatedMosaicIdStr = (
-              aggTx.innerTransactions[0] as MosaicDefinitionTransaction
-            ).mosaicId.toHex();
-            state.value = TransactionGroup.Confirmed;
-            // リスナーをクローズ
-            mosaicTxListener.close();
-          });
-      })
-      .catch((error) => {
-        envStore.logger.error(
-          logTitle,
-          "aggregate tx listener open failed",
-          error
+    // モザイク作成Txリスナーオープン
+    const mosaicTxlistener = await openTxListener(
+      "create mosaic",
+      owner,
+      signedAggTx.hash,
+      () => {
+        state.value = TransactionGroup.Unconfirmed;
+      },
+      async () => {
+        // モザイクIDを保存した直後にモザイク情報を取得するが、承認後すぐだと失敗する場合があるため実行待機
+        await new Promise((resolve) =>
+          setTimeout(resolve, CONSTS.SSS_AFTER_CREATE_MOSAIC_WAIT_MSEC)
         );
-      });
+        // モザイクIDを保存
+        writeOnChainDataStore.relatedMosaicIdStr = (
+          aggTx.innerTransactions[0] as MosaicDefinitionTransaction
+        ).mosaicId.toHex();
+        state.value = TransactionGroup.Confirmed;
+      }
+    );
+    if (typeof mosaicTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open create mosaic tx listener failed.");
+      return;
+    }
 
     // アグリゲートコンプリートTxの場合はアナウンスして終了
     if (!isBonded) {
@@ -156,44 +139,22 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     );
 
     // ハッシュロックTxリスナー設定
-    // TODO: カスタムクラスか関数か、なんにせよ分離する（したい）
-    const hashLockTxListener = new Listener(
-      envStore.wsEndpoint,
-      envStore.namespaceRepo,
-      WebSocket
+    const hashlockTxlistener = await openTxListener(
+      "hash lock",
+      signerAddress,
+      signedHashLockTx.hash,
+      () => {
+        state.value = TransactionGroup.Unconfirmed;
+      },
+      async () => {
+        // アグリゲートTxをアナウンス
+        envStore.txRepo?.announceAggregateBonded(signedAggTx).toPromise();
+      }
     );
-    await hashLockTxListener
-      .open()
-      .then(() => {
-        // 切断軽減のためのブロック生成検知
-        hashLockTxListener.newBlock();
-
-        // Tx未承認検知
-        hashLockTxListener
-          .unconfirmedAdded(signerAddress, signedHashLockTx.hash)
-          .subscribe(() => {
-            envStore.logger.debug(logTitle, "hash lock tx unconfirmed");
-            state.value = TransactionGroup.Unconfirmed;
-          });
-
-        // Tx承認検知
-        hashLockTxListener
-          .confirmed(signerAddress, signedHashLockTx.hash)
-          .subscribe(async () => {
-            envStore.logger.debug(logTitle, "hash lock tx confirmed");
-            // アグリゲートTxをアナウンス
-            envStore.txRepo?.announceAggregateBonded(signedAggTx).toPromise();
-            // リスナーをクローズ
-            hashLockTxListener.close();
-          });
-      })
-      .catch((error) => {
-        envStore.logger.error(
-          logTitle,
-          "hash lock listener open failed",
-          error
-        );
-      });
+    if (typeof hashlockTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open hash lock tx listener failed.");
+      return;
+    }
 
     // Txアナウンス
     await envStore.txRepo.announce(signedHashLockTx).toPromise();
