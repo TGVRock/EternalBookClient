@@ -4,8 +4,6 @@ import { NetworkType } from "symbol-sdk";
 import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
 import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
-import { getNetworkType } from "@/utils/sss";
-import CONSTS from "@/utils/consts";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 
 // Stores
