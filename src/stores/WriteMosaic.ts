@@ -28,9 +28,6 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
   const sssStore = useSSSStore();
   const writeOnChainDataStore = useWriteOnChainDataStore();
 
-  /** SSS連携アドレス */
-  // TODO: 不要と思われるので消す
-  const linkedAddress = ref("");
   /** モザイク所有者アドレス */
   const ownerAddress = ref("");
   /** モザイクフラグ */
@@ -205,7 +202,6 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
   // Exports
   return {
-    linkedAddress,
     ownerAddress,
     mosaicFlags,
     amount,

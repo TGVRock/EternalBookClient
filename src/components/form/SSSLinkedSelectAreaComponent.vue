@@ -32,7 +32,6 @@ watch(
       value: sssStore.address,
       display: sssStore.address,
     });
-    writeMosaicStore.linkedAddress = sssStore.address;
     writeMosaicStore.ownerAddress = sssStore.address;
     // SSS 連携アドレスのマルチシグアドレスを追加
     const multisigAddresses = await getMultisigAddresses(sssStore.address);
