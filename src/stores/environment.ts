@@ -11,7 +11,6 @@ import {
   type NamespaceRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { getNetworkType, isSSSEnable } from "@/utils/sss";
 import { ConsoleLogger } from "@/utils/consolelogger";
 
 // TODO: Mapにする？
@@ -56,38 +55,14 @@ export const useEnvironmentStore = defineStore("environment", () => {
   /** マルチシグリポジトリ */
   const multisigRepo = ref<MultisigRepository | undefined>(undefined);
 
-  /** SSS連携 */
-  const sssLinked = ref(isSSSEnable());
-  // 定周期でSSS連携状態を確認
-  const checkSSSLinked = setInterval(() => {
-    // SSS連携されたら定周期確認を終了
-    if (isSSSEnable()) {
-      sssLinked.value = true;
-      clearInterval(checkSSSLinked);
-    }
-  }, CONSTS.SSS_CONFIRM_INTERVAL_MSEC);
-  // 一定時間待っても連携されない場合は定周期確認を終了
-  setTimeout(() => {
-    clearInterval(checkSSSLinked);
-  }, CONSTS.SSS_INIITALIZE_WAIT_MSEC);
-
   /** ロガー */
   const logger = new ConsoleLogger();
 
   // Watch
   watch(
-    sssLinked,
-    (): void => {
-      const logTitle = "env store watch (sss linked):";
-      logger.debug(logTitle, "start", sssLinked.value);
-      networkType.value = getNetworkType();
-    },
-    { immediate: true }
-  );
-  watch(
     networkType,
     (): void => {
-      const logTitle = "env store watch (network type):";
+      const logTitle = "env store watch:";
       logger.debug(logTitle, "start", networkType.value);
 
       // ネットワークタイプ確認
@@ -148,7 +123,6 @@ export const useEnvironmentStore = defineStore("environment", () => {
     namespaceRepo,
     accountRepo,
     multisigRepo,
-    sssLinked,
     logger,
   };
 });

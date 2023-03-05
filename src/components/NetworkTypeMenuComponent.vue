@@ -5,9 +5,11 @@ import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
 import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
+import { useSSSStore } from "@/stores/sss";
 
 // Stores
 const envStore = useEnvironmentStore();
+const sssStore = useSSSStore();
 
 // Reactives
 const networks = ref<Array<SelectboxItemModel>>([
@@ -24,7 +26,7 @@ const networks = ref<Array<SelectboxItemModel>>([
 ]);
 const attributes = ref<SelectboxAttributeModel>({
   ariaLabel: "network-type",
-  disabled: envStore.sssLinked,
+  disabled: sssStore.sssLinked,
 });
 </script>
 

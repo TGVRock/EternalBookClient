@@ -8,6 +8,7 @@ import {
   Address,
 } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
+import { useSSSStore } from "./sss";
 import { getMosaicInfo, isValidMosaicId } from "@/apis/mosaic";
 import {
   createTxHashLock,
@@ -18,7 +19,6 @@ import {
 import CONSTS from "@/utils/consts";
 import { encryptHeader, getHash } from "@/utils/crypto";
 import { createHeader } from "@/utils/eternalbookprotocol";
-import { requestTxSign } from "@/utils/sss";
 import { FetchState } from "@/models/FetchState";
 
 /**
@@ -27,6 +27,7 @@ import { FetchState } from "@/models/FetchState";
 export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   // Other Stores
   const envStore = useEnvironmentStore();
+  const sssStore = useSSSStore();
 
   /** タイトル */
   const title = ref("");
@@ -208,7 +209,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       : createTxAggregateComplete(txList);
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
-    const signedAggTx = await requestTxSign(aggTx);
+    const signedAggTx = await sssStore.requestTxSign(aggTx);
     if (typeof signedAggTx === "undefined") {
       envStore.logger.error(logTitle, "sss sign failed.");
       return;
@@ -241,11 +242,6 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
             envStore.logger.debug(logTitle, "write data tx confirmed.");
             // 未処理データが存在する場合はデータ書き込みを再帰実行
             if (processedSize.value < dataBase64.value.length) {
-              // 次のデータ書き込みでSSS署名するため待ち
-              // TODO: SSS署名の関数に移動する
-              await new Promise((resolve) =>
-                setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-              );
               prevTxHash.value = signedAggTx.hash;
               writeOnChainOneAggregate(isBonded);
             } else {
@@ -272,17 +268,11 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     }
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
 
-    // ハッシュロックTxをSSSで署名するため待ち
-    // TODO: SSS署名の関数に移動する
-    await new Promise((resolve) =>
-      setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-    );
-
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(signedAggTx);
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
-    const signedHashLockTx = await requestTxSign(hashLockTx);
+    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
     if (typeof signedHashLockTx === "undefined") {
       envStore.logger.error(logTitle, "sss sign failed.");
       return;
@@ -314,7 +304,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
             state.value = TransactionGroup.Unconfirmed;
           });
 
-        // ハッシュロックトランザクションの承認検知
+        // Tx承認検知
         hashLockTxListener
           .confirmed(signerAddress, signedHashLockTx.hash)
           .subscribe(async () => {

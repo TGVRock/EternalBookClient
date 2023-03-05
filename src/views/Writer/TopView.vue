@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMimeFromBase64 } from "@/utils/mime";
@@ -11,7 +11,7 @@ import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaC
 import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
-const envStore = useEnvironmentStore();
+const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
@@ -24,7 +24,7 @@ writeMosaicStore.ownerAddress = "";
 <template>
   <article class="container">
     <section>
-      <SSSLinkedSelectAreaComponent v-if="envStore.sssLinked" />
+      <SSSLinkedSelectAreaComponent v-if="sssStore.sssLinked" />
       <TextAreaComponent
         v-else
         v-bind:item-name="$t('mosaicInfo.address')"

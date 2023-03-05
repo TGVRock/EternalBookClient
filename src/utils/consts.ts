@@ -31,6 +31,11 @@ const constants = {
   SSS_CONFIRM_INTERVAL_MSEC: 500,
   /** 1署名後の待ち時間(msec) */
   SSS_AFTER_SIGNED_WAIT_MSEC: 5000,
+  /**
+   * SSS署名待ち時間(msec)
+   * @see https://github.com/SafelySignSymbol/SSS-Extension/wiki/requestSign
+   */
+  SSS_SIGN_REJECT_WAIT_MSEC: 60000,
 
   // 暗号化
   /** ハッシュアルゴリズム */

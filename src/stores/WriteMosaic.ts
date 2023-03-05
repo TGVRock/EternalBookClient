@@ -8,9 +8,9 @@ import {
   MosaicDefinitionTransaction,
 } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
+import { useSSSStore } from "./sss";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";
 import { createInnerTxForMosaic } from "@/apis/mosaic";
-import { requestTxSign } from "@/utils/sss";
 import CONSTS from "@/utils/consts";
 import { getAccountInfo } from "@/apis/account";
 import {
@@ -25,6 +25,7 @@ import {
 export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
   // Other Stores
   const envStore = useEnvironmentStore();
+  const sssStore = useSSSStore();
   const writeOnChainDataStore = useWriteOnChainDataStore();
 
   /** SSS連携アドレス */
@@ -86,7 +87,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
         );
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
-    const signedAggTx = await requestTxSign(aggTx);
+    const signedAggTx = await sssStore.requestTxSign(aggTx);
     if (typeof signedAggTx === "undefined") {
       envStore.logger.error(logTitle, "sss sign failed.");
       return;
@@ -142,17 +143,11 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     }
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
 
-    // ハッシュロックTxをSSSで署名するため待ち
-    // TODO: SSS署名の関数に移動する
-    await new Promise((resolve) =>
-      setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-    );
-
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(signedAggTx);
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
-    const signedHashLockTx = await requestTxSign(hashLockTx);
+    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
     if (typeof signedHashLockTx === "undefined") {
       envStore.logger.error(logTitle, "sss sign failed.");
       return;

@@ -4,12 +4,13 @@ import { getMultisigAddresses } from "@/apis/account";
 import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
 import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
+import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
-import { getAddress } from "@/utils/sss";
 import SelectboxComponent from "./SelectboxComponent.vue";
 
 // Stores
 const envStore = useEnvironmentStore();
+const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
@@ -20,22 +21,21 @@ const attributes = ref<SelectboxAttributeModel>({
 
 // Watch
 watch(
-  () => envStore.sssLinked,
+  () => sssStore.sssLinked,
   async (): Promise<void> => {
     const logTitle = "sss linked selectbox area watch:";
-    envStore.logger.debug(logTitle, "start", envStore.sssLinked);
+    envStore.logger.debug(logTitle, "start", sssStore.sssLinked);
 
     // SSS 連携アドレスを追加
-    const linkedAddress = getAddress();
     addresses.value.push({
-      key: linkedAddress,
-      value: linkedAddress,
-      display: linkedAddress,
+      key: sssStore.address,
+      value: sssStore.address,
+      display: sssStore.address,
     });
-    writeMosaicStore.linkedAddress = linkedAddress;
-    writeMosaicStore.ownerAddress = linkedAddress;
+    writeMosaicStore.linkedAddress = sssStore.address;
+    writeMosaicStore.ownerAddress = sssStore.address;
     // SSS 連携アドレスのマルチシグアドレスを追加
-    const multisigAddresses = await getMultisigAddresses(linkedAddress);
+    const multisigAddresses = await getMultisigAddresses(sssStore.address);
     for (let idx = 0; idx < multisigAddresses.length; idx++) {
       addresses.value.push({
         key: multisigAddresses[idx].plain(),
