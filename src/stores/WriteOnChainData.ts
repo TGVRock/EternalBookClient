@@ -139,6 +139,12 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       return;
     }
 
+    // 最終データか判定
+    const isLastData =
+      processedSize.value +
+        CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM <=
+      dataBase64.value.length;
+
     // リポジトリチェック
     if (
       typeof envStore.accountRepo === "undefined" ||
@@ -165,14 +171,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     }
 
     // ヘッダ情報の作成と暗号化
-    // TODO: 最終データ以外にもデータハッシュ含まれてる
     const header = createHeader(
       mosaicInfo.id.toHex(),
       mosaicInfo.ownerAddress.plain(),
       title.value,
       message.value,
-      prevTxHash.value,
-      getHash(dataBase64.value)
+      processedSize.value === 0 ? undefined : prevTxHash.value,
+      isLastData ? getHash(dataBase64.value) : undefined
     );
     const encodedHeader = encryptHeader(header, mosaicInfo.id.toHex());
     if (typeof encodedHeader === "undefined") {
