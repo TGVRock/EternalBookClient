@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // Props
 defineProps<{
-  base64: string; // 読み込んだBase64データ
+  /** 読み込んだBase64データ */
+  base64: string;
 }>();
 
 // Emits

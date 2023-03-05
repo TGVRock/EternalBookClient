@@ -9,7 +9,7 @@ import { getAddress } from "@/utils/sss";
 import SelectboxComponent from "./SelectboxComponent.vue";
 
 // Stores
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
@@ -18,9 +18,13 @@ const attributes = ref<SelectboxAttributeModel>({
   ariaLabel: "address",
 });
 
+// Watch
 watch(
-  () => environmentStore.sssLinked,
+  () => envStore.sssLinked,
   async (): Promise<void> => {
+    const logTitle = "sss linked selectbox area watch:";
+    envStore.logger.debug(logTitle, "start", envStore.sssLinked);
+
     // SSS 連携アドレスを追加
     const linkedAddress = getAddress();
     addresses.value.push({
@@ -39,6 +43,7 @@ watch(
         display: "(multisig) " + multisigAddresses[idx].plain(),
       });
     }
+    envStore.logger.debug(logTitle, "end");
   },
   {
     immediate: true,

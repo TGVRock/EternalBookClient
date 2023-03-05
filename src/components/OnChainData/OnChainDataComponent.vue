@@ -4,7 +4,8 @@ import OnChainDataRowComponent from "./OnChainDataRowComponent.vue";
 
 // Props
 defineProps<{
-  onChainDataList: OnChainData[]; // オンチェーンデータリスト
+  /** オンチェーンデータリスト */
+  onChainDataList: OnChainData[];
 }>();
 </script>
 

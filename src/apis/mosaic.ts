@@ -14,21 +14,46 @@ import {
 import { useEnvironmentStore } from "@/stores/environment";
 
 // Stores
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 
+/**
+ * モザイクIDとして有効かチェック
+ * @param mosaicIdStr モザイクID文字列(HEX)
+ * @returns true: 有効, false: 無効
+ */
+export function isValidMosaicId(mosaicIdStr: string): boolean {
+  // MosaicId オブジェクトを作成し、成功するかどうかで判定する
+  try {
+    new MosaicId(mosaicIdStr);
+  } catch (error) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * モザイク情報取得
+ * @param mosaicIdStr モザイクID文字列(HEX)
+ * @returns モザイク情報
+ */
 export async function getMosaicInfo(
   mosaicIdStr: string
 ): Promise<MosaicInfo | undefined> {
-  if (typeof environmentStore.mosaicRepo === "undefined") {
+  const logTitle = "get mosaic info:";
+  if (typeof envStore.mosaicRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
+    return undefined;
+  }
+  if (!isValidMosaicId(mosaicIdStr)) {
+    envStore.logger.error(logTitle, "invalid mosaic.", mosaicIdStr);
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
-  return environmentStore.mosaicRepo.getMosaic(mosaicId).toPromise();
+  return await envStore.mosaicRepo.getMosaic(mosaicId).toPromise();
 }
 
 /**
  * モザイク作成の InnerTransaction 作成
- *
  * @param accountInfo アカウント情報
  * @param amount 数量
  * @param mosaicFlags モザイクフラグ
@@ -42,25 +67,25 @@ export function createInnerTxForMosaic(
   // モザイク定義
   const nonce = MosaicNonce.createRandom();
   const mosaicDefTx = MosaicDefinitionTransaction.create(
-    Deadline.create(environmentStore.epochAdjustment),
+    Deadline.create(envStore.epochAdjustment),
     nonce,
     MosaicId.createFromNonce(nonce, accountInfo.address),
     mosaicFlags,
     0,
     UInt64.fromUint(0),
-    environmentStore.networkType
+    envStore.networkType
   );
 
   // モザイク数量設定
   const mosaicChangeTx = MosaicSupplyChangeTransaction.create(
-    Deadline.create(environmentStore.epochAdjustment),
+    Deadline.create(envStore.epochAdjustment),
     mosaicDefTx.mosaicId,
     MosaicSupplyChangeAction.Increase,
     UInt64.fromUint(amount),
-    environmentStore.networkType
+    envStore.networkType
   );
 
-  // 2つのトランザクションを InnerTransaction に変換して返却
+  // InnerTransaction[] 返却
   return [
     mosaicDefTx.toAggregate(accountInfo.publicAccount),
     mosaicChangeTx.toAggregate(accountInfo.publicAccount),

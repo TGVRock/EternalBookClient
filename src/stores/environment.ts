@@ -5,77 +5,111 @@ import {
   RepositoryFactoryHttp,
   type AccountRepository,
   type MultisigRepository,
-} from "symbol-sdk";
-import type {
-  TransactionRepository,
-  BlockRepository,
-  MosaicRepository,
-  NamespaceRepository,
+  type TransactionRepository,
+  type BlockRepository,
+  type MosaicRepository,
+  type NamespaceRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { isSSSEnable } from "@/utils/sss";
-import { ConsoleLogger, ConsoleLogLevel } from "@/utils/consolelogger";
+import { getNetworkType, isSSSEnable } from "@/utils/sss";
+import { ConsoleLogger } from "@/utils/consolelogger";
 
+// TODO: Mapにする？
+/** テストノードリスト */
 const nodeListTest: Array<string> = [
   "https://vmi831828.contaboserver.net:3001",
   "https://001-sai-dual.symboltest.net:3001",
   "https://5.dusan.gq:3001",
 ];
 
+/** メインノードリスト */
 const nodeListMain: Array<string> = [
   "https://59026db.xym.gakky.net:3001",
   "https://0-0-0-0-0-0-0-0-1.tokyo-node.jp:3001",
   "https://00.high-performance.symbol-nodes.com:3001",
 ];
 
+// TODO: 命名考える（ブロックチェーン？ネットワーク？そうなるとロガーとかも移動する？）
+/**
+ * 環境情報ストア
+ */
 export const useEnvironmentStore = defineStore("environment", () => {
+  /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
+  /** ジェネレーションハッシュ */
   const generationHash = ref("");
+  /** エポックアジャストメント */
   const epochAdjustment = ref(-1);
-  const repo = ref<RepositoryFactoryHttp | undefined>(undefined);
-  const txRepo = ref<TransactionRepository | undefined>(undefined);
-  const blockRepo = ref<BlockRepository | undefined>(undefined);
-  const mosaicRepo = ref<MosaicRepository | undefined>(undefined);
-  const namespaceRepo = ref<NamespaceRepository | undefined>(undefined);
-  const accountRepo = ref<AccountRepository | undefined>(undefined);
-  const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+  /** Websocket エンドポイントURI */
   const wsEndpoint = ref("");
-  const sssLinked = ref(isSSSEnable());
-  const consoleLogger = new ConsoleLogger(
-    process.env.NODE_ENV === "development"
-      ? ConsoleLogLevel.debug
-      : ConsoleLogLevel.error
-  );
 
+  /** Txリポジトリ */
+  const txRepo = ref<TransactionRepository | undefined>(undefined);
+  /** ブロックリポジトリ */
+  const blockRepo = ref<BlockRepository | undefined>(undefined);
+  /** モザイクリポジトリ */
+  const mosaicRepo = ref<MosaicRepository | undefined>(undefined);
+  /** ネームスペースリポジトリ */
+  const namespaceRepo = ref<NamespaceRepository | undefined>(undefined);
+  /** アカウントリポジトリ */
+  const accountRepo = ref<AccountRepository | undefined>(undefined);
+  /** マルチシグリポジトリ */
+  const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+
+  /** SSS連携 */
+  const sssLinked = ref(isSSSEnable());
+  // 定周期でSSS連携状態を確認
   const checkSSSLinked = setInterval(() => {
+    // SSS連携されたら定周期確認を終了
     if (isSSSEnable()) {
       sssLinked.value = true;
       clearInterval(checkSSSLinked);
     }
-  }, 500);
+  }, CONSTS.SSS_CONFIRM_INTERVAL_MSEC);
+  // 一定時間待っても連携されない場合は定周期確認を終了
   setTimeout(() => {
     clearInterval(checkSSSLinked);
-  }, 10000);
+  }, CONSTS.SSS_INIITALIZE_WAIT_MSEC);
 
+  /** ロガー */
+  const logger = new ConsoleLogger();
+
+  // Watch
+  watch(
+    sssLinked,
+    (): void => {
+      const logTitle = "env store watch (sss linked):";
+      logger.debug(logTitle, "start", sssLinked.value);
+      networkType.value = getNetworkType();
+    },
+    { immediate: true }
+  );
   watch(
     networkType,
     (): void => {
+      const logTitle = "env store watch (network type):";
+      logger.debug(logTitle, "start", networkType.value);
+
+      // ネットワークタイプ確認
+      // TODO: ノードリストをMapにできれば const にできそう
+      let repo: RepositoryFactoryHttp | undefined = undefined;
       switch (networkType.value) {
         case NetworkType.TEST_NET:
-          repo.value = new RepositoryFactoryHttp(nodeListTest[0]);
+          repo = new RepositoryFactoryHttp(nodeListTest[0]);
           wsEndpoint.value = nodeListTest[0].replace("http", "ws") + "/ws";
           break;
 
         case NetworkType.MAIN_NET:
-          repo.value = new RepositoryFactoryHttp(nodeListMain[0]);
+          repo = new RepositoryFactoryHttp(nodeListMain[0]);
           wsEndpoint.value = nodeListMain[0].replace("http", "ws") + "/ws";
           break;
 
         default:
-          generationHash.value = CONSTS.STR_NA;
-          epochAdjustment.value - 1;
+          logger.error(logTitle, "invalid network type.");
+          repo = undefined;
           wsEndpoint.value = "";
-          repo.value = undefined;
+          generationHash.value = CONSTS.STR_NA;
+          epochAdjustment.value = 0;
           txRepo.value = undefined;
           blockRepo.value = undefined;
           mosaicRepo.value = undefined;
@@ -84,28 +118,30 @@ export const useEnvironmentStore = defineStore("environment", () => {
           multisigRepo.value = undefined;
           return;
       }
-      repo.value.getGenerationHash().subscribe((value) => {
+      // 各種データとリポジトリを設定
+      repo.getGenerationHash().subscribe((value) => {
         generationHash.value = value;
       });
-      repo.value.getEpochAdjustment().subscribe((value) => {
+      repo.getEpochAdjustment().subscribe((value) => {
         epochAdjustment.value = value;
       });
-      txRepo.value = repo.value.createTransactionRepository();
-      blockRepo.value = repo.value.createBlockRepository();
-      mosaicRepo.value = repo.value.createMosaicRepository();
-      namespaceRepo.value = repo.value.createNamespaceRepository();
-      accountRepo.value = repo.value.createAccountRepository();
-      multisigRepo.value = repo.value.createMultisigRepository();
+      txRepo.value = repo.createTransactionRepository();
+      blockRepo.value = repo.createBlockRepository();
+      mosaicRepo.value = repo.createMosaicRepository();
+      namespaceRepo.value = repo.createNamespaceRepository();
+      accountRepo.value = repo.createAccountRepository();
+      multisigRepo.value = repo.createMultisigRepository();
+      logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
 
+  // Exports
   return {
     networkType,
     generationHash,
     epochAdjustment,
     wsEndpoint,
-    repo,
     txRepo,
     blockRepo,
     mosaicRepo,
@@ -113,6 +149,6 @@ export const useEnvironmentStore = defineStore("environment", () => {
     accountRepo,
     multisigRepo,
     sssLinked,
-    consoleLogger,
+    logger,
   };
 });

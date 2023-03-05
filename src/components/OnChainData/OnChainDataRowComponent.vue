@@ -4,7 +4,8 @@ import DataAreaComponent from "./DataAreaComponent.vue";
 
 // Props
 defineProps<{
-  data: OnChainData; // オンチェーンデータ
+  /** オンチェーンデータ */
+  data: OnChainData;
 }>();
 </script>
 

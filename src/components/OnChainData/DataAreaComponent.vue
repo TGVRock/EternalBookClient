@@ -3,8 +3,10 @@ import { isImage, isAudio, isHtml, isMovie } from "@/utils/mime";
 
 // Props
 defineProps<{
-  base64: string; // Base64データ
-  mime: string; // MIMEタイプ
+  /** Base64データ */
+  base64: string;
+  /** MIMEタイプ */
+  mime: string;
 }>();
 </script>
 

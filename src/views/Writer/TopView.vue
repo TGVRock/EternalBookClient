@@ -11,9 +11,11 @@ import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaC
 import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
+
+// FIXME: 手数料乗数を選択可能にする(NetworkHttp.getTransactionFees())
 
 writeMosaicStore.linkedAddress = "";
 writeMosaicStore.ownerAddress = "";
@@ -22,7 +24,7 @@ writeMosaicStore.ownerAddress = "";
 <template>
   <article class="container">
     <section>
-      <SSSLinkedSelectAreaComponent v-if="environmentStore.sssLinked" />
+      <SSSLinkedSelectAreaComponent v-if="envStore.sssLinked" />
       <TextAreaComponent
         v-else
         v-bind:item-name="$t('mosaicInfo.address')"

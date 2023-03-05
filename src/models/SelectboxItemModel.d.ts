@@ -1,5 +1,11 @@
+/**
+ * selectbox 要素アイテム
+ */
 export interface SelectboxItemModel {
-  key: string; // キー
-  value: any; // 値
-  display: string; // 表示
+  /** キー */
+  key: string;
+  /** 値 */
+  value: any;
+  /** UI表示 */
+  display: string;
 }

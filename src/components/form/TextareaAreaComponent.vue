@@ -1,10 +1,14 @@
 <script setup lang="ts">
 // Props
 defineProps<{
-  itemName: string; // 表示項目名
-  placeholder: string; // プレースホルダー
-  rows: number; // 行数
-  value: string; // 値
+  /** 表示項目名 */
+  itemName: string;
+  /** プレースホルダー */
+  placeholder: string;
+  /** 行数 */
+  rows: number;
+  /** 値 */
+  value: string;
 }>();
 
 // Emits

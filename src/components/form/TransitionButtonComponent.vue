@@ -1,8 +1,10 @@
 <script setup lang="ts">
 // Props
 defineProps<{
-  itemName: string; // 表示項目名
-  nextRouteName: string; // 遷移先のルート名
+  /** 表示項目名 */
+  itemName: string;
+  /** 遷移先のルート名 */
+  nextRouteName: string;
 }>();
 </script>
 

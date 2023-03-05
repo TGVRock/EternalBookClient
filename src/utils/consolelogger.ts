@@ -1,7 +1,17 @@
+import { ConsoleLogLevel } from "@/models/ConsoleLogLevel";
+
+/**
+ * コンソールロガークラス
+ */
 export class ConsoleLogger {
+  /** ログ出力レベル */
   private level: ConsoleLogLevel;
 
-  constructor(parameters: ConsoleLogLevel) {
+  /**
+   * コンストラクタ
+   * @param parameters ログ出力レベル
+   */
+  constructor(parameters?: ConsoleLogLevel) {
     switch (parameters) {
       case ConsoleLogLevel.fatal:
       case ConsoleLogLevel.error:
@@ -12,44 +22,123 @@ export class ConsoleLogger {
         break;
 
       default:
-        this.level = ConsoleLogLevel.error;
+        this.level = this.getDefaultLevel();
         break;
     }
   }
 
-  fatal(...args: any[]): void {
-    this.outLog(ConsoleLogLevel.fatal, args);
+  /**
+   * Fatal ログ出力
+   * @param title タイトル(省略可能)
+   * @param args 出力データ
+   */
+  fatal(title?: string, ...args: any[]): void {
+    this.outError(ConsoleLogLevel.fatal, title, ...args);
   }
 
-  error(...args: any[]): void {
-    this.outLog(ConsoleLogLevel.error, args);
+  /**
+   * Error ログ出力
+   * @param title タイトル(省略可能)
+   * @param args 出力データ
+   */
+  error(title?: string, ...args: any[]): void {
+    this.outError(ConsoleLogLevel.error, title, ...args);
   }
 
-  warn(...args: any[]): void {
-    this.outLog(ConsoleLogLevel.warn, args);
+  /**
+   * Warning ログ出力
+   * @param title タイトル(省略可能)
+   * @param args 出力データ
+   */
+  warn(title?: string, ...args: any[]): void {
+    this.outWarn(ConsoleLogLevel.warn, title, ...args);
   }
 
-  info(...args: any[]): void {
-    this.outLog(ConsoleLogLevel.info, args);
+  /**
+   * Info ログ出力
+   * @param title タイトル(省略可能)
+   * @param args 出力データ
+   */
+  info(title?: string, ...args: any[]): void {
+    this.outInfo(ConsoleLogLevel.info, title, ...args);
   }
 
-  debug(...args: any[]): void {
-    this.outLog(ConsoleLogLevel.debug, args);
+  /**
+   * Debug ログ出力
+   * @param title タイトル(省略可能)
+   * @param args 出力データ
+   */
+  debug(title?: string, ...args: any[]): void {
+    this.outInfo(ConsoleLogLevel.debug, title, ...args);
   }
 
-  private outLog(targetLevel: ConsoleLogLevel, args: any[]): void {
+  /**
+   * コンソールへのエラー出力
+   * @param targetLevel ターゲットログレベル
+   * @param title タイトル(undefined で省略)
+   * @param args 出力データ
+   */
+  private outError(
+    targetLevel: ConsoleLogLevel,
+    title?: string,
+    ...args: any[]
+  ): void {
     if (this.level >= targetLevel) {
-      args.forEach((arg) => {
-        console.log(arg);
-      });
+      if (typeof title === "undefined" || title.length === 0) {
+        console.error(...args);
+      } else {
+        console.error(title, ...args);
+      }
     }
   }
-}
 
-export enum ConsoleLogLevel {
-  fatal,
-  error,
-  warn,
-  info,
-  debug,
+  /**
+   * コンソールへの警告出力
+   * @param targetLevel ターゲットログレベル
+   * @param title タイトル(undefined で省略)
+   * @param args 出力データ
+   */
+  private outWarn(
+    targetLevel: ConsoleLogLevel,
+    title?: string,
+    ...args: any[]
+  ): void {
+    if (this.level >= targetLevel) {
+      if (typeof title === "undefined" || title.length === 0) {
+        console.error(...args);
+      } else {
+        console.error(title, ...args);
+      }
+    }
+  }
+
+  /**
+   * コンソールへの情報出力
+   * @param targetLevel ターゲットログレベル
+   * @param title タイトル(undefined で省略)
+   * @param args 出力データ
+   */
+  private outInfo(
+    targetLevel: ConsoleLogLevel,
+    title?: string,
+    ...args: any[]
+  ): void {
+    if (this.level >= targetLevel) {
+      if (typeof title === "undefined" || title.length === 0) {
+        console.info(...args);
+      } else {
+        console.info(title, ...args);
+      }
+    }
+  }
+
+  /**
+   * デフォルトのログレベルを取得
+   * @returns デフォルトログレベル
+   */
+  getDefaultLevel(): ConsoleLogLevel {
+    return process.env.NODE_ENV === "development"
+      ? ConsoleLogLevel.debug
+      : ConsoleLogLevel.error;
+  }
 }

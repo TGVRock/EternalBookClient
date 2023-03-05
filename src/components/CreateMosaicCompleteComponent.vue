@@ -1,22 +1,41 @@
 <script setup lang="ts">
 // TODO: コード整理
 import { ref } from "vue";
-import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import { useRouter } from "vue-router";
-import { getMosaicInfo } from "@/apis/mosaic";
 import type { MosaicInfo } from "symbol-sdk";
+import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import ProcessingComponent from "./ProcessingComponent.vue";
+import { useEnvironmentStore } from "@/stores/environment";
+import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
+import { getMosaicInfo } from "@/apis/mosaic";
 
+// Stores
+const envStore = useEnvironmentStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
+// Router
 const router = useRouter();
 
+// Reactives
 const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
 
-getMosaicInfo(writeOnChainDataStore.relatedMosaicIdStr).then((value) => {
-  mosaicInfo.value = value;
-});
+// モザイク情報の取得
+getMosaicInfo(writeOnChainDataStore.relatedMosaicIdStr)
+  .then((value) => {
+    envStore.logger.debug(
+      "create mosaic complete:",
+      "get mosaic info complete."
+    );
+    mosaicInfo.value = value;
+  })
+  .catch((error) => {
+    envStore.logger.error(
+      "create mosaic complete:",
+      "get mosaic info failed.",
+      error
+    );
+  });
 
+// 一定時間後にオンチェーンデータ書き込みに移行する
 setTimeout(() => {
   router.push({ name: "WriteOnChainData" });
 }, 10 * 1000);

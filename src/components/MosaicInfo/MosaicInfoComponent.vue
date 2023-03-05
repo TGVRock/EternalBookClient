@@ -9,7 +9,8 @@ import MosaicInfoRowComponent from "./MosaicInfoRowComponent.vue";
 
 // Props
 const props = defineProps<{
-  mosaicInfo: MosaicInfo; // モザイク情報
+  /** モザイク情報 */
+  mosaicInfo: MosaicInfo;
 }>();
 
 // Reactives

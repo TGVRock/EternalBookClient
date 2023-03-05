@@ -9,7 +9,7 @@ import CONSTS from "@/utils/consts";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 
 // Stores
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 
 // Reactives
 const networks = ref<Array<SelectboxItemModel>>([
@@ -26,19 +26,13 @@ const networks = ref<Array<SelectboxItemModel>>([
 ]);
 const attributes = ref<SelectboxAttributeModel>({
   ariaLabel: "network-type",
-  disabled: environmentStore.sssLinked,
+  disabled: envStore.sssLinked,
 });
-
-// SSSで連携されているネットワークタイプを設定
-const netType = getNetworkType();
-if (netType !== CONSTS.NETWORKTYPE_INVALID) {
-  environmentStore.networkType = netType;
-}
 </script>
 
 <template>
   <SelectboxComponent
-    v-model:value="environmentStore.networkType"
+    v-model:value="envStore.networkType"
     v-bind:attributes="attributes"
     v-bind:items="networks"
     size="sm"

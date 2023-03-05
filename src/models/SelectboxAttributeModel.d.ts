@@ -1,4 +1,9 @@
+/**
+ * selectbox 入力要素の属性
+ */
 export interface SelectboxAttributeModel {
-  ariaLabel: string; // ラベル
-  disabled?: boolean; // 無効
+  /** aria-label 属性 */
+  ariaLabel: string;
+  /** disabled 属性 */
+  disabled?: boolean;
 }

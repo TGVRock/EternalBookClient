@@ -7,8 +7,10 @@ import DataAreaComponent from "./DataAreaComponent.vue";
 
 // Props
 const props = defineProps<{
-  base64: string; // Base64データ
-  mime: string; // MIMEタイプ
+  /** Base64データ */
+  base64: string;
+  /** MIMEタイプ */
+  mime: string;
 }>();
 
 // Reactives
@@ -19,15 +21,16 @@ const aggTxNum = computed(() => {
   return Math.ceil(innerTxNum.value / CONSTS.TX_DATA_TX_NUM);
 });
 const predictFee = computed(() => {
-  // 手数料は トランザクションサイズ x 乗数 [μXYM] で計算
-  // トランザクションサイズ : [データサイズ] ＋ [インナートランザクションごとのオーバーヘッド] ＋ [ヘッダサイズ(オーバーヘッド含む)]
+  // 手数料は Txサイズ x 乗数 [μXYM] で計算
+  // Txサイズ : [データサイズ] ＋ [インナーTxごとのオーバーヘッド] ＋ [ヘッダサイズ(オーバーヘッド含む)]
+  // TODO: モザイク作成時の手数料も必要
   return (
     (props.base64.length +
       innerTxNum.value * CONSTS.TX_OVERHEAD_SIZE_PER_INNER +
       aggTxNum.value *
         (CONSTS.TX_DATASIZE_PER_TRANSFER + CONSTS.TX_OVERHEAD_SIZE_PER_INNER)) *
     CONSTS.TX_FEE_MULTIPLIER_DEFAULT *
-    Math.pow(10, -1 * CONSTS.TX_DIVISIBILITY_XYM)
+    Math.pow(10, -1 * CONSTS.TX_XYM_DIVISIBILITY)
   );
 });
 </script>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { RouterLink, RouterView } from "vue-router";
-import { getAddress } from "@/utils/sss";
 import { useEnvironmentStore } from "@/stores/environment";
+import { getAddress } from "@/utils/sss";
 import LocaleMenuComponent from "@/components/LocaleMenuComponent.vue";
 import NetworkTypeMenuComponent from "@/components/NetworkTypeMenuComponent.vue";
 
 // Stores
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 const linkedAddress = ref("");
 
 watch(
-  () => environmentStore.sssLinked,
+  () => envStore.sssLinked,
   async (): Promise<void> => {
     linkedAddress.value = getAddress();
   },
@@ -55,7 +55,7 @@ watch(
           <div class="d-flex me-2">
             <NetworkTypeMenuComponent />
           </div>
-          <div v-if="environmentStore.sssLinked" class="d-flex me-2">
+          <div v-if="envStore.sssLinked" class="d-flex me-2">
             {{ linkedAddress }}
           </div>
           <div class="d-flex me-2">
