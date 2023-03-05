@@ -1,4 +1,4 @@
-import { ConsoleLogLevel } from "@/models/ConsoleLogLevel";
+import { ConsoleLogLevel } from "@/models/enums/ConsoleLogLevel";
 
 /**
  * コンソールロガークラス

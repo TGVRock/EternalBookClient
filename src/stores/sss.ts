@@ -4,7 +4,7 @@ import type { SSSWindow } from "sss-module";
 import { useEnvironmentStore } from "./environment";
 import CONSTS from "@/utils/consts";
 import type { SignedTransaction, Transaction } from "symbol-sdk";
-import { SSSState } from "@/models/SSSState";
+import { SSSState } from "@/models/enums/SSSState";
 declare const window: SSSWindow;
 
 /**

@@ -9,8 +9,8 @@ import { useEnvironmentStore } from "@/stores/environment";
 import CONSTS from "./consts";
 import { ConsoleLogger } from "./consolelogger";
 import { getMimeFromBase64 } from "./mime";
-import type { OnChainData } from "@/models/OnChainDataModel";
-import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
+import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
+import type { EternalBookProtocolHeader } from "@/models/interfaces/EternalBookProtocolHeader";
 import { getTransactionInfo, getTransactions } from "@/apis/transaction";
 import { ConvertRealTimestampFromTxTimestamp } from "./converter";
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { MosaicInfo, NetworkType } from "symbol-sdk";
-import ProcessingComponent from "@/components/ProcessingComponent.vue";
+import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
 import { useEnvironmentStore } from "@/stores/environment";
-import type { OnChainData } from "@/models/OnChainDataModel";
+import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import { getMosaicInfo } from "@/apis/mosaic";
 import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
 

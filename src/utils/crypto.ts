@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import { createHash, createDecipheriv, createCipheriv } from "crypto";
 import CONSTS from "@/utils/consts";
 import { ConsoleLogger } from "./consolelogger";
-import type { EternalBookProtocolHeader } from "@/models/EternalBookProtocolHeader";
+import type { EternalBookProtocolHeader } from "@/models/interfaces/EternalBookProtocolHeader";
 
 /** ロガー */
 const logger = new ConsoleLogger();

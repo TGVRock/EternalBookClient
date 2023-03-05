@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OnChainData } from "@/models/OnChainDataModel";
+import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import OnChainDataRowComponent from "./OnChainDataRowComponent.vue";
 
 // Props

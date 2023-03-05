@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { NetworkType } from "symbol-sdk";
-import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 import { useSSSStore } from "@/stores/sss";

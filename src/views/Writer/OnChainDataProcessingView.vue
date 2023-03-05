@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import ProcessingComponent from "@/components/ProcessingComponent.vue";
-import WriteOnChainCompleteComponent from "@/components/WriteOnChainCompleteComponent.vue";
+import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
+import WriteOnChainCompleteComponent from "@/components/Progress/WriteOnChainCompleteComponent.vue";
 import { TransactionGroup } from "symbol-sdk";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import CONSTS from "@/utils/consts";

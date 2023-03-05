@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ProcessingComponent from "@/components/ProcessingComponent.vue";
-import WriteCompleteComponent from "@/components/CreateMosaicCompleteComponent.vue";
+import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
+import WriteCompleteComponent from "@/components/Progress/CreateMosaicCompleteComponent.vue";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { TransactionGroup } from "symbol-sdk";
 

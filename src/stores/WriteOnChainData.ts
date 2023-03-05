@@ -19,7 +19,7 @@ import {
 import CONSTS from "@/utils/consts";
 import { encryptHeader, getHash } from "@/utils/crypto";
 import { createHeader } from "@/utils/eternalbookprotocol";
-import { FetchState } from "@/models/FetchState";
+import { FetchState } from "@/models/enums/FetchState";
 import { openTxListener } from "@/apis/listner";
 
 /**

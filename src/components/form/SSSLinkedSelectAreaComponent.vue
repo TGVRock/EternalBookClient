@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { getMultisigAddresses } from "@/apis/account";
-import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
 import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";

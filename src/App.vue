@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
 import { useSSSStore } from "./stores/sss";
-import LocaleMenuComponent from "@/components/LocaleMenuComponent.vue";
-import NetworkTypeMenuComponent from "@/components/NetworkTypeMenuComponent.vue";
+import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
+import NetworkTypeMenuComponent from "@/components/header/NetworkTypeMenuComponent.vue";
 
 // Stores
 const sssStore = useSSSStore();

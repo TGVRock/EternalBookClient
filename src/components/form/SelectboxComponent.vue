@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 
 // Props
 const props = defineProps<{
