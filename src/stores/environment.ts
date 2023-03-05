@@ -13,20 +13,25 @@ import {
 import CONSTS from "@/utils/consts";
 import { ConsoleLogger } from "@/utils/consolelogger";
 
-// TODO: Mapにする？
-/** テストノードリスト */
-const nodeListTest: Array<string> = [
-  "https://vmi831828.contaboserver.net:3001",
-  "https://001-sai-dual.symboltest.net:3001",
-  "https://5.dusan.gq:3001",
-];
-
-/** メインノードリスト */
-const nodeListMain: Array<string> = [
-  "https://59026db.xym.gakky.net:3001",
-  "https://0-0-0-0-0-0-0-0-1.tokyo-node.jp:3001",
-  "https://00.high-performance.symbol-nodes.com:3001",
-];
+/** ノードリスト */
+const nodeList = new Map<NetworkType, Array<string>>([
+  [
+    NetworkType.TEST_NET,
+    [
+      "https://vmi831828.contaboserver.net:3001",
+      "https://001-sai-dual.symboltest.net:3001",
+      "https://5.dusan.gq:3001",
+    ],
+  ],
+  [
+    NetworkType.MAIN_NET,
+    [
+      "https://59026db.xym.gakky.net:3001",
+      "https://0-0-0-0-0-0-0-0-1.tokyo-node.jp:3001",
+      "https://00.high-performance.symbol-nodes.com:3001",
+    ],
+  ],
+]);
 
 // TODO: 命名考える（ブロックチェーン？ネットワーク？そうなるとロガーとかも移動する？）
 /**
@@ -66,34 +71,24 @@ export const useEnvironmentStore = defineStore("environment", () => {
       logger.debug(logTitle, "start", networkType.value);
 
       // ネットワークタイプ確認
-      // TODO: ノードリストをMapにできれば const にできそう
-      let repo: RepositoryFactoryHttp | undefined = undefined;
-      switch (networkType.value) {
-        case NetworkType.TEST_NET:
-          repo = new RepositoryFactoryHttp(nodeListTest[0]);
-          wsEndpoint.value = nodeListTest[0].replace("http", "ws") + "/ws";
-          break;
-
-        case NetworkType.MAIN_NET:
-          repo = new RepositoryFactoryHttp(nodeListMain[0]);
-          wsEndpoint.value = nodeListMain[0].replace("http", "ws") + "/ws";
-          break;
-
-        default:
-          logger.error(logTitle, "invalid network type.");
-          repo = undefined;
-          wsEndpoint.value = "";
-          generationHash.value = CONSTS.STR_NA;
-          epochAdjustment.value = 0;
-          txRepo.value = undefined;
-          blockRepo.value = undefined;
-          mosaicRepo.value = undefined;
-          namespaceRepo.value = undefined;
-          accountRepo.value = undefined;
-          multisigRepo.value = undefined;
-          return;
+      if (!nodeList.has(networkType.value)) {
+        logger.error(logTitle, "invalid network type.");
+        wsEndpoint.value = "";
+        generationHash.value = CONSTS.STR_NA;
+        epochAdjustment.value = 0;
+        txRepo.value = undefined;
+        blockRepo.value = undefined;
+        mosaicRepo.value = undefined;
+        namespaceRepo.value = undefined;
+        accountRepo.value = undefined;
+        multisigRepo.value = undefined;
+        return;
       }
+
       // 各種データとリポジトリを設定
+      const nodes = nodeList.get(networkType.value)!;
+      const repo = new RepositoryFactoryHttp(nodes[0]);
+      wsEndpoint.value = nodes[0].replace("http", "ws") + "/ws";
       repo.getGenerationHash().subscribe((value) => {
         generationHash.value = value;
       });
