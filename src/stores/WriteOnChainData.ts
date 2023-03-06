@@ -1,11 +1,6 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import {
-  type InnerTransaction,
-  type MosaicInfo,
-  TransactionGroup,
-  Address,
-} from "symbol-sdk";
+import { type InnerTransaction, type MosaicInfo, Address } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
 import { useSSSStore } from "./sss";
 import { FetchState } from "@/models/enums/FetchState";

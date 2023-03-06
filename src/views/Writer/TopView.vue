@@ -2,7 +2,6 @@
 import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import { getMimeFromBase64 } from "@/utils/mime";
 import PreviewDataComponent from "@/components/OnChainData/PreviewDataComponent.vue";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import MosaicFlagAreaComponent from "@/components/form/MosaicFlagAreaComponent.vue";

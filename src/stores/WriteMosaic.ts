@@ -1,11 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import {
-  Address,
-  MosaicFlags,
-  TransactionGroup,
-  MosaicDefinitionTransaction,
-} from "symbol-sdk";
+import { Address, MosaicFlags, MosaicDefinitionTransaction } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
 import { useSSSStore } from "./sss";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";

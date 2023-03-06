@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import WriteOnChainCompleteComponent from "@/components/Progress/WriteOnChainCompleteComponent.vue";
 import { useEnvironmentStore } from "@/stores/environment";
