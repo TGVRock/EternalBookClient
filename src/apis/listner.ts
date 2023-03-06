@@ -10,16 +10,20 @@ const envStore = useEnvironmentStore();
  * @param key キー
  * @param address 監視対象アドレス
  * @param txHash 監視対象Txハッシュ
+ * @param bondedCallback アグリゲートボンデッド検知時のコールバック
  * @param unconfirmedCallback 未承認検知時のコールバック
  * @param confirmedCallback 承認検知時のコールバック
+ * @param errorCallback エラー発生時のコールバック
  * @returns オープン済のリスナー
  */
 export async function openTxListener(
   key: string,
   address: Address,
   txHash: string,
+  bondedCallback?: (...params: any) => void,
   unconfirmedCallback?: (...params: any) => void,
-  confirmedCallback?: (...params: any) => void
+  confirmedCallback?: (...params: any) => void,
+  errorCallback?: (...params: any) => void
 ): Promise<Listener | undefined> {
   const logTitle = "open listener:";
   envStore.logger.debug(logTitle, key, "start");
@@ -47,6 +51,9 @@ export async function openTxListener(
       // Txステータス
       txListener.status(address, txHash).subscribe((status) => {
         envStore.logger.error(logTitle, key, "tx status:", status);
+        if (typeof errorCallback !== "undefined") {
+          errorCallback();
+        }
         // リスナーをクローズ
         txListener.close();
       });
@@ -54,6 +61,9 @@ export async function openTxListener(
       // アグリゲートボンデッドTx検知
       txListener.aggregateBondedAdded(address, txHash).subscribe(() => {
         envStore.logger.debug(logTitle, key, "tx aggregate bonded added");
+        if (typeof bondedCallback !== "undefined") {
+          bondedCallback();
+        }
       });
 
       // Tx未承認検知
@@ -76,6 +86,7 @@ export async function openTxListener(
     })
     .catch((error) => {
       envStore.logger.error(logTitle, key, "failed.", error);
+      return undefined;
     });
 
   envStore.logger.debug(logTitle, key, "end");

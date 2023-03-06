@@ -1,4 +1,6 @@
 import type { UInt64 } from "symbol-sdk";
+import { useI18n } from "vue-i18n";
+import { WriteProgress } from "@/models/enums/WriteProgress";
 
 /**
  * boolean to string
@@ -44,4 +46,42 @@ export function ConvertRealTimestampFromTxTimestamp(
   txTimestamp: UInt64
 ): number {
   return epochAdjustment * 1000 + Number(txTimestamp.toString());
+}
+
+/**
+ * 書き込み状況に対応したメッセージを取得する
+ * @param progress 書き込み状況
+ * @returns 対応メッセージ
+ */
+export function getWriteProgreassMessage(progress: WriteProgress): string {
+  const i18n = useI18n();
+  switch (progress) {
+    case WriteProgress.Preprocess:
+      return i18n.t("message.processing");
+    case WriteProgress.LockSigning:
+      return i18n.t("message.lockSigning");
+    case WriteProgress.LockAnnounced:
+      return i18n.t("message.lockAnnounced");
+    case WriteProgress.LockUnconfirmed:
+      return i18n.t("message.lockUnconfirmed");
+    case WriteProgress.LockConfirmed:
+      return i18n.t("message.lockConfirmed");
+    case WriteProgress.TxSigning:
+      return i18n.t("message.txSigning");
+    case WriteProgress.TxAnnounced:
+      return i18n.t("message.txAnnounced");
+    case WriteProgress.TxWaitCosign:
+      return i18n.t("message.txWaitCosign");
+    case WriteProgress.TxUnconfirmed:
+      return i18n.t("message.txUnconfirmed");
+    case WriteProgress.TxConfirmed:
+      return i18n.t("message.txConfirmed");
+    case WriteProgress.Complete:
+      return i18n.t("message.complete");
+    case WriteProgress.Failed:
+      return i18n.t("message.failed");
+    case WriteProgress.Standby:
+    default:
+      return i18n.t("message.prepare");
+  }
 }
