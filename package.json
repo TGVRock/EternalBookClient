@@ -19,7 +19,7 @@
     "pinia": "^2.0.28",
     "rxjs": "^7.8.0",
     "sss-module": "^1.0.4",
-    "symbol-sdk": "^2.0.3",
+    "symbol-sdk": "^2.0.4",
     "vite-plugin-node-polyfills": "^0.7.0",
     "vue": "^3.2.45",
     "vue-i18n": "^9.2.2",
