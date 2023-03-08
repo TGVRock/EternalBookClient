@@ -5,10 +5,11 @@ import { useEnvironmentStore } from "./environment";
 import { useSSSStore } from "./sss";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";
 import { WriteProgress } from "@/models/enums/WriteProgress";
-import { getAccountInfo } from "@/apis/account";
+import { getAccountInfo, getMultisigInfo } from "@/apis/account";
 import { openTxListener } from "@/apis/listner";
 import { createInnerTxForMosaic } from "@/apis/mosaic";
 import {
+  announceTx,
   createTxAggregateBonded,
   createTxAggregateComplete,
   createTxHashLock,
@@ -53,19 +54,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     progress.value = WriteProgress.Preprocess;
 
     // モザイク所有アカウントがマルチシグアカウントか確認
-    if (
-      typeof envStore.namespaceRepo === "undefined" ||
-      typeof envStore.txRepo === "undefined" ||
-      typeof envStore.multisigRepo === "undefined"
-    ) {
-      envStore.logger.error(logTitle, "repository undefined.");
-      progress.value = WriteProgress.Failed;
-      return;
-    }
-    const owner = Address.createFromRawAddress(ownerAddress.value);
-    const multisigInfo = await envStore.multisigRepo
-      .getMultisigAccountInfo(owner)
-      .toPromise();
+    const multisigInfo = await getMultisigInfo(ownerAddress.value);
     if (typeof multisigInfo === "undefined") {
       envStore.logger.error(logTitle, "get multisig info failed.");
       progress.value = WriteProgress.Failed;
@@ -74,7 +63,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     const isBonded = multisigInfo.isMultisig();
 
     // モザイク所有アカウントのアカウント情報を取得
-    const accountInfo = await getAccountInfo(owner.plain());
+    const accountInfo = await getAccountInfo(ownerAddress.value);
     if (typeof accountInfo === "undefined") {
       envStore.logger.error(logTitle, "get account info failed.");
       progress.value = WriteProgress.Failed;
@@ -100,6 +89,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     }
 
     // モザイク作成Txリスナーオープン
+    const owner = Address.createFromRawAddress(ownerAddress.value);
     const mosaicTxlistener = await openTxListener(
       "create mosaic",
       owner,
@@ -134,7 +124,12 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     // アグリゲートコンプリートTxの場合はアナウンスして終了
     if (!isBonded) {
       progress.value = WriteProgress.TxAnnounced;
-      await envStore.txRepo.announce(signedAggTx).toPromise();
+      const response = await announceTx(signedAggTx);
+      envStore.logger.debug(logTitle, "aggregate complete tx announced.", [
+        signedAggTx,
+        response,
+      ]);
+      envStore.logger.debug(logTitle, "aggregate complete end");
       return;
     }
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
@@ -168,7 +163,11 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       async () => {
         // アグリゲートTxをアナウンス
         progress.value = WriteProgress.TxAnnounced;
-        envStore.txRepo?.announceAggregateBonded(signedAggTx).toPromise();
+        const response = await announceTx(signedAggTx);
+        envStore.logger.debug(logTitle, "aggregate bonded tx announced.", [
+          signedAggTx,
+          response,
+        ]);
       },
       () => {
         progress.value = WriteProgress.Failed;
@@ -182,7 +181,11 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
     // Txアナウンス
     progress.value = WriteProgress.LockAnnounced;
-    await envStore.txRepo.announce(signedHashLockTx).toPromise();
+    const response = await announceTx(signedHashLockTx);
+    envStore.logger.debug(logTitle, "hashlock tx announced.", [
+      signedHashLockTx,
+      response,
+    ]);
     envStore.logger.debug(logTitle, "end");
   }
 

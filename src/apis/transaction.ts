@@ -9,19 +9,39 @@ import {
   UInt64,
   AggregateTransaction,
   type InnerTransaction,
-  type TransactionType,
+  TransactionType,
   type TransactionSearchCriteria,
   HashLockTransaction,
   Mosaic,
   NamespaceId,
   SignedTransaction,
   RawMessage,
+  TransactionAnnounceResponse,
 } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
 import CONSTS from "@/utils/consts";
 
 // Stores
 const envStore = useEnvironmentStore();
+
+/**
+ * Txアナウンス
+ * @param signedTx 署名済Tx
+ * @returns レスポンス
+ */
+export async function announceTx(
+  signedTx: SignedTransaction
+): Promise<TransactionAnnounceResponse | undefined> {
+  const logTitle = "announce tx:";
+  if (typeof envStore.txRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
+    return undefined;
+  }
+  if (signedTx.type === TransactionType.AGGREGATE_BONDED) {
+    return await envStore.txRepo.announceAggregateBonded(signedTx).toPromise();
+  }
+  return await envStore.txRepo.announce(signedTx).toPromise();
+}
 
 /**
  * Tx情報取得

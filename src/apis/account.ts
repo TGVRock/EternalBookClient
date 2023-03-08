@@ -1,4 +1,4 @@
-import { AccountInfo, Address } from "symbol-sdk";
+import { AccountInfo, Address, MultisigAccountInfo } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
 
 // Stores
@@ -35,6 +35,29 @@ export async function getAccountInfo(
 }
 
 /**
+ * マルチシグアカウント情報の取得
+ * @param address 対象アドレス
+ * @returns マルチシグアカウント情報
+ */
+export async function getMultisigInfo(
+  address: string
+): Promise<MultisigAccountInfo | undefined> {
+  const logTitle = "get multisig info:";
+  if (typeof envStore.multisigRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
+    return undefined;
+  }
+  if (!isValidAddress(address)) {
+    envStore.logger.error(logTitle, "invalid address.", address);
+    return undefined;
+  }
+  // マルチシグアカウント情報の取得
+  return await envStore.multisigRepo
+    .getMultisigAccountInfo(Address.createFromRawAddress(address))
+    .toPromise();
+}
+
+/**
  * マルチシグを構成するアドレスの取得
  * @param address 対象アドレス
  * @returns マルチシグアドレスリスト
@@ -43,18 +66,8 @@ export async function getMultisigAddresses(
   address: string
 ): Promise<Address[]> {
   const logTitle = "get multisig addresses:";
-  if (typeof envStore.multisigRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
-    return [];
-  }
-  if (!isValidAddress(address)) {
-    envStore.logger.error(logTitle, "invalid address.", address);
-    return [];
-  }
   // マルチシグアカウント情報の取得
-  const multisigInfo = await envStore.multisigRepo
-    .getMultisigAccountInfo(Address.createFromRawAddress(address))
-    .toPromise();
+  const multisigInfo = await getMultisigInfo(address);
   if (typeof multisigInfo === "undefined") {
     envStore.logger.error(logTitle, "get multisig info failed.", address);
     return [];
