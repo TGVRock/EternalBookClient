@@ -23,6 +23,11 @@ export default {
     predictFee: "手数料(予測値)",
     title: "タイトル",
     message: "メッセージ",
+    feeDefault: "デフォルト",
+    feeFast: "早い",
+    feeAverage: "平均",
+    feeSlow: "遅い",
+    feeSlowest: "最遅",
   },
   writer: {
     mosaicFlags: "モザイクフラグ",

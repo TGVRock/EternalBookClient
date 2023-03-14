@@ -14,8 +14,6 @@ const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
-// FIXME: 手数料乗数を選択可能にする(NetworkHttp.getTransactionFees())
-
 writeMosaicStore.ownerAddress = "";
 </script>
 

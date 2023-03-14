@@ -23,6 +23,11 @@ export default {
     predictFee: "Fee (Predict)",
     title: "Title",
     message: "Message",
+    feeDefault: "Default",
+    feeFast: "Fast",
+    feeAverage: "Average",
+    feeSlow: "Slow",
+    feeSlowest: "Slowest",
   },
   writer: {
     mosaicFlags: "Mosaic Flags",

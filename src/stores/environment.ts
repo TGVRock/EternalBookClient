@@ -9,9 +9,11 @@ import {
   type BlockRepository,
   type MosaicRepository,
   type NamespaceRepository,
+  type NetworkRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
 import { ConsoleLogger } from "@/utils/consolelogger";
+import { FeeKind } from "@/models/enums/FeeKind";
 
 /** ノードリスト */
 const nodeList = new Map<NetworkType, Array<string>>([
@@ -46,6 +48,8 @@ export const useEnvironmentStore = defineStore("environment", () => {
   const epochAdjustment = ref(-1);
   /** Websocket エンドポイントURI */
   const wsEndpoint = ref("");
+  /** 手数料種別 */
+  const feeKind = ref(FeeKind.Default);
 
   /** Txリポジトリ */
   const txRepo = ref<TransactionRepository | undefined>(undefined);
@@ -59,6 +63,8 @@ export const useEnvironmentStore = defineStore("environment", () => {
   const accountRepo = ref<AccountRepository | undefined>(undefined);
   /** マルチシグリポジトリ */
   const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+  /** ネットワークリポジトリ */
+  const networkRepo = ref<NetworkRepository | undefined>(undefined);
 
   /** ロガー */
   const logger = new ConsoleLogger();
@@ -82,6 +88,7 @@ export const useEnvironmentStore = defineStore("environment", () => {
         namespaceRepo.value = undefined;
         accountRepo.value = undefined;
         multisigRepo.value = undefined;
+        networkRepo.value = undefined;
         return;
       }
 
@@ -101,6 +108,7 @@ export const useEnvironmentStore = defineStore("environment", () => {
       namespaceRepo.value = repo.createNamespaceRepository();
       accountRepo.value = repo.createAccountRepository();
       multisigRepo.value = repo.createMultisigRepository();
+      networkRepo.value = repo.createNetworkRepository();
       logger.debug(logTitle, "end");
     },
     { immediate: true }
@@ -112,12 +120,14 @@ export const useEnvironmentStore = defineStore("environment", () => {
     generationHash,
     epochAdjustment,
     wsEndpoint,
+    feeKind,
     txRepo,
     blockRepo,
     mosaicRepo,
     namespaceRepo,
     accountRepo,
     multisigRepo,
+    networkRepo,
     logger,
   };
 });

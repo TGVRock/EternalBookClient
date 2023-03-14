@@ -161,10 +161,12 @@ export function createTxTransferData(
 /**
  * ハッシュロックTx作成
  * @param signedTx 署名済Tx
+ * @param fee 手数料乗数
  * @returns ハッシュロックTx
  */
 export function createTxHashLock(
-  signedTx: SignedTransaction
+  signedTx: SignedTransaction,
+  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): HashLockTransaction {
   const hashLockTx = HashLockTransaction.create(
     Deadline.create(envStore.epochAdjustment),
@@ -175,39 +177,53 @@ export function createTxHashLock(
     UInt64.fromUint(480),
     signedTx,
     envStore.networkType
-  ).setMaxFee(CONSTS.TX_FEE_MULTIPLIER_DEFAULT) as HashLockTransaction;
-  hashLockTx.setMaxFee(CONSTS.TX_FEE_MULTIPLIER_DEFAULT);
+  ) as HashLockTransaction;
+  if (typeof fee !== "undefined") {
+    hashLockTx.setMaxFee(fee);
+  }
   return hashLockTx;
 }
 
 /**
  * アグリゲートボンデッドTx作成
  * @param txList インナーTxリスト
+ * @param fee 手数料乗数
  * @returns アグリゲートボンデッドTx
  */
 export function createTxAggregateBonded(
-  txList: InnerTransaction[]
+  txList: InnerTransaction[],
+  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
-  return AggregateTransaction.createBonded(
+  const aggTx = AggregateTransaction.createBonded(
     Deadline.create(envStore.epochAdjustment),
     txList,
     envStore.networkType,
     []
-  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
+  );
+  if (typeof fee !== "undefined") {
+    aggTx.setMaxFeeForAggregate(fee, 0);
+  }
+  return aggTx;
 }
 
 /**
  * アグリゲートコンプリートTx作成
  * @param txList インナーTxリスト
+ * @param fee 手数料乗数
  * @returns アグリゲートコンプリートTx
  */
 export function createTxAggregateComplete(
-  txList: InnerTransaction[]
+  txList: InnerTransaction[],
+  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
-  return AggregateTransaction.createComplete(
+  const aggTx = AggregateTransaction.createComplete(
     Deadline.create(envStore.epochAdjustment),
     txList,
     envStore.networkType,
     []
-  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
+  );
+  if (typeof fee !== "undefined") {
+    aggTx.setMaxFeeForAggregate(fee, 0);
+  }
+  return aggTx;
 }

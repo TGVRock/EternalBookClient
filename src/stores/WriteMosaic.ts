@@ -15,6 +15,7 @@ import {
   createTxHashLock,
 } from "@/apis/transaction";
 import CONSTS from "@/utils/consts";
+import { getTxFee } from "@/apis/network";
 
 /**
  * モザイク作成ストア
@@ -73,10 +74,12 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     // モザイク作成のアグリゲートTx作成
     const aggTx = isBonded
       ? createTxAggregateBonded(
-          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value)
+          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
+          await getTxFee(envStore.feeKind)
         )
       : createTxAggregateComplete(
-          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value)
+          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
+          await getTxFee(envStore.feeKind)
         );
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
@@ -135,7 +138,10 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
 
     // ハッシュロックTx作成
-    const hashLockTx = createTxHashLock(signedAggTx);
+    const hashLockTx = createTxHashLock(
+      signedAggTx,
+      await getTxFee(envStore.feeKind)
+    );
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.LockSigning;

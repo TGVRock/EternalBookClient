@@ -1,6 +1,6 @@
-import type { UInt64 } from "symbol-sdk";
-import { useI18n } from "vue-i18n";
-import { WriteProgress } from "@/models/enums/WriteProgress";
+import type { TransactionFees, UInt64 } from "symbol-sdk";
+import { FeeKind } from "@/models/enums/FeeKind";
+import CONSTS from "./consts";
 
 /**
  * boolean to string
@@ -46,4 +46,27 @@ export function ConvertRealTimestampFromTxTimestamp(
   txTimestamp: UInt64
 ): number {
   return epochAdjustment * 1000 + Number(txTimestamp.toString());
+}
+
+/**
+ * 手数料種別に応じた手数料へ変換する
+ * @param txFees Tx手数料乗数
+ * @param feeKind 手数料種別
+ * @returns 実手数料乗数
+ */
+export function ConvertFee(txFees: TransactionFees, feeKind: FeeKind): number {
+  // 値はデスクトップウォレットに準拠
+  switch (feeKind) {
+    case FeeKind.Fast:
+      return txFees.averageFeeMultiplier;
+    case FeeKind.Average:
+      return txFees.minFeeMultiplier + txFees.averageFeeMultiplier * 0.65;
+    case FeeKind.Slow:
+      return txFees.minFeeMultiplier + txFees.averageFeeMultiplier * 0.35;
+    case FeeKind.Slowest:
+      return txFees.minFeeMultiplier;
+    case FeeKind.Default:
+    default:
+      return CONSTS.TX_FEE_MULTIPLIER_DEFAULT;
+  }
 }

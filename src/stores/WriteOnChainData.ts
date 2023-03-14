@@ -18,6 +18,7 @@ import {
 import CONSTS from "@/utils/consts";
 import { encryptHeader, getHash } from "@/utils/crypto";
 import { createHeader } from "@/utils/eternalbookprotocol";
+import { getTxFee } from "@/apis/network";
 
 /**
  * オンチェーンデータ書き込みストア
@@ -209,8 +210,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
-      ? createTxAggregateBonded(txList)
-      : createTxAggregateComplete(txList);
+      ? createTxAggregateBonded(txList, await getTxFee(envStore.feeKind))
+      : createTxAggregateComplete(txList, await getTxFee(envStore.feeKind));
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
@@ -266,7 +267,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
 
     // ハッシュロックTx作成
-    const hashLockTx = createTxHashLock(signedAggTx);
+    const hashLockTx = createTxHashLock(
+      signedAggTx,
+      await getTxFee(envStore.feeKind)
+    );
     // SSSによる署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
