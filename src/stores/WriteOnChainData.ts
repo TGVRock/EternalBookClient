@@ -150,7 +150,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // 最終データか判定
     const isLastData =
       processedSize.value +
-        CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM <=
+        CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM >=
       dataBase64.value.length;
 
     // モザイク設定チェック
