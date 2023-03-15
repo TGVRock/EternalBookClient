@@ -166,9 +166,9 @@ export function createTxTransferData(
  */
 export function createTxHashLock(
   signedTx: SignedTransaction,
-  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
+  fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): HashLockTransaction {
-  const hashLockTx = HashLockTransaction.create(
+  return HashLockTransaction.create(
     Deadline.create(envStore.epochAdjustment),
     new Mosaic(
       new NamespaceId(CONSTS.TX_XYM_ALIAS),
@@ -177,11 +177,7 @@ export function createTxHashLock(
     UInt64.fromUint(480),
     signedTx,
     envStore.networkType
-  ) as HashLockTransaction;
-  if (typeof fee !== "undefined") {
-    hashLockTx.setMaxFee(fee);
-  }
-  return hashLockTx;
+  ).setMaxFee(fee) as HashLockTransaction;
 }
 
 /**
@@ -192,18 +188,14 @@ export function createTxHashLock(
  */
 export function createTxAggregateBonded(
   txList: InnerTransaction[],
-  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
+  fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
-  const aggTx = AggregateTransaction.createBonded(
+  return AggregateTransaction.createBonded(
     Deadline.create(envStore.epochAdjustment),
     txList,
     envStore.networkType,
     []
-  );
-  if (typeof fee !== "undefined") {
-    aggTx.setMaxFeeForAggregate(fee, 0);
-  }
-  return aggTx;
+  ).setMaxFeeForAggregate(fee, 0);
 }
 
 /**
@@ -216,14 +208,10 @@ export function createTxAggregateComplete(
   txList: InnerTransaction[],
   fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
-  const aggTx = AggregateTransaction.createComplete(
+  return AggregateTransaction.createComplete(
     Deadline.create(envStore.epochAdjustment),
     txList,
     envStore.networkType,
     []
-  );
-  if (typeof fee !== "undefined") {
-    aggTx.setMaxFeeForAggregate(fee, 0);
-  }
-  return aggTx;
+  ).setMaxFeeForAggregate(fee, 0);
 }
