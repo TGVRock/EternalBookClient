@@ -4,7 +4,7 @@ import { useEnvironmentStore } from "@/stores/environment";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import CONSTS from "@/utils/consts";
 
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
 const mosaicId = ref("");
 const linkMosaicId = computed((): string => {
   return "" !== mosaicId.value ? mosaicId.value : CONSTS.STR_NA;
@@ -24,7 +24,7 @@ const linkMosaicId = computed((): string => {
       v-bind:to="{
         name: 'ViewerResult',
         params: {
-          netType: environmentStore.networkType,
+          netType: envStore.networkType,
           mosaicId: linkMosaicId,
         },
       }"

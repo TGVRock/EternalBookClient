@@ -1,37 +1,90 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import ProcessingComponent from "@/components/ProcessingComponent.vue";
-import WriteOnChainCompleteComponent from "@/components/WriteOnChainCompleteComponent.vue";
-import { TransactionGroup } from "symbol-sdk";
+import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
+import WriteOnChainCompleteComponent from "@/components/Progress/WriteOnChainCompleteComponent.vue";
+import { useEnvironmentStore } from "@/stores/environment";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import CONSTS from "@/utils/consts";
+import { WriteProgress } from "@/models/enums/WriteProgress";
 
+// Locale
+const i18n = useI18n();
+
+// Stores
+const envStore = useEnvironmentStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
-const entire = Math.ceil(
-  writeOnChainDataStore.dataBase64.length /
-    (CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM)
+// Reactives
+const message = ref("");
+
+// Watch
+watch(
+  () => writeOnChainDataStore.progress,
+  () => {
+    const logTitle = "write data progress watch:";
+    envStore.logger.debug(logTitle, "start", writeOnChainDataStore.progress);
+    message.value = getWriteProgreassMessage(writeOnChainDataStore.progress);
+    envStore.logger.debug(logTitle, "end", message.value);
+  },
+  {
+    immediate: true,
+  }
 );
 
-const proceed = computed(() => {
-  return Math.ceil(
+// オンチェーンデータ書き込み
+writeOnChainDataStore.writeOnChain();
+
+/**
+ * 書き込み状況に対応したメッセージを取得する
+ * @param progress 書き込み状況
+ * @returns 対応メッセージ
+ */
+function getWriteProgreassMessage(progress: WriteProgress): string {
+  const entire = Math.ceil(
+    writeOnChainDataStore.dataBase64.length /
+      (CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM)
+  );
+  const proceed = Math.ceil(
     writeOnChainDataStore.processedSize /
       writeOnChainDataStore.dataBase64.length
   );
-});
-
-writeOnChainDataStore.writeOnChain();
+  const dataProgress = proceed.toString() + " / " + entire.toString() + " ";
+  switch (progress) {
+    case WriteProgress.Preprocess:
+      return dataProgress + i18n.t("message.processing");
+    case WriteProgress.LockSigning:
+      return dataProgress + i18n.t("message.lockSigning");
+    case WriteProgress.LockAnnounced:
+      return dataProgress + i18n.t("message.lockAnnounced");
+    case WriteProgress.LockUnconfirmed:
+      return dataProgress + i18n.t("message.lockUnconfirmed");
+    case WriteProgress.LockConfirmed:
+      return dataProgress + i18n.t("message.lockConfirmed");
+    case WriteProgress.TxSigning:
+      return dataProgress + i18n.t("message.txSigning");
+    case WriteProgress.TxAnnounced:
+      return dataProgress + i18n.t("message.txAnnounced");
+    case WriteProgress.TxWaitCosign:
+      return dataProgress + i18n.t("message.txWaitCosign");
+    case WriteProgress.TxUnconfirmed:
+      return dataProgress + i18n.t("message.txUnconfirmed");
+    case WriteProgress.TxConfirmed:
+      return dataProgress + i18n.t("message.txConfirmed");
+    case WriteProgress.Complete:
+      return i18n.t("message.complete");
+    case WriteProgress.Failed:
+      return i18n.t("message.failed");
+    case WriteProgress.Standby:
+    default:
+      return i18n.t("message.prepare");
+  }
+}
 </script>
 
 <template>
-  <ProcessingComponent
-    v-if="writeOnChainDataStore.state === TransactionGroup.Unconfirmed"
-    v-bind:message="
-      $t('message.processingOnChain', { proceed: proceed, entire: entire })
-    "
-  />
   <WriteOnChainCompleteComponent
-    v-else-if="writeOnChainDataStore.state === TransactionGroup.Confirmed"
+    v-if="writeOnChainDataStore.progress === WriteProgress.Complete"
   />
-  <ProcessingComponent v-else v-bind:message="$t('message.prepare')" />
+  <ProcessingComponent v-else v-bind:message="message" />
 </template>

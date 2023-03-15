@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { NetworkType } from "symbol-sdk";
-import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
-import { getNetworkType } from "@/utils/sss";
-import CONSTS from "@/utils/consts";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
+import { useSSSStore } from "@/stores/sss";
 
 // Stores
-const environmentStore = useEnvironmentStore();
+const envStore = useEnvironmentStore();
+const sssStore = useSSSStore();
 
 // Reactives
 const networks = ref<Array<SelectboxItemModel>>([
@@ -26,19 +26,13 @@ const networks = ref<Array<SelectboxItemModel>>([
 ]);
 const attributes = ref<SelectboxAttributeModel>({
   ariaLabel: "network-type",
-  disabled: environmentStore.sssLinked,
+  disabled: sssStore.sssLinked,
 });
-
-// SSSで連携されているネットワークタイプを設定
-const netType = getNetworkType();
-if (netType !== CONSTS.NETWORKTYPE_INVALID) {
-  environmentStore.networkType = netType;
-}
 </script>
 
 <template>
   <SelectboxComponent
-    v-model:value="environmentStore.networkType"
+    v-model:value="envStore.networkType"
     v-bind:attributes="attributes"
     v-bind:items="networks"
     size="sm"

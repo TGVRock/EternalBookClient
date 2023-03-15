@@ -3,9 +3,12 @@ import { ref } from "vue";
 
 // Props
 const props = defineProps<{
-  id: string; // Element id
-  itemName: string; // 表示項目名
-  checked: boolean; // チェック状態
+  /** Element id */
+  id: string;
+  /** 表示項目名 */
+  itemName: string;
+  /** チェック状態 */
+  checked: boolean;
 }>();
 
 // Emits

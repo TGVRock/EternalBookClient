@@ -1,8 +1,10 @@
 <script setup lang="ts">
 // Props
 defineProps<{
-  title: string; // 行タイトル
-  data: string; // データ
+  /** 行タイトル */
+  title: string;
+  /** データ */
+  data: string;
 }>();
 </script>
 

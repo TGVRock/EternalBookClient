@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // Props
 defineProps<{
-  message: string; // 表示メッセージ
+  /** 表示メッセージ */
+  message: string;
 }>();
 </script>
 

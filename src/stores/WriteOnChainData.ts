@@ -1,431 +1,334 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import {
-  AggregateTransaction,
-  Deadline,
-  type InnerTransaction,
-  type MosaicInfo,
-  Listener,
-  TransactionGroup,
-  Address,
-} from "symbol-sdk";
-import { getMosaicInfo } from "@/apis/mosaic";
-import { createHeader } from "@/utils/eternalbookprotocol";
-import { cryptoHeader, getHash } from "@/utils/crypto";
-import { createTxHashLock, createTxTransfer } from "@/apis/transaction";
+import { type InnerTransaction, type MosaicInfo, Address } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
+import { useSSSStore } from "./sss";
+import { FetchState } from "@/models/enums/FetchState";
+import { WriteProgress } from "@/models/enums/WriteProgress";
+import { getAccountInfo, getMultisigInfo } from "@/apis/account";
+import { openTxListener } from "@/apis/listner";
+import { getMosaicInfo, isValidMosaicId } from "@/apis/mosaic";
+import {
+  announceTx,
+  createTxHashLock,
+  createTxTransferPlainMessage,
+  createTxAggregateComplete,
+  createTxAggregateBonded,
+} from "@/apis/transaction";
 import CONSTS from "@/utils/consts";
-import { requestTxSign } from "@/utils/sss";
+import { encryptHeader, getHash } from "@/utils/crypto";
+import { createHeader } from "@/utils/eternalbookprotocol";
+import { getTxFee } from "@/apis/network";
 
+/**
+ * オンチェーンデータ書き込みストア
+ */
 export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
-  const environmentStore = useEnvironmentStore();
+  // Other Stores
+  const envStore = useEnvironmentStore();
+  const sssStore = useSSSStore();
 
+  /** タイトル */
   const title = ref("");
+  /** メッセージ */
   const message = ref("");
+  /** 紐付けるモザイクID */
   const relatedMosaicIdStr = ref("");
+  /** 紐付けるモザイク情報 */
   const relatedMosaicInfo = ref<MosaicInfo | undefined>(undefined);
+  /** 紐付けるモザイク情報取得状況 */
+  const infoFetchState = ref<FetchState>(FetchState.Undefined);
+  /** 紐付けるBase64データ */
   const dataBase64 = ref("");
-  const state = ref<TransactionGroup | undefined>(undefined);
+  /** 書き込み状況 */
+  const progress = ref<WriteProgress>(WriteProgress.Standby);
+  /** 処理済サイズ */
   const processedSize = ref(0);
+  /** 直前のTxハッシュ */
   const prevTxHash = ref("");
 
+  // Watch
   watch(
     relatedMosaicIdStr,
     (): void => {
+      const logTitle = "write data store watch:";
+      envStore.logger.debug(logTitle, "start", relatedMosaicIdStr.value);
+
+      // 有効なモザイクIDかチェック
+      if (!isValidMosaicId(relatedMosaicIdStr.value)) {
+        infoFetchState.value =
+          relatedMosaicIdStr.value.length === 0
+            ? FetchState.Undefined
+            : FetchState.Failed;
+        relatedMosaicInfo.value = undefined;
+        return;
+      }
+
+      // モザイク情報の取得
       getMosaicInfo(relatedMosaicIdStr.value)
         .then((value): void => {
+          envStore.logger.debug(logTitle, "get mosaic info complete.", value);
           relatedMosaicInfo.value = value;
+          infoFetchState.value = FetchState.Complete;
         })
-        .catch(() => {
+        .catch((error) => {
+          envStore.logger.debug(logTitle, "get account info failed.", error);
           relatedMosaicInfo.value = undefined;
+          infoFetchState.value = FetchState.Failed;
         });
+      envStore.logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
 
+  /**
+   * オンチェーンデータ書き込み
+   * @returns なし
+   */
   async function writeOnChain(): Promise<void> {
-    environmentStore.consoleLogger.debug("writeOnChain() start.");
-    state.value = undefined;
+    const logTitle = "write data:";
+    envStore.logger.debug(logTitle, "start");
+
+    // 書き込み状況のチェック
+    if (
+      progress.value !== WriteProgress.Standby &&
+      progress.value !== WriteProgress.Complete &&
+      progress.value !== WriteProgress.Failed
+    ) {
+      envStore.logger.error(logTitle, "other processing.");
+      return;
+    }
+    progress.value = WriteProgress.Preprocess;
     processedSize.value = 0;
     prevTxHash.value = "";
+
     // データ設定チェック
     if (dataBase64.value.length === 0) {
-      environmentStore.consoleLogger.debug(
-        "writeOnChain() error : data no setting."
-      );
+      envStore.logger.error(logTitle, "data no setting.");
+      progress.value = WriteProgress.Failed;
       return;
     }
-    if (typeof relatedMosaicInfo.value === "undefined" || typeof environmentStore.multisigRepo === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChain() error : data no setting."
-      );
+    // TODO: モザイク情報取得中か確認して待つ必要あり
+    if (typeof relatedMosaicInfo.value === "undefined") {
+      envStore.logger.error(logTitle, "mosaic info undefined.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    const owner = Address.createFromRawAddress(relatedMosaicInfo.value?.ownerAddress.plain());
-    const multisigInfo = await environmentStore.multisigRepo
-      .getMultisigAccountInfo(owner)
-      .toPromise();
+    // モザイク所有アカウントがマルチシグアカウントか確認
+    // TODO: モザイク所有者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
+    const multisigInfo = await getMultisigInfo(
+      relatedMosaicInfo.value.ownerAddress.plain()
+    );
     if (typeof multisigInfo === "undefined") {
+      envStore.logger.error(logTitle, "get multisig info failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
-    multisigInfo.isMultisig()
-      ? await writeOnChainOneComponentForMultisigAccount()
-      : await writeOnChainOneComponent();
-    environmentStore.consoleLogger.debug("writeOnChain() end.");
+    const isBonded = multisigInfo.isMultisig();
+    writeOnChainOneAggregate(isBonded);
+    envStore.logger.debug(logTitle, "end");
   }
 
-  async function writeOnChainOneComponent(): Promise<void> {
-    environmentStore.consoleLogger.debug("writeOnChainOneComponent() start.");
-    environmentStore.consoleLogger.debug("processed Size", processedSize.value);
+  /**
+   * アグリゲートTx1つ分のオンチェーンデータ書き込み
+   * @returns なし
+   */
+  async function writeOnChainOneAggregate(isBonded: boolean): Promise<void> {
+    const logTitle = "write data:";
+    envStore.logger.debug(logTitle, "start");
+    progress.value = WriteProgress.Preprocess;
+
     // 書き込み済データサイズチェック
+    envStore.logger.debug(logTitle, "processed size", processedSize.value);
     if (processedSize.value >= dataBase64.value.length) {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() : completed."
-      );
+      envStore.logger.debug(logTitle, "all data proceeded.");
+      progress.value = WriteProgress.Complete;
       return;
     }
+
+    // 最終データか判定
+    const isLastData =
+      processedSize.value +
+        CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM >=
+      dataBase64.value.length;
+
     // モザイク設定チェック
     const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
     if (typeof mosaicInfo === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : mosaic no setting."
-      );
-      return;
-    }
-    if (
-      typeof environmentStore.accountRepo === "undefined" ||
-      typeof environmentStore.namespaceRepo === "undefined" ||
-      typeof environmentStore.txRepo === "undefined"
-    ) {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : repository unavailable."
-      );
+      envStore.logger.error(logTitle, "mosaic info undefined.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    const accountInfo = await environmentStore.accountRepo
-      .getAccountInfo(mosaicInfo.ownerAddress)
-      .toPromise();
+    // アカウント情報の取得
+    const accountInfo = await getAccountInfo(mosaicInfo.ownerAddress.plain());
     if (typeof accountInfo === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : get account info failed."
-      );
+      envStore.logger.error(logTitle, "account info invalid.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    const txList: Array<InnerTransaction> = [];
+    // ヘッダ情報の作成と暗号化
     const header = createHeader(
       mosaicInfo.id.toHex(),
       mosaicInfo.ownerAddress.plain(),
-      prevTxHash.value,
       title.value,
       message.value,
-      getHash(dataBase64.value)
+      processedSize.value === 0 ? undefined : prevTxHash.value,
+      isLastData ? getHash(dataBase64.value) : undefined
     );
-    const encryptHeader = cryptoHeader(mosaicInfo.id.toHex(), header);
-    if (typeof encryptHeader === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : crypto header failed."
-      );
+    const encodedHeader = encryptHeader(header, mosaicInfo.id.toHex());
+    if (typeof encodedHeader === "undefined") {
+      envStore.logger.error(logTitle, "create crypto header failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
-    const txHeader = createTxTransfer(accountInfo, encryptHeader);
-    if (typeof txHeader === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : create header tx failed."
-      );
-      return;
-    }
+
+    // ヘッダ情報Txを作成してTxリストに追加
+    const txList: Array<InnerTransaction> = [];
+    const txHeader = createTxTransferPlainMessage(accountInfo, encodedHeader);
     txList.push(txHeader.toAggregate(accountInfo.publicAccount));
 
-    // データトランザクションの作成
+    // データTxをTxリストに追加
     for (; txList.length < CONSTS.TX_AGGREGATE_INNER_NUM; ) {
+      // 全てのデータを処理済の場合は終了
       if (processedSize.value >= dataBase64.value.length) {
         break;
       }
+      // 未処理のデータから1Txに格納できる分だけデータを切り出す
       const sendData = dataBase64.value.substring(
         processedSize.value,
         processedSize.value + CONSTS.TX_DATASIZE_PER_TRANSFER
       );
-      const txHeader = createTxTransfer(accountInfo, sendData);
-      if (typeof txHeader === "undefined") {
-        environmentStore.consoleLogger.debug(
-          "writeOnChainOneComponent() error : create data tx failed."
-        );
-        return;
-      }
-      txList.push(txHeader.toAggregate(accountInfo.publicAccount));
+      // データTxを作成してTxリストに追加
+      const txData = createTxTransferPlainMessage(accountInfo, sendData);
+      txList.push(txData.toAggregate(accountInfo.publicAccount));
+      // 処理済みデータサイズの更新
       processedSize.value += sendData.length;
     }
 
-    const aggTx = AggregateTransaction.createComplete(
-      Deadline.create(environmentStore.epochAdjustment),
-      txList,
-      environmentStore.networkType,
-      []
-    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
-
-    const signedAggTx = await requestTxSign(aggTx);
+    // オンチェーンデータTxのアグリゲートTx作成
+    const aggTx = isBonded
+      ? createTxAggregateBonded(txList, await getTxFee(envStore.feeKind))
+      : createTxAggregateComplete(txList, await getTxFee(envStore.feeKind));
+    // SSSによる署名
+    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    progress.value = WriteProgress.TxSigning;
+    const signedAggTx = await sssStore.requestTxSign(aggTx);
     if (typeof signedAggTx === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponent() error : SSS request sign failed."
-      );
+      envStore.logger.error(logTitle, "sss sign failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    // トランザクションリスナーオープン
-    const txListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
-    );
-    await txListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      txListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      txListener
-        .unconfirmedAdded(mosaicInfo.ownerAddress, signedAggTx.hash)
-        .subscribe(() => {
-          environmentStore.consoleLogger.debug(
-            "on chain data listener : unconfirmed."
-          );
-          state.value = TransactionGroup.Unconfirmed;
-        });
-
-      // ハッシュロックトランザクションの承認検知
-      txListener
-        .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
-        .subscribe(async () => {
-          environmentStore.consoleLogger.debug(
-            "on chain data listener : confirmed."
-          );
+    // オンチェーンデータTxリスナー設定
+    const dataTxListener = await openTxListener(
+      "write data",
+      mosaicInfo.ownerAddress,
+      signedAggTx.hash,
+      () => {
+        progress.value = WriteProgress.TxWaitCosign;
+      },
+      () => {
+        progress.value = WriteProgress.TxUnconfirmed;
+      },
+      async () => {
+        // 未処理データが存在する場合はデータ書き込みを再帰実行
+        if (processedSize.value < dataBase64.value.length) {
+          prevTxHash.value = signedAggTx.hash;
+          writeOnChainOneAggregate(isBonded);
+        } else {
           prevTxHash.value = "";
-          if (processedSize.value < dataBase64.value.length) {
-            prevTxHash.value = signedAggTx.hash;
-            await new Promise((resolve) =>
-              setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-            );
-            writeOnChainOneComponent();
-          } else {
-            state.value = TransactionGroup.Confirmed;
-          }
-          // リスナーをクローズ
-          txListener.close();
-        });
-    }
-
-    await environmentStore.txRepo.announce(signedAggTx).toPromise();
-    environmentStore.consoleLogger.debug("writeOnChainOneComponent() end.");
-  }
-
-  async function writeOnChainOneComponentForMultisigAccount(): Promise<void> {
-    environmentStore.consoleLogger.debug("writeOnChainOneComponentForMultisigAccount() start.");
-    environmentStore.consoleLogger.debug("processed Size", processedSize.value);
-    // 書き込み済データサイズチェック
-    if (processedSize.value >= dataBase64.value.length) {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() : completed."
-      );
-      return;
-    }
-    // モザイク設定チェック
-    const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
-    if (typeof mosaicInfo === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : mosaic no setting."
-      );
-      return;
-    }
-    if (
-      typeof environmentStore.accountRepo === "undefined" ||
-      typeof environmentStore.namespaceRepo === "undefined" ||
-      typeof environmentStore.txRepo === "undefined"
-    ) {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : repository unavailable."
-      );
-      return;
-    }
-
-    const accountInfo = await environmentStore.accountRepo
-      .getAccountInfo(mosaicInfo.ownerAddress)
-      .toPromise();
-    if (typeof accountInfo === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : get account info failed."
-      );
-      return;
-    }
-
-    const txList: Array<InnerTransaction> = [];
-    const header = createHeader(
-      mosaicInfo.id.toHex(),
-      mosaicInfo.ownerAddress.plain(),
-      prevTxHash.value,
-      title.value,
-      message.value,
-      getHash(dataBase64.value)
-    );
-    const encryptHeader = cryptoHeader(mosaicInfo.id.toHex(), header);
-    if (typeof encryptHeader === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : crypto header failed."
-      );
-      return;
-    }
-    const txHeader = createTxTransfer(accountInfo, encryptHeader);
-    if (typeof txHeader === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : create header tx failed."
-      );
-      return;
-    }
-    txList.push(txHeader.toAggregate(accountInfo.publicAccount));
-
-    // データトランザクションの作成
-    for (; txList.length < CONSTS.TX_AGGREGATE_INNER_NUM; ) {
-      if (processedSize.value >= dataBase64.value.length) {
-        break;
+          progress.value = WriteProgress.Complete;
+        }
+      },
+      () => {
+        progress.value = WriteProgress.Failed;
       }
-      const sendData = dataBase64.value.substring(
-        processedSize.value,
-        processedSize.value + CONSTS.TX_DATASIZE_PER_TRANSFER
-      );
-      const txHeader = createTxTransfer(accountInfo, sendData);
-      if (typeof txHeader === "undefined") {
-        environmentStore.consoleLogger.debug(
-          "writeOnChainOneComponentForMultisigAccount() error : create data tx failed."
-        );
-        return;
-      }
-      txList.push(txHeader.toAggregate(accountInfo.publicAccount));
-      processedSize.value += sendData.length;
-    }
-
-    const aggTx = AggregateTransaction.createBonded(
-      Deadline.create(environmentStore.epochAdjustment),
-      txList,
-      environmentStore.networkType,
-      []
-    ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
-
-    const signedAggTx = await requestTxSign(aggTx);
-    if (typeof signedAggTx === "undefined") {
-      environmentStore.consoleLogger.debug(
-        "writeOnChainOneComponentForMultisigAccount() error : SSS request sign failed."
-      );
+    );
+    if (typeof dataTxListener === "undefined") {
+      envStore.logger.error(logTitle, "open create mosaic tx listener failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    // SSS待ち
-    await new Promise((resolve) =>
-      setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-    );
+    // アグリゲートコンプリートTxの場合はアナウンスして終了
+    if (!isBonded) {
+      progress.value = WriteProgress.TxAnnounced;
+      const response = await announceTx(signedAggTx);
+      envStore.logger.debug(logTitle, "aggregate complete tx announced.", [
+        signedAggTx,
+        response,
+      ]);
+      envStore.logger.debug(logTitle, "aggregate complete end");
+      return;
+    }
+    // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
 
-    // ハッシュロックTxを作成し、SSSで署名
-    const hashLockTx = createTxHashLock(signedAggTx);
-    const signedHashLockTx = await requestTxSign(hashLockTx);
+    // ハッシュロックTx作成
+    const hashLockTx = createTxHashLock(
+      signedAggTx,
+      await getTxFee(envStore.feeKind)
+    );
+    // SSSによる署名
+    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
     if (typeof signedHashLockTx === "undefined") {
-      return undefined;
+      envStore.logger.error(logTitle, "sss sign failed.");
+      return;
     }
-    // NOTE: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
+    // HACK: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
     const signerAddress = Address.createFromPublicKey(
       signedHashLockTx.signerPublicKey,
-      environmentStore.networkType
+      envStore.networkType
     );
 
-    // ハッシュロック用のトランザクションリスナーオープン
-    const hashLockTxListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
+    // ハッシュロックTxリスナー設定
+    const hashlockTxlistener = await openTxListener(
+      "hash lock",
+      signerAddress,
+      signedHashLockTx.hash,
+      undefined,
+      () => {
+        progress.value = WriteProgress.LockUnconfirmed;
+      },
+      async () => {
+        // アグリゲートTxをアナウンス
+        progress.value = WriteProgress.TxAnnounced;
+        const response = await announceTx(signedAggTx);
+        envStore.logger.debug(logTitle, "aggregate bonded tx announced.", [
+          signedAggTx,
+          response,
+        ]);
+      },
+      () => {
+        progress.value = WriteProgress.Failed;
+      }
     );
-    await hashLockTxListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      hashLockTxListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      hashLockTxListener
-        .unconfirmedAdded(signerAddress, signedHashLockTx.hash)
-        .subscribe(() => {
-          environmentStore.consoleLogger.debug(
-            "on chain data (multisig) hash lock listener : unconfirmed."
-          );
-          state.value = TransactionGroup.Unconfirmed;
-        });
-
-      // ハッシュロックトランザクションの承認検知
-      hashLockTxListener
-        .confirmed(signerAddress, signedHashLockTx.hash)
-        .subscribe(async () => {
-          environmentStore.consoleLogger.debug(
-            "on chain data (multisig) hash lock listener : confirmed."
-          );
-          environmentStore.txRepo
-            ?.announceAggregateBonded(signedAggTx)
-            .toPromise();
-          // リスナーをクローズ
-          hashLockTxListener.close();
-        });
+    if (typeof hashlockTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open hash lock tx listener failed.");
+      progress.value = WriteProgress.Failed;
+      return;
     }
 
-    // トランザクションリスナーオープン
-    const txListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
-    );
-    await txListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      txListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      txListener
-        .unconfirmedAdded(mosaicInfo.ownerAddress, signedAggTx.hash)
-        .subscribe(() => {
-          environmentStore.consoleLogger.debug(
-            "on chain data listener : unconfirmed."
-          );
-          state.value = TransactionGroup.Unconfirmed;
-        });
-
-      // ハッシュロックトランザクションの承認検知
-      txListener
-        .confirmed(mosaicInfo.ownerAddress, signedAggTx.hash)
-        .subscribe(async () => {
-          environmentStore.consoleLogger.debug(
-            "on chain data listener : confirmed."
-          );
-          prevTxHash.value = "";
-          if (processedSize.value < dataBase64.value.length) {
-            prevTxHash.value = signedAggTx.hash;
-            await new Promise((resolve) =>
-              setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-            );
-            writeOnChainOneComponentForMultisigAccount();
-          } else {
-            state.value = TransactionGroup.Confirmed;
-          }
-          // リスナーをクローズ
-          txListener.close();
-        });
-    }
-
-    await environmentStore.txRepo.announce(signedHashLockTx).toPromise();
-    environmentStore.consoleLogger.debug("writeOnChainOneComponentForMultisigAccount() end.");
+    // Txアナウンス
+    progress.value = WriteProgress.LockAnnounced;
+    const response = await announceTx(signedHashLockTx);
+    envStore.logger.debug(logTitle, "hashlock tx announced.", [
+      signedHashLockTx,
+      response,
+    ]);
+    envStore.logger.debug(logTitle, "aggregate bonded end");
   }
 
+  // Exports
   return {
     title,
     message,
     relatedMosaicIdStr,
     dataBase64,
-    state,
+    progress,
     processedSize,
     writeOnChain,
   };

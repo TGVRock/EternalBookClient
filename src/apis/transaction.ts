@@ -9,28 +9,65 @@ import {
   UInt64,
   AggregateTransaction,
   type InnerTransaction,
+  TransactionType,
+  type TransactionSearchCriteria,
   HashLockTransaction,
   Mosaic,
   NamespaceId,
   SignedTransaction,
+  RawMessage,
+  TransactionAnnounceResponse,
 } from "symbol-sdk";
-import type { TransactionType, TransactionSearchCriteria } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
 import CONSTS from "@/utils/consts";
 
-const environmentStore = useEnvironmentStore();
+// Stores
+const envStore = useEnvironmentStore();
 
+/**
+ * Txアナウンス
+ * @param signedTx 署名済Tx
+ * @returns レスポンス
+ */
+export async function announceTx(
+  signedTx: SignedTransaction
+): Promise<TransactionAnnounceResponse | undefined> {
+  const logTitle = "announce tx:";
+  if (typeof envStore.txRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
+    return undefined;
+  }
+  if (signedTx.type === TransactionType.AGGREGATE_BONDED) {
+    return await envStore.txRepo.announceAggregateBonded(signedTx).toPromise();
+  }
+  return await envStore.txRepo.announce(signedTx).toPromise();
+}
+
+/**
+ * Tx情報取得
+ * @param txHash Txハッシュ
+ * @returns Tx情報
+ */
 export async function getTransactionInfo(
   txHash: string
 ): Promise<Transaction | undefined> {
-  if (typeof environmentStore.txRepo === "undefined") {
+  const logTitle = "get tx info:";
+  if (typeof envStore.txRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return environmentStore.txRepo
+  return await envStore.txRepo
     .getTransaction(txHash, TransactionGroup.Confirmed)
     .toPromise();
 }
 
+/**
+ * 対象アドレスのTx一覧取得
+ * @param address アドレス
+ * @param txType Txタイプ
+ * @param fromHeight 始点のブロック高(省略可能)
+ * @returns 該当するTx一覧
+ */
 export async function getTransactions(
   address: Address,
   txType: Array<TransactionType>,
@@ -46,70 +83,135 @@ export async function getTransactions(
   if (typeof fromHeight != "undefined") {
     criteria.fromHeight = fromHeight;
   }
-  return getTransactionsOnePage(criteria);
+  return searchTransactions(criteria);
 }
 
-async function getTransactionsOnePage(
+/**
+ * Tx検索
+ * @param criteria 検索条件
+ * @returns 検索条件に一致するTx一覧
+ */
+async function searchTransactions(
   criteria: TransactionSearchCriteria
 ): Promise<Transaction[]> {
-  if (typeof environmentStore.txRepo === "undefined") {
+  const logTitle = "search txes:";
+  envStore.logger.debug(
+    logTitle,
+    "start",
+    "page:",
+    criteria.pageNumber || CONSTS.STR_NA
+  );
+  if (typeof envStore.txRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
     return [];
   }
-  const pageTxes = await environmentStore.txRepo.search(criteria).toPromise();
+  const pageTxes = await envStore.txRepo.search(criteria).toPromise();
   if (typeof pageTxes === "undefined") {
+    envStore.logger.error(logTitle, "search failed.");
     return [];
   }
+  // 最終ページの場合は結果を返却する
   if (pageTxes.isLastPage) {
     return pageTxes.data;
   }
+  // 再帰実行で次のページを検索し、結果を結合して返却する
   criteria.pageNumber =
     typeof criteria.pageNumber === "undefined" ? 2 : criteria.pageNumber + 1;
-  return pageTxes.data.concat(await getTransactionsOnePage(criteria));
+  return pageTxes.data.concat(await searchTransactions(criteria));
 }
 
-export function createTxTransfer(
+/**
+ * 平文メッセージ転送Tx作成
+ * @param accountInfo アカウント情報
+ * @param message 転送する平文メッセージ
+ * @returns 転送Tx
+ */
+export function createTxTransferPlainMessage(
   accountInfo: AccountInfo,
   message: string
 ): TransferTransaction {
   return TransferTransaction.create(
-    Deadline.create(environmentStore.epochAdjustment),
+    Deadline.create(envStore.epochAdjustment),
     accountInfo.address,
     [],
     PlainMessage.create(message),
-    environmentStore.networkType
+    envStore.networkType
   );
 }
 
+/**
+ * データ転送Tx作成
+ * @param accountInfo アカウント情報
+ * @param data 転送するデータ
+ * @returns 転送Tx
+ */
+export function createTxTransferData(
+  accountInfo: AccountInfo,
+  data: Uint8Array
+): TransferTransaction {
+  return TransferTransaction.create(
+    Deadline.create(envStore.epochAdjustment),
+    accountInfo.address,
+    [],
+    RawMessage.create(data),
+    envStore.networkType
+  );
+}
+
+/**
+ * ハッシュロックTx作成
+ * @param signedTx 署名済Tx
+ * @param fee 手数料乗数
+ * @returns ハッシュロックTx
+ */
 export function createTxHashLock(
-  signedTx: SignedTransaction
+  signedTx: SignedTransaction,
+  fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): HashLockTransaction {
   return HashLockTransaction.create(
-    Deadline.create(environmentStore.epochAdjustment),
-    new Mosaic(new NamespaceId("symbol.xym"), UInt64.fromUint(10 * 1000000)), // 固定値:10XYM
+    Deadline.create(envStore.epochAdjustment),
+    new Mosaic(
+      new NamespaceId(CONSTS.TX_XYM_ALIAS),
+      UInt64.fromUint(CONSTS.TX_HASHLOCK_COST)
+    ),
     UInt64.fromUint(480),
     signedTx,
-    environmentStore.networkType
-  ).setMaxFee(CONSTS.TX_FEE_MULTIPLIER_DEFAULT) as HashLockTransaction;
+    envStore.networkType
+  ).setMaxFee(fee) as HashLockTransaction;
 }
 
+/**
+ * アグリゲートボンデッドTx作成
+ * @param txList インナーTxリスト
+ * @param fee 手数料乗数
+ * @returns アグリゲートボンデッドTx
+ */
 export function createTxAggregateBonded(
-  txList: InnerTransaction[]
+  txList: InnerTransaction[],
+  fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
   return AggregateTransaction.createBonded(
-    Deadline.create(environmentStore.epochAdjustment),
+    Deadline.create(envStore.epochAdjustment),
     txList,
-    environmentStore.networkType,
+    envStore.networkType,
     []
-  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
+  ).setMaxFeeForAggregate(fee, 0);
 }
 
+/**
+ * アグリゲートコンプリートTx作成
+ * @param txList インナーTxリスト
+ * @param fee 手数料乗数
+ * @returns アグリゲートコンプリートTx
+ */
 export function createTxAggregateComplete(
-  txList: InnerTransaction[]
+  txList: InnerTransaction[],
+  fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
   return AggregateTransaction.createComplete(
-    Deadline.create(environmentStore.epochAdjustment),
+    Deadline.create(envStore.epochAdjustment),
     txList,
-    environmentStore.networkType,
+    envStore.networkType,
     []
-  ).setMaxFeeForAggregate(CONSTS.TX_FEE_MULTIPLIER_DEFAULT, 0);
+  ).setMaxFeeForAggregate(fee, 0);
 }

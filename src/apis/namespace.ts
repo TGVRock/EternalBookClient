@@ -1,29 +1,41 @@
 import { MosaicId } from "symbol-sdk";
 import { useEnvironmentStore } from "@/stores/environment";
+import { isValidMosaicId } from "./mosaic";
 
-const environmentStore = useEnvironmentStore();
+// Stores
+const envStore = useEnvironmentStore();
 
+/**
+ * モザイクエイリアス取得
+ * @param mosaicIdStr モザイクID文字列
+ * @returns モザイクエイリアス
+ */
 export async function getMosaicName(
   mosaicIdStr: string
 ): Promise<string | undefined> {
-  if (typeof environmentStore.namespaceRepo === "undefined") {
+  const logTitle = "get mosaic name:";
+  if (typeof envStore.namespaceRepo === "undefined") {
+    envStore.logger.error(logTitle, "repository undefined.");
+    return undefined;
+  }
+  if (!isValidMosaicId(mosaicIdStr)) {
+    envStore.logger.error(logTitle, "invalid mosaic.", mosaicIdStr);
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
-  const mosaicNames = await environmentStore.namespaceRepo
+  const allMosaicNames = await envStore.namespaceRepo
     .getMosaicsNames([mosaicId])
     .toPromise();
-  if (typeof mosaicNames === "undefined") {
+  if (typeof allMosaicNames === "undefined") {
+    envStore.logger.error(logTitle, "get name failed.", mosaicIdStr);
     return undefined;
   }
-  const names = mosaicNames.find(
+  const mosaicNames = allMosaicNames.find(
     (name) => name.mosaicId.toHex() === mosaicIdStr
   );
-  if (typeof names === "undefined") {
+  if (typeof mosaicNames === "undefined" || mosaicNames.names.length === 0) {
+    envStore.logger.error(logTitle, "not exist mosaic.", mosaicIdStr);
     return undefined;
   }
-  if (0 < names.names.length) {
-    return names.names[0].name;
-  }
-  return undefined;
+  return mosaicNames.names[0].name;
 }

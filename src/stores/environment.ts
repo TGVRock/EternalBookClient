@@ -5,114 +5,129 @@ import {
   RepositoryFactoryHttp,
   type AccountRepository,
   type MultisigRepository,
-} from "symbol-sdk";
-import type {
-  TransactionRepository,
-  BlockRepository,
-  MosaicRepository,
-  NamespaceRepository,
+  type TransactionRepository,
+  type BlockRepository,
+  type MosaicRepository,
+  type NamespaceRepository,
+  type NetworkRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { isSSSEnable } from "@/utils/sss";
-import { ConsoleLogger, ConsoleLogLevel } from "@/utils/consolelogger";
+import { ConsoleLogger } from "@/utils/consolelogger";
+import { FeeKind } from "@/models/enums/FeeKind";
 
-const nodeListTest: Array<string> = [
-  "https://vmi831828.contaboserver.net:3001",
-  "https://001-sai-dual.symboltest.net:3001",
-  "https://5.dusan.gq:3001",
-];
+/** ノードリスト */
+const nodeList = new Map<NetworkType, Array<string>>([
+  [
+    NetworkType.TEST_NET,
+    [
+      "https://vmi831828.contaboserver.net:3001",
+      "https://001-sai-dual.symboltest.net:3001",
+      "https://5.dusan.gq:3001",
+    ],
+  ],
+  [
+    NetworkType.MAIN_NET,
+    [
+      "https://59026db.xym.gakky.net:3001",
+      "https://0-0-0-0-0-0-0-0-1.tokyo-node.jp:3001",
+      "https://00.high-performance.symbol-nodes.com:3001",
+    ],
+  ],
+]);
 
-const nodeListMain: Array<string> = [
-  "https://59026db.xym.gakky.net:3001",
-  "https://0-0-0-0-0-0-0-0-1.tokyo-node.jp:3001",
-  "https://00.high-performance.symbol-nodes.com:3001",
-];
-
+// TODO: 命名考える（ブロックチェーン？ネットワーク？そうなるとロガーとかも移動する？）
+/**
+ * 環境情報ストア
+ */
 export const useEnvironmentStore = defineStore("environment", () => {
+  /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
+  /** ジェネレーションハッシュ */
   const generationHash = ref("");
+  /** エポックアジャストメント */
   const epochAdjustment = ref(-1);
-  const repo = ref<RepositoryFactoryHttp | undefined>(undefined);
-  const txRepo = ref<TransactionRepository | undefined>(undefined);
-  const blockRepo = ref<BlockRepository | undefined>(undefined);
-  const mosaicRepo = ref<MosaicRepository | undefined>(undefined);
-  const namespaceRepo = ref<NamespaceRepository | undefined>(undefined);
-  const accountRepo = ref<AccountRepository | undefined>(undefined);
-  const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+  /** Websocket エンドポイントURI */
   const wsEndpoint = ref("");
-  const sssLinked = ref(isSSSEnable());
-  const consoleLogger = new ConsoleLogger(
-    process.env.NODE_ENV === "development"
-      ? ConsoleLogLevel.debug
-      : ConsoleLogLevel.error
-  );
+  /** 手数料種別 */
+  const feeKind = ref(FeeKind.Default);
 
-  const checkSSSLinked = setInterval(() => {
-    if (isSSSEnable()) {
-      sssLinked.value = true;
-      clearInterval(checkSSSLinked);
-    }
-  }, 500);
-  setTimeout(() => {
-    clearInterval(checkSSSLinked);
-  }, 10000);
+  /** Txリポジトリ */
+  const txRepo = ref<TransactionRepository | undefined>(undefined);
+  /** ブロックリポジトリ */
+  const blockRepo = ref<BlockRepository | undefined>(undefined);
+  /** モザイクリポジトリ */
+  const mosaicRepo = ref<MosaicRepository | undefined>(undefined);
+  /** ネームスペースリポジトリ */
+  const namespaceRepo = ref<NamespaceRepository | undefined>(undefined);
+  /** アカウントリポジトリ */
+  const accountRepo = ref<AccountRepository | undefined>(undefined);
+  /** マルチシグリポジトリ */
+  const multisigRepo = ref<MultisigRepository | undefined>(undefined);
+  /** ネットワークリポジトリ */
+  const networkRepo = ref<NetworkRepository | undefined>(undefined);
 
+  /** ロガー */
+  const logger = new ConsoleLogger();
+
+  // Watch
   watch(
     networkType,
     (): void => {
-      switch (networkType.value) {
-        case NetworkType.TEST_NET:
-          repo.value = new RepositoryFactoryHttp(nodeListTest[0]);
-          wsEndpoint.value = nodeListTest[0].replace("http", "ws") + "/ws";
-          break;
+      const logTitle = "env store watch:";
+      logger.debug(logTitle, "start", networkType.value);
 
-        case NetworkType.MAIN_NET:
-          repo.value = new RepositoryFactoryHttp(nodeListMain[0]);
-          wsEndpoint.value = nodeListMain[0].replace("http", "ws") + "/ws";
-          break;
-
-        default:
-          generationHash.value = CONSTS.STR_NA;
-          epochAdjustment.value - 1;
-          wsEndpoint.value = "";
-          repo.value = undefined;
-          txRepo.value = undefined;
-          blockRepo.value = undefined;
-          mosaicRepo.value = undefined;
-          namespaceRepo.value = undefined;
-          accountRepo.value = undefined;
-          multisigRepo.value = undefined;
-          return;
+      // ネットワークタイプ確認
+      if (!nodeList.has(networkType.value)) {
+        logger.error(logTitle, "invalid network type.");
+        wsEndpoint.value = "";
+        generationHash.value = CONSTS.STR_NA;
+        epochAdjustment.value = 0;
+        txRepo.value = undefined;
+        blockRepo.value = undefined;
+        mosaicRepo.value = undefined;
+        namespaceRepo.value = undefined;
+        accountRepo.value = undefined;
+        multisigRepo.value = undefined;
+        networkRepo.value = undefined;
+        return;
       }
-      repo.value.getGenerationHash().subscribe((value) => {
+
+      // 各種データとリポジトリを設定
+      const nodes = nodeList.get(networkType.value)!;
+      const repo = new RepositoryFactoryHttp(nodes[0]);
+      wsEndpoint.value = nodes[0].replace("http", "ws") + "/ws";
+      repo.getGenerationHash().subscribe((value) => {
         generationHash.value = value;
       });
-      repo.value.getEpochAdjustment().subscribe((value) => {
+      repo.getEpochAdjustment().subscribe((value) => {
         epochAdjustment.value = value;
       });
-      txRepo.value = repo.value.createTransactionRepository();
-      blockRepo.value = repo.value.createBlockRepository();
-      mosaicRepo.value = repo.value.createMosaicRepository();
-      namespaceRepo.value = repo.value.createNamespaceRepository();
-      accountRepo.value = repo.value.createAccountRepository();
-      multisigRepo.value = repo.value.createMultisigRepository();
+      txRepo.value = repo.createTransactionRepository();
+      blockRepo.value = repo.createBlockRepository();
+      mosaicRepo.value = repo.createMosaicRepository();
+      namespaceRepo.value = repo.createNamespaceRepository();
+      accountRepo.value = repo.createAccountRepository();
+      multisigRepo.value = repo.createMultisigRepository();
+      networkRepo.value = repo.createNetworkRepository();
+      logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
 
+  // Exports
   return {
     networkType,
     generationHash,
     epochAdjustment,
     wsEndpoint,
-    repo,
+    feeKind,
     txRepo,
     blockRepo,
     mosaicRepo,
     namespaceRepo,
     accountRepo,
     multisigRepo,
-    sssLinked,
-    consoleLogger,
+    networkRepo,
+    logger,
   };
 });

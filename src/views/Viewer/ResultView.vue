@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { MosaicInfo, NetworkType } from "symbol-sdk";
-import type { OnChainData } from "@/models/OnChainDataModel";
-import { getMosaicInfo } from "@/apis/mosaic";
-import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
-import ProcessingComponent from "@/components/ProcessingComponent.vue";
+import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
+import { useEnvironmentStore } from "@/stores/environment";
+import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
+import { getMosaicInfo } from "@/apis/mosaic";
+import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
 
 // FIXME: ネットワークタイプ指定できない
 
+// Stores
+const envStore = useEnvironmentStore();
+
+// Props
 const props = defineProps<{
   netType: NetworkType;
   mosaicId: string;
@@ -18,17 +23,36 @@ const props = defineProps<{
 const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
 const onChainDataList = ref<OnChainData[] | undefined>(undefined);
 
-getMosaicInfo(props.mosaicId).then((value) => {
-  mosaicInfo.value = value;
-});
-watch(mosaicInfo, (): void => {
+// モザイク情報の取得
+getMosaicInfo(props.mosaicId)
+  .then((value) => {
+    envStore.logger.debug("viewer result:", "get mosaic info complete.");
+    mosaicInfo.value = value;
+  })
+  .catch((error) => {
+    envStore.logger.error("viewer result:", "get mosaic info failed.", error);
+  });
+
+// Watch
+watch(mosaicInfo, async (): Promise<void> => {
+  const logTitle = "viewer result watch:";
+  envStore.logger.debug(logTitle, "start", mosaicInfo.value);
+
+  // モザイクに紐づいたオンチェーンデータを取得
   if (typeof mosaicInfo.value === "undefined") {
+    envStore.logger.error(logTitle, "not exist mosaic info.");
     onChainDataList.value = undefined;
     return;
   }
-  getEBPOnChainData(mosaicInfo.value as MosaicInfo).then((value) => {
-    onChainDataList.value = value;
-  });
+  getEBPOnChainData(mosaicInfo.value as MosaicInfo)
+    .then((value) => {
+      envStore.logger.debug(logTitle, "get on chain data complete.");
+      onChainDataList.value = value;
+    })
+    .catch((error) => {
+      envStore.logger.error(logTitle, "get on chain data failed.", error);
+    });
+  envStore.logger.debug(logTitle, "end");
 });
 </script>
 

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { SelectboxItemModel } from "@/models/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/SelectboxAttributeModel";
+import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
+import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 
 // Props
 const props = defineProps<{
-  attributes: SelectboxAttributeModel; // 属性
-  items: Array<SelectboxItemModel>; // 表示アイテムリスト
-  value: any; // 値
-  size?: string; // ラベル
+  /** 属性 */
+  attributes: SelectboxAttributeModel;
+  /** 表示アイテムリスト */
+  items: Array<SelectboxItemModel>;
+  /** 値 */
+  value: any;
+  /** ラベル */
+  size?: string;
 }>();
 
 // Emits

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { OnChainData } from "@/models/OnChainDataModel";
+import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import DataAreaComponent from "./DataAreaComponent.vue";
 
 // Props
 defineProps<{
-  data: OnChainData; // オンチェーンデータ
+  /** オンチェーンデータ */
+  data: OnChainData;
 }>();
 </script>
 

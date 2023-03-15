@@ -1,237 +1,206 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import {
-  Address,
-  MosaicFlags,
-  TransactionGroup,
-  Listener,
-  MosaicDefinitionTransaction,
-} from "symbol-sdk";
+import { Address, MosaicFlags, MosaicDefinitionTransaction } from "symbol-sdk";
 import { useEnvironmentStore } from "./environment";
+import { useSSSStore } from "./sss";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";
+import { WriteProgress } from "@/models/enums/WriteProgress";
+import { getAccountInfo, getMultisigInfo } from "@/apis/account";
+import { openTxListener } from "@/apis/listner";
 import { createInnerTxForMosaic } from "@/apis/mosaic";
-import { requestTxSign } from "@/utils/sss";
-import CONSTS from "@/utils/consts";
-import { getAccountInfo } from "@/apis/account";
 import {
+  announceTx,
   createTxAggregateBonded,
   createTxAggregateComplete,
   createTxHashLock,
 } from "@/apis/transaction";
+import CONSTS from "@/utils/consts";
+import { getTxFee } from "@/apis/network";
 
+/**
+ * モザイク作成ストア
+ */
 export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
-  const environmentStore = useEnvironmentStore();
+  // Other Stores
+  const envStore = useEnvironmentStore();
+  const sssStore = useSSSStore();
   const writeOnChainDataStore = useWriteOnChainDataStore();
 
-  const linkedAddress = ref("");
+  /** モザイク所有者アドレス */
   const ownerAddress = ref("");
+  /** モザイクフラグ */
   const mosaicFlags = ref(MosaicFlags.create(false, false, false, false));
+  /** 数量 */
   const amount = ref(1);
-  const state = ref<TransactionGroup | undefined>(undefined);
+  /** 書き込み状況 */
+  const progress = ref<WriteProgress>(WriteProgress.Standby);
 
+  /**
+   * モザイク作成
+   * @returns なし
+   */
   async function createMosaic(): Promise<void> {
-    state.value = undefined;
-    if (typeof environmentStore.multisigRepo === "undefined") {
-      return;
-    }
+    const logTitle = "create mosaic:";
+    envStore.logger.debug(logTitle, "start");
 
-    const owner = Address.createFromRawAddress(ownerAddress.value);
-    const multisigInfo = await environmentStore.multisigRepo
-      .getMultisigAccountInfo(owner)
-      .toPromise();
-    if (typeof multisigInfo === "undefined") {
-      return;
-    }
-    return multisigInfo.isMultisig()
-      ? createMosaicForMultisigAccount(owner)
-      : createMosaicForAccount(owner);
-  }
-
-  async function createMosaicForAccount(owner: Address): Promise<void> {
-    environmentStore.consoleLogger.debug("create mosaic : start.");
+    // 書き込み状況のチェック
     if (
-      typeof environmentStore.namespaceRepo === "undefined" ||
-      typeof environmentStore.txRepo === "undefined"
+      progress.value !== WriteProgress.Standby &&
+      progress.value !== WriteProgress.Complete &&
+      progress.value !== WriteProgress.Failed
     ) {
+      envStore.logger.error(logTitle, "other processing.");
       return;
     }
-    const accountInfo = await getAccountInfo(owner.plain());
+    progress.value = WriteProgress.Preprocess;
+
+    // モザイク所有アカウントがマルチシグアカウントか確認
+    const multisigInfo = await getMultisigInfo(ownerAddress.value);
+    if (typeof multisigInfo === "undefined") {
+      envStore.logger.error(logTitle, "get multisig info failed.");
+      progress.value = WriteProgress.Failed;
+      return;
+    }
+    const isBonded = multisigInfo.isMultisig();
+
+    // モザイク所有アカウントのアカウント情報を取得
+    const accountInfo = await getAccountInfo(ownerAddress.value);
     if (typeof accountInfo === "undefined") {
+      envStore.logger.error(logTitle, "get account info failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
-    const aggTx = createTxAggregateComplete(
-      createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value)
-    );
-    if (typeof aggTx === "undefined") {
-      return;
-    }
-    const signedAggTx = await requestTxSign(aggTx);
+
+    // モザイク作成のアグリゲートTx作成
+    const aggTx = isBonded
+      ? createTxAggregateBonded(
+          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
+          await getTxFee(envStore.feeKind)
+        )
+      : createTxAggregateComplete(
+          createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
+          await getTxFee(envStore.feeKind)
+        );
+    // SSSによる署名
+    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    progress.value = WriteProgress.TxSigning;
+    const signedAggTx = await sssStore.requestTxSign(aggTx);
     if (typeof signedAggTx === "undefined") {
+      envStore.logger.error(logTitle, "sss sign failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
 
-    // トランザクションリスナーオープン
-    const txListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
-    );
-    await txListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      txListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      txListener.unconfirmedAdded(owner, signedAggTx.hash).subscribe(() => {
-        environmentStore.consoleLogger.debug(
-          "create mosaic tx listener : unconfirmed."
-        );
-        state.value = TransactionGroup.Unconfirmed;
-      });
-
-      // ハッシュロックトランザクションの承認検知
-      txListener.confirmed(owner, signedAggTx.hash).subscribe(async () => {
-        environmentStore.consoleLogger.debug(
-          "create mosaic tx listener : confirmed."
-        );
+    // モザイク作成Txリスナーオープン
+    const owner = Address.createFromRawAddress(ownerAddress.value);
+    const mosaicTxlistener = await openTxListener(
+      "create mosaic",
+      owner,
+      signedAggTx.hash,
+      () => {
+        progress.value = WriteProgress.TxWaitCosign;
+      },
+      () => {
+        progress.value = WriteProgress.TxUnconfirmed;
+      },
+      async () => {
+        // モザイクIDを保存した直後にモザイク情報を取得するが、承認後すぐだと失敗する場合があるため実行待機
         await new Promise((resolve) =>
-          setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
+          setTimeout(resolve, CONSTS.SSS_AFTER_CREATE_MOSAIC_WAIT_MSEC)
         );
+        // モザイクIDを保存
         writeOnChainDataStore.relatedMosaicIdStr = (
           aggTx.innerTransactions[0] as MosaicDefinitionTransaction
         ).mosaicId.toHex();
-        state.value = TransactionGroup.Confirmed;
-        // リスナーをクローズ
-        txListener.close();
-      });
-    }
-
-    await environmentStore.txRepo.announce(signedAggTx).toPromise();
-    environmentStore.consoleLogger.debug("create mosaic : end.");
-  }
-
-  async function createMosaicForMultisigAccount(owner: Address): Promise<void> {
-    environmentStore.consoleLogger.debug("create mosaic (multisig) : start.");
-    if (
-      typeof environmentStore.namespaceRepo === "undefined" ||
-      typeof environmentStore.txRepo === "undefined"
-    ) {
-      return undefined;
-    }
-    const accountInfo = await getAccountInfo(owner.plain());
-    if (typeof accountInfo === "undefined") {
-      return undefined;
-    }
-    const aggTx = createTxAggregateBonded(
-      createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value)
+        progress.value = WriteProgress.Complete;
+      },
+      () => {
+        progress.value = WriteProgress.Failed;
+      }
     );
-    if (typeof aggTx === "undefined") {
-      return undefined;
-    }
-    const signedAggTx = await requestTxSign(aggTx);
-    if (typeof signedAggTx === "undefined") {
-      return undefined;
+    if (typeof mosaicTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open create mosaic tx listener failed.");
+      progress.value = WriteProgress.Failed;
+      return;
     }
 
-    // SSS待ち
-    await new Promise((resolve) =>
-      setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
+    // アグリゲートコンプリートTxの場合はアナウンスして終了
+    if (!isBonded) {
+      progress.value = WriteProgress.TxAnnounced;
+      const response = await announceTx(signedAggTx);
+      envStore.logger.debug(logTitle, "aggregate complete tx announced.", [
+        signedAggTx,
+        response,
+      ]);
+      envStore.logger.debug(logTitle, "aggregate complete end");
+      return;
+    }
+    // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
+
+    // ハッシュロックTx作成
+    const hashLockTx = createTxHashLock(
+      signedAggTx,
+      await getTxFee(envStore.feeKind)
     );
-
-    // ハッシュロックTxを作成し、SSSで署名
-    const hashLockTx = createTxHashLock(signedAggTx);
-    const signedHashLockTx = await requestTxSign(hashLockTx);
+    // SSSによる署名
+    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    progress.value = WriteProgress.LockSigning;
+    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
     if (typeof signedHashLockTx === "undefined") {
-      return undefined;
+      envStore.logger.error(logTitle, "sss sign failed.");
+      progress.value = WriteProgress.Failed;
+      return;
     }
-    // NOTE: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
+    // HACK: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
     const signerAddress = Address.createFromPublicKey(
       signedHashLockTx.signerPublicKey,
-      environmentStore.networkType
+      envStore.networkType
     );
 
-    // ハッシュロック用のトランザクションリスナーオープン
-    const hashLockTxListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
+    // ハッシュロックTxリスナー設定
+    const hashlockTxlistener = await openTxListener(
+      "hash lock",
+      signerAddress,
+      signedHashLockTx.hash,
+      undefined,
+      () => {
+        progress.value = WriteProgress.LockUnconfirmed;
+      },
+      async () => {
+        // アグリゲートTxをアナウンス
+        progress.value = WriteProgress.TxAnnounced;
+        const response = await announceTx(signedAggTx);
+        envStore.logger.debug(logTitle, "aggregate bonded tx announced.", [
+          signedAggTx,
+          response,
+        ]);
+      },
+      () => {
+        progress.value = WriteProgress.Failed;
+      }
     );
-    await hashLockTxListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      hashLockTxListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      hashLockTxListener
-        .unconfirmedAdded(signerAddress, signedHashLockTx.hash)
-        .subscribe(() => {
-          environmentStore.consoleLogger.debug(
-            "create mosaic (multisig) hash lock listener : unconfirmed."
-          );
-          state.value = TransactionGroup.Unconfirmed;
-        });
-
-      // ハッシュロックトランザクションの承認検知
-      hashLockTxListener
-        .confirmed(signerAddress, signedHashLockTx.hash)
-        .subscribe(async () => {
-          environmentStore.consoleLogger.debug(
-            "create mosaic (multisig) hash lock listener : confirmed."
-          );
-          environmentStore.txRepo
-            ?.announceAggregateBonded(signedAggTx)
-            .toPromise();
-          // リスナーをクローズ
-          hashLockTxListener.close();
-        });
+    if (typeof hashlockTxlistener === "undefined") {
+      envStore.logger.error(logTitle, "open hash lock tx listener failed.");
+      progress.value = WriteProgress.Failed;
+      return;
     }
 
-    // トランザクションリスナーオープン
-    const txListener = new Listener(
-      environmentStore.wsEndpoint,
-      environmentStore.namespaceRepo,
-      WebSocket
-    );
-    await txListener.open();
-    {
-      // 切断軽減のためのブロック生成検知
-      txListener.newBlock();
-
-      // ハッシュロックトランザクションの承認検知
-      txListener.unconfirmedAdded(owner, signedAggTx.hash).subscribe(() => {
-        environmentStore.consoleLogger.debug(
-          "create mosaic (multisig) tx listener : unconfirmed."
-        );
-        state.value = TransactionGroup.Unconfirmed;
-      });
-
-      // ハッシュロックトランザクションの承認検知
-      txListener.confirmed(owner, signedAggTx.hash).subscribe(async () => {
-        environmentStore.consoleLogger.debug(
-          "create mosaic (multisig) tx listener : confirmed."
-        );
-        await new Promise((resolve) =>
-          setTimeout(resolve, CONSTS.SSS_AFTER_SIGNED_WAIT_MSEC)
-        );
-        writeOnChainDataStore.relatedMosaicIdStr = (
-          aggTx.innerTransactions[0] as MosaicDefinitionTransaction
-        ).mosaicId.toHex();
-        state.value = TransactionGroup.Confirmed;
-        // リスナーをクローズ
-        txListener.close();
-      });
-    }
-
-    await environmentStore.txRepo.announce(signedHashLockTx).toPromise();
-    environmentStore.consoleLogger.debug("create mosaic (multisig) : end.");
+    // Txアナウンス
+    progress.value = WriteProgress.LockAnnounced;
+    const response = await announceTx(signedHashLockTx);
+    envStore.logger.debug(logTitle, "hashlock tx announced.", [
+      signedHashLockTx,
+      response,
+    ]);
+    envStore.logger.debug(logTitle, "end");
   }
 
+  // Exports
   return {
-    linkedAddress,
     ownerAddress,
     mosaicFlags,
     amount,
-    state,
+    progress,
     createMosaic,
   };
 });
