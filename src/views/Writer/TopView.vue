@@ -2,7 +2,7 @@
 import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import PreviewDataComponent from "@/components/OnChainData/PreviewDataComponent.vue";
+import InputAreaComponent from "@/components/OnChainData/InputAreaComponent.vue";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import MosaicFlagAreaComponent from "@/components/form/MosaicFlagAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
@@ -31,7 +31,7 @@ writeMosaicStore.ownerAddress = "";
       />
     </section>
     <section>
-      <PreviewDataComponent />
+      <InputAreaComponent />
       <TextAreaComponent
         v-bind:item-name="$t('preview.title')"
         v-bind:placeholder="
