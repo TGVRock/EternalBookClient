@@ -40,6 +40,9 @@ const nodeList = new Map<NetworkType, Array<string>>([
  * 環境情報ストア
  */
 export const useEnvironmentStore = defineStore("environment", () => {
+  /** ツール利用可否 */
+  const isAvailable = ref(true);
+
   /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
   /** ジェネレーションハッシュ */
@@ -114,8 +117,22 @@ export const useEnvironmentStore = defineStore("environment", () => {
     { immediate: true }
   );
 
+  // ツール利用可否の設定
+  try {
+    fetch("https://tgvrock.github.io/SymbolOnChainDataViewer/", {
+      method: "GET",
+    })
+      .then(() => {})
+      .catch(() => {
+        isAvailable.value = false;
+      });
+  } catch (error) {
+    isAvailable.value = false;
+  }
+
   // Exports
   return {
+    isAvailable,
     networkType,
     generationHash,
     epochAdjustment,

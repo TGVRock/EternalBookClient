@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
+import TopLinkAreaComponent from "@/components/home/TopLinkAreaComponent.vue";
 import CONSTS from "@/utils/consts";
+import { useEnvironmentStore } from "@/stores/environment";
 
 // Locale
 const i18n = useI18n();
+
+// Stores
+const envStore = useEnvironmentStore();
 
 // Reactives
 const messageList = ref<Array<string>>([]);
@@ -41,30 +45,23 @@ watch(
         </li>
       </ul>
     </section>
-    <section class="row my-2 text-center text-danger">
+    <section
+      class="row my-2 text-center text-danger"
+      v-if="!envStore.isAvailable"
+    >
       <h4 class="my-2">{{ $t(`home.bugInfo`) }}</h4>
       <p>{{ $t(`home.bugInfoDetail`) }}</p>
     </section>
-    <section class="row my-2">
-      <TransitionButtonComponent
-        class="col-lg-2"
-        v-bind:next-route-name="`WriterTop`"
-        v-bind:item-name="$t(`writer.title`)"
-      />
-      <div class="col-lg-10">
-        <p>{{ $t(`writer.explanation`) }}</p>
-      </div>
-    </section>
-    <section class="row my-2">
-      <TransitionButtonComponent
-        class="col-lg-2"
-        v-bind:next-route-name="`ViewerTop`"
-        v-bind:item-name="$t(`viewer.title`)"
-      />
-      <div class="col-lg-10">
-        <p>{{ $t(`viewer.explanation`) }}</p>
-      </div>
-    </section>
+    <TopLinkAreaComponent
+      v-if="envStore.isAvailable"
+      v-bind:next-route-name="`WriterTop`"
+      v-bind:function-name="`writer`"
+    />
+    <TopLinkAreaComponent
+      v-if="envStore.isAvailable"
+      v-bind:next-route-name="`ViewerTop`"
+      v-bind:function-name="`viewer`"
+    />
   </article>
 </template>
 
