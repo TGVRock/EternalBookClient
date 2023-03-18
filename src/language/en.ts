@@ -31,18 +31,21 @@ export default {
   },
   home: {
     title: "EternalBookClient",
-    explanation: "This tool is for writing data on the Symbol blockchain and reading the written data.",
+    explanation:
+      "This tool is for writing data on the Symbol blockchain and reading the written data.",
     explanationList: [
       "Data is written to the mosaic.",
       "It is also possible to write data to an existing mosaic, as long as it is a mosaic of which you are the owner.",
       "Multiple data can be written to a single mosaic.",
     ],
     bugInfo: "Bug Information",
-    bugInfoDetail: "This tool is currently unavailable due to a fight between Mameshiba's Aruji and Darling'pi.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi make peace with each other.",
+    bugInfoDetail:
+      "This tool is currently unavailable due to a fight between Mameshiba's Aruji and Darling'pi.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi make peace with each other.",
   },
   writer: {
     title: "Writer",
-    explanation: "Symbol Writes data on the blockchain.\nMosaics can also be created along with data writing.",
+    explanation:
+      "Symbol Writes data on the blockchain.\nMosaics can also be created along with data writing.",
     mosaicFlags: "Mosaic Flags",
     pleaseInputItem: "Please Input {item} ...",
     fileSelect: "Select File",
@@ -51,7 +54,8 @@ export default {
   },
   viewer: {
     title: "Viewer",
-    explanation: "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
+    explanation:
+      "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
   },
   setting: {
     title: "Settings",
