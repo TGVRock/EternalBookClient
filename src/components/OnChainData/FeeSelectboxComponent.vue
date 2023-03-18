@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
 import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 import { FeeKind } from "@/models/enums/FeeKind";
 import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 
-// Stores
+// Locale
 const i18n = useI18n();
 
 // Props
@@ -25,33 +25,44 @@ const attributes = ref<SelectboxAttributeModel>({
   ariaLabel: "tx-fee",
 });
 
-const fees: Array<SelectboxItemModel> = [
-  {
-    key: "default",
-    value: FeeKind.Default,
-    display: i18n.t("preview.feeDefault"),
+const fees = ref<Array<SelectboxItemModel>>([]);
+
+// Watch
+watch(
+  i18n.locale,
+  () => {
+    fees.value = [
+      {
+        key: "default",
+        value: FeeKind.Default,
+        display: i18n.t("preview.feeDefault"),
+      },
+      {
+        key: "fast",
+        value: FeeKind.Fast,
+        display: i18n.t("preview.feeFast"),
+      },
+      {
+        key: "average",
+        value: FeeKind.Average,
+        display: i18n.t("preview.feeAverage"),
+      },
+      {
+        key: "slow",
+        value: FeeKind.Slow,
+        display: i18n.t("preview.feeSlow"),
+      },
+      {
+        key: "slowest",
+        value: FeeKind.Slowest,
+        display: i18n.t("preview.feeSlowest"),
+      },
+    ];
   },
   {
-    key: "fast",
-    value: FeeKind.Fast,
-    display: i18n.t("preview.feeFast"),
-  },
-  {
-    key: "average",
-    value: FeeKind.Average,
-    display: i18n.t("preview.feeAverage"),
-  },
-  {
-    key: "slow",
-    value: FeeKind.Slow,
-    display: i18n.t("preview.feeSlow"),
-  },
-  {
-    key: "slowest",
-    value: FeeKind.Slowest,
-    display: i18n.t("preview.feeSlowest"),
-  },
-];
+    immediate: true,
+  }
+);
 
 /**
  * 変更イベント処理

@@ -20,7 +20,10 @@ const message = ref("");
 
 // Watch
 watch(
-  () => writeOnChainDataStore.progress,
+  [
+    () => writeOnChainDataStore.progress,
+    i18n.locale,
+  ],
   () => {
     const logTitle = "write data progress watch:";
     envStore.logger.debug(logTitle, "start", writeOnChainDataStore.progress);
