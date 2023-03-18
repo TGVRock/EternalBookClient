@@ -56,6 +56,7 @@ export default {
     title: "Viewer",
     explanation:
       "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
+    readData: "Data Loading",
   },
   setting: {
     title: "Settings",

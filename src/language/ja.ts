@@ -56,6 +56,7 @@ export default {
     title: "ビューアー",
     explanation:
       "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
+    readData: "データ読み込み",
   },
   setting: {
     title: "設定",
