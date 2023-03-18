@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { useEnvironmentStore } from "@/stores/environment";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
+import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 import CONSTS from "@/utils/consts";
 
 const envStore = useEnvironmentStore();
@@ -12,7 +13,7 @@ const linkMosaicId = computed((): string => {
 </script>
 
 <template>
-  <section class="container" id="inputArea">
+  <section class="container animate__animated animate__fadeIn">
     <TextAreaComponent
       v-bind:item-name="$t('mosaicInfo.id')"
       v-bind:placeholder="
@@ -20,16 +21,14 @@ const linkMosaicId = computed((): string => {
       "
       v-model:value="mosaicId"
     />
-    <RouterLink
-      v-bind:to="{
-        name: 'ViewerResult',
-        params: {
-          netType: envStore.networkType,
-          mosaicId: linkMosaicId,
-        },
+    <TransitionButtonComponent
+      class="text-center"
+      v-bind:next-route-name="`ViewerResult`"
+      v-bind:item-name="$t(`viewer.readData`)"
+      v-bind:params="{
+        netType: envStore.networkType,
+        mosaicId: linkMosaicId,
       }"
-    >
-      <button>Get Mosaic Data</button>
-    </RouterLink>
+    />
   </section>
 </template>

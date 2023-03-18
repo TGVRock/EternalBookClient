@@ -17,24 +17,55 @@ export default {
     revokable: "取消可能",
   },
   preview: {
-    byte: "バイト",
-    dataSize: "データサイズ",
-    entire: "全体",
-    predictFee: "手数料(予測値)",
     title: "タイトル",
     message: "メッセージ",
+    fee: "手数料",
     feeDefault: "デフォルト",
     feeFast: "早い",
     feeAverage: "平均",
     feeSlow: "遅い",
     feeSlowest: "最遅",
+    notice: "※ファイル選択後に書き込みデータの情報が表示されます。",
+    info: "書き込みデータ情報",
+    dataSize: "データサイズ",
+    byte: "バイト",
+    entire: "全体",
+    predictFee: "合計手数料\n(予測値)",
+  },
+  home: {
+    title: "EternalBookClient",
+    explanation:
+      "本ツールは Symbol ブロックチェーン上へのデータ書き込み、書き込んだデータの読み込みを行うためのツールです。",
+    explanationList: [
+      "データはモザイクに対して書き込まれます。",
+      "自身が所有者であるモザイクに限り、既存のモザイクに対してデータを書き込むことも可能です。",
+      "1つのモザイクに対し複数のデータを書き込むことが可能です。",
+    ],
+    bugInfo: "不具合情報",
+    bugInfoDetail:
+      "ただいまあるじとだーりんピがケンカ中につき、本ツールは利用できません。\nあるじとだーりんピが仲直りするまで、今しばらくお待ちください。",
   },
   writer: {
+    title: "データ書き込み",
+    explanation:
+      "Symbol ブロックチェーン上にデータを書き込みます。\nデータ書き込みと併せてモザイクの作成も可能です。",
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
+    modeCreate: "モザイクを作成して書き込み",
+    modeRelated: "既存モザイクへの書き込み",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
+  },
+  viewer: {
+    title: "ビューアー",
+    explanation:
+      "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
+    readData: "データ読み込み",
+  },
+  setting: {
+    title: "設定",
+    explanation: "本ツールの設定を行います。",
   },
   message: {
     loading: "読み込み中...",

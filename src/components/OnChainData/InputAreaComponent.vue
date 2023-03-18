@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import DataAreaComponent from "./DataAreaComponent.vue";
+import DataAreaComponent from "./flagments/DataAreaComponent.vue";
+import FeeSelectboxComponent from "./flagments/FeeSelectboxComponent.vue";
 import MosaicInfoRowComponent from "../MosaicInfo/MosaicInfoRowComponent.vue";
-import FeeSelectboxComponent from "./FeeSelectboxComponent.vue";
 import FileSelectComponent from "../form/FileSelectButtonComponent.vue";
+import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
+import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import CONSTS from "@/utils/consts";
 import {
   ConvertHumanReadableByteDataSize,
@@ -62,7 +64,7 @@ getTxFees().then((txFees) => {
 </script>
 
 <template>
-  <div class="row">
+  <section class="row my-2">
     <div class="col-lg-6 align-self-center text-center">
       <DataAreaComponent
         v-bind:base64="writeOnChainDataStore.dataBase64"
@@ -70,26 +72,48 @@ getTxFees().then((txFees) => {
       />
     </div>
     <div class="col-lg-6 align-self-center">
-      <MosaicInfoRowComponent
-        v-bind:title="$t('preview.dataSize')"
-        v-bind:data="
-          ConvertHumanReadableByteDataSize(
-            writeOnChainDataStore.dataBase64.length
-          ) +
-          ' ' +
-          $t('preview.byte')
+      <TextAreaComponent
+        v-bind:item-name="$t('preview.title')"
+        v-bind:placeholder="
+          $t('writer.pleaseInputItem', { item: $t('preview.title') })
         "
+        v-model:value="writeOnChainDataStore.title"
       />
-      <MosaicInfoRowComponent
-        v-bind:title="$t('preview.entire')"
-        v-bind:data="aggTxNum.toString()"
-      />
-      <MosaicInfoRowComponent
-        v-bind:title="$t('preview.predictFee')"
-        v-bind:data="predictFee.toFixed(6) + ' xym'"
+      <TextareaAreaComponent
+        v-bind:item-name="$t('preview.message')"
+        v-bind:placeholder="
+          $t('writer.pleaseInputItem', { item: $t('preview.message') })
+        "
+        v-bind:rows="5"
+        v-model:value="writeOnChainDataStore.message"
       />
       <FeeSelectboxComponent v-model:value="envStore.feeKind" />
       <FileSelectComponent v-model:base64="writeOnChainDataStore.dataBase64" />
+      <div class="my-2" v-if="aggTxNum === 0">
+        <h6>{{ $t("preview.info") }}</h6>
+        <p>{{ $t("preview.notice") }}</p>
+      </div>
+      <div class="animate__animated animate__fadeIn my-2" v-else>
+        <h6>{{ $t("preview.info") }}</h6>
+        <MosaicInfoRowComponent
+          v-bind:title="$t('preview.dataSize')"
+          v-bind:data="
+            ConvertHumanReadableByteDataSize(
+              writeOnChainDataStore.dataBase64.length
+            ) +
+            ' ' +
+            $t('preview.byte')
+          "
+        />
+        <MosaicInfoRowComponent
+          v-bind:title="$t('preview.entire')"
+          v-bind:data="aggTxNum.toString()"
+        />
+        <MosaicInfoRowComponent
+          v-bind:title="$t('preview.predictFee')"
+          v-bind:data="predictFee.toFixed(6) + ' xym'"
+        />
+      </div>
     </div>
-  </div>
+  </section>
 </template>

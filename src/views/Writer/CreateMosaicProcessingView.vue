@@ -19,7 +19,7 @@ const message = ref("");
 
 // Watch
 watch(
-  () => writeMosaicStore.progress,
+  [() => writeMosaicStore.progress, i18n.locale],
   () => {
     const logTitle = "create mosaic progress watch:";
     envStore.logger.debug(logTitle, "start", writeMosaicStore.progress);

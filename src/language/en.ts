@@ -17,24 +17,55 @@ export default {
     revokable: "Revokable",
   },
   preview: {
-    byte: "Byte",
-    dataSize: "Data Size",
-    entire: "Entire",
-    predictFee: "Fee (Predict)",
     title: "Title",
     message: "Message",
+    fee: "Fee",
     feeDefault: "Default",
     feeFast: "Fast",
     feeAverage: "Average",
     feeSlow: "Slow",
     feeSlowest: "Slowest",
+    notice: "* Information about the written data is displayed after the file is selected.",
+    info: "Writing data information",
+    dataSize: "Data Size",
+    byte: "Byte",
+    entire: "Entire",
+    predictFee: "Total Fee\n(Predict)",
+  },
+  home: {
+    title: "EternalBookClient",
+    explanation:
+      "This tool is for writing data on the Symbol blockchain and reading the written data.",
+    explanationList: [
+      "Data is written to the mosaic.",
+      "It is also possible to write data to an existing mosaic, as long as it is a mosaic of which you are the owner.",
+      "Multiple data can be written to a single mosaic.",
+    ],
+    bugInfo: "Bug Information",
+    bugInfoDetail:
+      "This tool is currently unavailable due to a fight between Mameshiba's Aruji and Darling'pi.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi make peace with each other.",
   },
   writer: {
+    title: "Writer",
+    explanation:
+      "Symbol Writes data on the blockchain.\nMosaics can also be created along with data writing.",
     mosaicFlags: "Mosaic Flags",
     pleaseInputItem: "Please Input {item} ...",
     fileSelect: "Select File",
+    modeCreate: "Create a mosaic and write",
+    modeRelated: "Writing in existing mosaic",
     createMosaic: "Create Mosaic",
     writeOnChain: "Write On Chain",
+  },
+  viewer: {
+    title: "Viewer",
+    explanation:
+      "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
+    readData: "Data Loading",
+  },
+  setting: {
+    title: "Settings",
+    explanation: "Configure the settings for this tool.",
   },
   message: {
     loading: "Now Loading...",

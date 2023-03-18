@@ -20,6 +20,7 @@ const props = defineProps<{
   mosaicId: string;
 }>();
 
+// Reactives
 const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
 const onChainDataList = ref<OnChainData[] | undefined>(undefined);
 
