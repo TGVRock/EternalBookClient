@@ -4,6 +4,7 @@ import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import InputAreaComponent from "@/components/OnChainData/InputAreaComponent.vue";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
+import NumberAreaComponent from "@/components/form/NumberAreaComponent.vue";
 import MosaicFlagAreaComponent from "@/components/form/MosaicFlagAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
@@ -32,20 +33,14 @@ writeMosaicStore.ownerAddress = "";
     <InputAreaComponent />
     <section>
       <MosaicFlagAreaComponent />
-      <div class="row">
-        <label class="col-md-3 col-form-label">
-          {{ $t("mosaicInfo.supply") }}
-        </label>
-        <div class="col-md-9">
-          <input
-            v-model="writeMosaicStore.amount"
-            type="number"
-            class="form-control"
-            min="1"
-            placeholder="Input Supply Amount..."
-          />
-        </div>
-      </div>
+      <NumberAreaComponent
+        v-bind:item-name="$t('mosaicInfo.supply')"
+        v-bind:placeholder="
+          $t('writer.pleaseInputItem', { item: $t('mosaicInfo.supply') })
+        "
+        v-model:value="writeMosaicStore.amount"
+        v-bind:min="1"
+      />
       <TransitionButtonComponent
         class="text-center"
         v-bind:next-route-name="`CreateMosaic`"
