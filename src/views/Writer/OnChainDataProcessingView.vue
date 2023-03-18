@@ -50,7 +50,7 @@ function getWriteProgreassMessage(progress: WriteProgress): string {
   );
   const proceed = Math.ceil(
     writeOnChainDataStore.processedSize /
-      writeOnChainDataStore.dataBase64.length
+      (CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM)
   );
   const dataProgress = proceed.toString() + " / " + entire.toString() + " ";
   switch (progress) {
