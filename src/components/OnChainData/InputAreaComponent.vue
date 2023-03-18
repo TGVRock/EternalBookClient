@@ -64,7 +64,7 @@ getTxFees().then((txFees) => {
 </script>
 
 <template>
-  <section class="row">
+  <section class="row my-2">
     <div class="col-lg-6 align-self-center text-center">
       <DataAreaComponent
         v-bind:base64="writeOnChainDataStore.dataBase64"

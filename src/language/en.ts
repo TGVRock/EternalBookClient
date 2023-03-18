@@ -52,6 +52,8 @@ export default {
     mosaicFlags: "Mosaic Flags",
     pleaseInputItem: "Please Input {item} ...",
     fileSelect: "Select File",
+    modeCreate: "Create a mosaic and write",
+    modeRelated: "Writing in existing mosaic",
     createMosaic: "Create Mosaic",
     writeOnChain: "Write On Chain",
   },

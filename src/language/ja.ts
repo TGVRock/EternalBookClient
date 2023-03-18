@@ -52,6 +52,8 @@ export default {
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
+    modeCreate: "モザイクを作成して書き込み",
+    modeRelated: "既存モザイクへの書き込み",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
   },
