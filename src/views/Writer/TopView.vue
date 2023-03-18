@@ -65,6 +65,7 @@ writeMosaicStore.ownerAddress = "";
         </div>
       </div>
       <TransitionButtonComponent
+        class="text-center"
         v-bind:next-route-name="`CreateMosaic`"
         v-bind:item-name="$t(`writer.createMosaic`)"
       />
@@ -78,6 +79,7 @@ writeMosaicStore.ownerAddress = "";
         v-model:value="writeOnChainDataStore.relatedMosaicIdStr"
       />
       <TransitionButtonComponent
+        class="text-center"
         v-bind:next-route-name="`WriteOnChainData`"
         v-bind:item-name="$t(`writer.writeOnChain`)"
       />

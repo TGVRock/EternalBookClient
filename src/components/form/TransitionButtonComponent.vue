@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div class="row my-2">
-    <div class="col-sm-12 text-center">
+    <div class="col-sm-12">
       <RouterLink v-bind:to="{ name: nextRouteName }">
         <button type="button" class="btn btn-primary">{{ itemName }}</button>
       </RouterLink>

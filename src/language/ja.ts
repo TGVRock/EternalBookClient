@@ -29,12 +29,33 @@ export default {
     feeSlow: "遅い",
     feeSlowest: "最遅",
   },
+  home: {
+    title: "EternalBookClient",
+    explanation: "本ツールは Symbol ブロックチェーン上へのデータ書き込み、書き込んだデータの読み込みを行うためのツールです。",
+    explanationList: [
+      "データはモザイクに対して書き込まれます。",
+      "自身が所有者であるモザイクに限り、既存のモザイクに対してデータを書き込むことも可能です。",
+      "1つのモザイクに対し複数のデータを書き込むことが可能です。",
+    ],
+    bugInfo: "不具合情報",
+    bugInfoDetail: "ただいまあるじとだーりんピがケンカ中につき、本ツールは利用できません。\nあるじとだーりんピが仲直りするまで、今しばらくお待ちください。",
+  },
   writer: {
+    title: "データ書き込み",
+    explanation: "Symbol ブロックチェーン上にデータを書き込みます。\nデータ書き込みと併せてモザイクの作成も可能です。",
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
+  },
+  viewer: {
+    title: "ビューアー",
+    explanation: "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
+  },
+  setting: {
+    title: "設定",
+    explanation: "本ツールの設定を行います。",
   },
   message: {
     loading: "読み込み中...",
