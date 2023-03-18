@@ -13,7 +13,7 @@ const linkMosaicId = computed((): string => {
 </script>
 
 <template>
-  <section class="container" id="inputArea">
+  <section class="container animate__animated animate__fadeIn">
     <TextAreaComponent
       v-bind:item-name="$t('mosaicInfo.id')"
       v-bind:placeholder="

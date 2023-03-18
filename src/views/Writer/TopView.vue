@@ -33,7 +33,7 @@ function onClickRelateMode() {
 </script>
 
 <template>
-  <article class="container">
+  <article class="container animate__animated animate__fadeIn">
     <InputAreaComponent />
     <section class="my-2">
       <SSSLinkedSelectAreaComponent v-if="sssStore.sssLinked" />
@@ -64,8 +64,14 @@ function onClickRelateMode() {
         </div>
       </div>
       <div class="col-lg-9 tab-content">
-        <CreateMosaicAreaComponent v-if="mode === WriteMode.CreateMosaic" />
-        <RelatedMosaicAreaComponent v-if="mode === WriteMode.RelatedMosaic" />
+        <CreateMosaicAreaComponent
+          class="animate__animated animate__fadeIn"
+          v-if="mode === WriteMode.CreateMosaic"
+        />
+        <RelatedMosaicAreaComponent
+          class="animate__animated animate__fadeIn"
+          v-if="mode === WriteMode.RelatedMosaic"
+        />
       </div>
     </section>
   </article>

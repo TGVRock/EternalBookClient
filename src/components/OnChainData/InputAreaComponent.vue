@@ -93,7 +93,7 @@ getTxFees().then((txFees) => {
         <h6>{{ $t("preview.info") }}</h6>
         <p>{{ $t("preview.notice") }}</p>
       </div>
-      <div class="my-2" v-else>
+      <div class="animate__animated animate__fadeIn my-2" v-else>
         <h6>{{ $t("preview.info") }}</h6>
         <MosaicInfoRowComponent
           v-bind:title="$t('preview.dataSize')"

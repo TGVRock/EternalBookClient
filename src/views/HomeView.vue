@@ -35,7 +35,7 @@ watch(
 </script>
 
 <template>
-  <article class="container">
+  <article class="container animate__animated animate__fadeIn">
     <h2 class="my-4 text-center">{{ $t(`home.title`) }}</h2>
     <section class="row my-2">
       <p>{{ $t(`home.explanation`) }}</p>
