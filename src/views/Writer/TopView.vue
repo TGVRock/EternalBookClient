@@ -6,7 +6,6 @@ import InputAreaComponent from "@/components/OnChainData/InputAreaComponent.vue"
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import MosaicFlagAreaComponent from "@/components/form/MosaicFlagAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
-import TextareaAreaComponent from "@/components/form/TextareaAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
 // Stores
@@ -30,24 +29,7 @@ writeMosaicStore.ownerAddress = "";
         v-model:value="writeMosaicStore.ownerAddress"
       />
     </section>
-    <section>
-      <InputAreaComponent />
-      <TextAreaComponent
-        v-bind:item-name="$t('preview.title')"
-        v-bind:placeholder="
-          $t('writer.pleaseInputItem', { item: $t('preview.title') })
-        "
-        v-model:value="writeOnChainDataStore.title"
-      />
-      <TextareaAreaComponent
-        v-bind:item-name="$t('preview.message')"
-        v-bind:placeholder="
-          $t('writer.pleaseInputItem', { item: $t('preview.message') })
-        "
-        v-bind:rows="5"
-        v-model:value="writeOnChainDataStore.message"
-      />
-    </section>
+    <InputAreaComponent />
     <section>
       <MosaicFlagAreaComponent />
       <div class="row">

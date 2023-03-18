@@ -77,7 +77,10 @@ const onChange = (e: Event): void => {
 
 <template>
   <div class="row my-2">
-    <div class="col-12">
+    <label class="col-md-3 col-form-label">
+      {{ $t("preview.fee") }}
+    </label>
+    <div class="col-md-9">
       <SelectboxComponent
         v-bind:value="value"
         v-on:change="onChange"
