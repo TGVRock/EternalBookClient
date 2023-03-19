@@ -1,4 +1,10 @@
-import { Account, AccountInfo, Address, MultisigAccountInfo, NetworkType } from "symbol-sdk";
+import {
+  Account,
+  AccountInfo,
+  Address,
+  MultisigAccountInfo,
+  NetworkType,
+} from "symbol-sdk";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
 

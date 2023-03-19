@@ -83,10 +83,17 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
           createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
           await getTxFee(chainStore.feeKind)
         );
-    // SSSによる署名
+    // 署名
+    if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
+      settingsStore.logger.error(logTitle, "account invalid.");
+      progress.value = WriteProgress.Failed;
+      return;
+    }
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
-    const signedAggTx = await sssStore.requestTxSign(aggTx);
+    const signedAggTx = settingsStore.useSSS
+      ? await sssStore.requestTxSign(aggTx)
+      : settingsStore.account?.sign(aggTx, chainStore.generationHash);
     if (typeof signedAggTx === "undefined") {
       settingsStore.logger.error(logTitle, "sss sign failed.");
       progress.value = WriteProgress.Failed;
@@ -147,10 +154,12 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       signedAggTx,
       await getTxFee(chainStore.feeKind)
     );
-    // SSSによる署名
+    // 署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.LockSigning;
-    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
+    const signedHashLockTx = settingsStore.useSSS
+      ? await sssStore.requestTxSign(hashLockTx)
+      : settingsStore.account?.sign(hashLockTx, chainStore.generationHash);
     if (typeof signedHashLockTx === "undefined") {
       settingsStore.logger.error(logTitle, "sss sign failed.");
       progress.value = WriteProgress.Failed;
@@ -200,7 +209,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       signedHashLockTx,
       response,
     ]);
-    settingsStore.logger.debug(logTitle, "end");
+    settingsStore.logger.debug(logTitle, "aggregate bonded end");
   }
 
   // Exports

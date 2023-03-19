@@ -17,20 +17,29 @@ const addresses = ref<Array<SelectboxItemModel>>([]);
 
 // Watch
 watch(
-  () => sssStore.sssLinked,
+  () => [sssStore.sssLinked, settingsStore.useSSS],
   async (): Promise<void> => {
     const logTitle = "sss linked selectbox area watch:";
-    settingsStore.logger.debug(logTitle, "start", sssStore.sssLinked);
-
-    // SSS 連携アドレスを追加
-    addresses.value.push({
-      key: sssStore.address,
-      value: sssStore.address,
-      display: sssStore.address,
+    settingsStore.logger.debug(logTitle, "start", {
+      sssLinked: sssStore.sssLinked,
+      sssUse: settingsStore.useSSS,
     });
-    writeMosaicStore.ownerAddress = sssStore.address;
-    // SSS 連携アドレスのマルチシグアドレスを追加
-    const multisigAddresses = await getMultisigAddresses(sssStore.address);
+
+    // SSS連携状況と設定から連携アドレスを取得
+    const addressStr =
+      sssStore.sssLinked && settingsStore.useSSS
+        ? sssStore.address
+        : settingsStore.account?.address.plain() || "";
+
+    // 連携アドレスを追加
+    addresses.value.push({
+      key: addressStr,
+      value: addressStr,
+      display: addressStr,
+    });
+    writeMosaicStore.ownerAddress = addressStr;
+    // 連携アドレスのマルチシグアドレスを追加
+    const multisigAddresses = await getMultisigAddresses(addressStr);
     for (let idx = 0; idx < multisigAddresses.length; idx++) {
       addresses.value.push({
         key: multisigAddresses[idx].plain(),
