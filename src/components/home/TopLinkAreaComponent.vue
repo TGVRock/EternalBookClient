@@ -14,7 +14,7 @@ defineProps<{
   <section class="row my-2 text-center text-lg-start">
     <TransitionButtonComponent
       class="col-lg-3 col-xl-2"
-      v-bind:next-route-name="`WriterTop`"
+      v-bind:next-route-name="nextRouteName"
       v-bind:item-name="$t(functionName + `.title`)"
     />
     <div class="col-lg-9 col-xl-10">
