@@ -26,7 +26,10 @@ const onChange = (e: Event): void => {
 
 <template>
   <div class="row my-2">
-    <label class="col-md-6 col-form-label">{{ $t("settings.netType") }}</label>
+    <label class="col-md-6 col-form-label">
+      {{ $t("settings.netType") }}
+      <p class="text-black-50 small">{{ $t("settings.netTypeSupplement") }}</p>
+    </label>
     <div class="col-md-6">
       <SelectboxComponent
         v-bind:value="value"

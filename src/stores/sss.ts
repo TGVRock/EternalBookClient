@@ -20,6 +20,8 @@ export const useSSSStore = defineStore("sss", () => {
   const sssLinked = ref(isSSSEnable());
   /** 連携アドレス */
   const address = ref(getAddress());
+  /** 連携ネットワークタイプ */
+  const networkType = ref(getNetworkType());
   /** ステータス */
   const state = ref<SSSState>(SSSState.Unlinked);
 
@@ -182,6 +184,7 @@ export const useSSSStore = defineStore("sss", () => {
         chainStore.networkType = getNetworkType();
       }
       address.value = getAddress();
+      networkType.value = getNetworkType();
       updateState(SSSState.Standby);
       settingsStore.logger.debug(logTitle, "end");
     },
@@ -192,6 +195,7 @@ export const useSSSStore = defineStore("sss", () => {
   return {
     sssLinked,
     address,
+    networkType,
     requestTxSign,
   };
 });

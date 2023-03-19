@@ -2,11 +2,13 @@
 import { ref } from "vue";
 
 // Props
-defineProps<{
+const props = defineProps<{
   /** プレースホルダー */
   placeholder: string;
   /** 値 */
   value: string;
+  /** 無効かどうか */
+  disabled?: boolean;
 }>();
 
 // Emits
@@ -21,7 +23,9 @@ const isPasswordVisible = ref(false);
  * パスワード表示変更
  */
 function onTogglePasswordVisible() {
-  isPasswordVisible.value = !isPasswordVisible.value;
+  if (props.disabled === false) {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
 }
 
 /**
@@ -45,6 +49,7 @@ const onChange = (e: Event): void => {
       autocomplete="off"
       autocorrect="off"
       v-bind:placeholder="placeholder"
+      v-bind:disabled="disabled"
     />
     <i
       class="bi input-group-text"
