@@ -49,8 +49,21 @@ watch(
       class="row my-2 text-center text-danger"
       v-if="!envStore.isAvailable"
     >
-      <h4 class="my-2">{{ $t(`home.bugInfo`) }}</h4>
-      <p>{{ $t(`home.bugInfoDetail`) }}</p>
+      <h4 class="my-2">
+        {{
+          $t(`home.info`, {
+            kind: $t("home." + envStore.unavailableReason + ".kind"),
+          })
+        }}
+      </h4>
+      <p>
+        {{
+          $t(`home.infoDetail`, {
+            cause: $t("home." + envStore.unavailableReason + ".cause"),
+            until: $t("home." + envStore.unavailableReason + ".until"),
+          })
+        }}
+      </p>
     </section>
     <TopLinkAreaComponent
       v-if="envStore.isAvailable"

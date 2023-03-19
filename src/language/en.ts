@@ -41,9 +41,24 @@ export default {
       "It is also possible to write data to an existing mosaic, as long as it is a mosaic of which you are the owner.",
       "Multiple data can be written to a single mosaic.",
     ],
-    bugInfo: "Bug Information",
-    bugInfoDetail:
-      "This tool is currently unavailable due to a fight between Mameshiba's Aruji and Darling'pi.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi make peace with each other.",
+    info: "{kind} Information",
+    infoDetail:
+      "This tool is currently unavailable due to Mameshiba's Aruji and Darling'pi being in the middle of a {cause}.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi {until}.",
+    bug: {
+      kind: "Bug",
+      cause: "fight",
+      until: "make peace with each other",
+    },
+    error: {
+      kind: "Error",
+      cause: "Gabunyan",
+      until: "return",
+    },
+    maintainance: {
+      kind: "Maintainance",
+      cause: "Gonyogonyo",
+      until: "return",
+    },
   },
   writer: {
     title: "Writer",

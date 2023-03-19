@@ -14,6 +14,7 @@ import {
 import CONSTS from "@/utils/consts";
 import { ConsoleLogger } from "@/utils/consolelogger";
 import { FeeKind } from "@/models/enums/FeeKind";
+import { UnavailableReason } from "@/models/enums/UnavailableReason";
 
 /** ノードリスト */
 const nodeList = new Map<NetworkType, Array<string>>([
@@ -42,6 +43,8 @@ const nodeList = new Map<NetworkType, Array<string>>([
 export const useEnvironmentStore = defineStore("environment", () => {
   /** ツール利用可否 */
   const isAvailable = ref(true);
+  /** ツール利用不可時の理由 */
+  const unavailableReason = ref(UnavailableReason.Bug);
 
   /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
@@ -125,14 +128,28 @@ export const useEnvironmentStore = defineStore("environment", () => {
       .then(() => {})
       .catch(() => {
         isAvailable.value = false;
+        unavailableReason.value = UnavailableReason.Bug;
       });
   } catch (error) {
     isAvailable.value = false;
+    unavailableReason.value = UnavailableReason.Bug;
+  }
+  // TODO: 暫定で特定時間を利用不可とする
+  const nowDate = new Date();
+  if (nowDate.getMinutes() >= 0 && nowDate.getMinutes() < 5) {
+    if (nowDate.getHours() === 0) {
+      isAvailable.value = false;
+      unavailableReason.value = UnavailableReason.Error;
+    } else if (nowDate.getHours() === 4) {
+      isAvailable.value = false;
+      unavailableReason.value = UnavailableReason.Maintainance;
+    }
   }
 
   // Exports
   return {
     isAvailable,
+    unavailableReason,
     networkType,
     generationHash,
     epochAdjustment,
