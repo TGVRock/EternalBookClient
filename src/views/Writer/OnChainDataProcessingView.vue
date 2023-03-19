@@ -24,7 +24,7 @@ watch(
   () => {
     const logTitle = "write data progress watch:";
     envStore.logger.debug(logTitle, "start", writeOnChainDataStore.progress);
-    message.value = getWriteProgreassMessage(writeOnChainDataStore.progress);
+    message.value = getWriteProgressMessage(writeOnChainDataStore.progress);
     envStore.logger.debug(logTitle, "end", message.value);
   },
   {
@@ -40,7 +40,7 @@ writeOnChainDataStore.writeOnChain();
  * @param progress 書き込み状況
  * @returns 対応メッセージ
  */
-function getWriteProgreassMessage(progress: WriteProgress): string {
+function getWriteProgressMessage(progress: WriteProgress): string {
   const entire = Math.ceil(
     writeOnChainDataStore.dataBase64.length /
       (CONSTS.TX_DATASIZE_PER_TRANSFER * CONSTS.TX_DATA_TX_NUM)

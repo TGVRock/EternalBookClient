@@ -23,7 +23,7 @@ watch(
   () => {
     const logTitle = "create mosaic progress watch:";
     envStore.logger.debug(logTitle, "start", writeMosaicStore.progress);
-    message.value = getWriteProgreassMessage(writeMosaicStore.progress);
+    message.value = getWriteProgressMessage(writeMosaicStore.progress);
     envStore.logger.debug(logTitle, "end", message.value);
   },
   {
@@ -39,7 +39,7 @@ writeMosaicStore.createMosaic();
  * @param progress 書き込み状況
  * @returns 対応メッセージ
  */
-function getWriteProgreassMessage(progress: WriteProgress): string {
+function getWriteProgressMessage(progress: WriteProgress): string {
   switch (progress) {
     case WriteProgress.Preprocess:
       return i18n.t("message.processing");
