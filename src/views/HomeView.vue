@@ -75,6 +75,11 @@ watch(
       v-bind:next-route-name="`ViewerTop`"
       v-bind:function-name="`viewer`"
     />
+    <TopLinkAreaComponent
+      v-if="envStore.isAvailable"
+      v-bind:next-route-name="`Settings`"
+      v-bind:function-name="`settings`"
+    />
   </article>
 </template>
 

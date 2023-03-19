@@ -32,6 +32,10 @@ export default {
     entire: "Entire",
     predictFee: "Total Fee\n(Predict)",
   },
+  networkTypes: {
+    main: "Main net",
+    test: "Test net",
+  },
   home: {
     title: "EternalBookClient",
     explanation:
@@ -78,9 +82,12 @@ export default {
       "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
     readData: "Data Loading",
   },
-  setting: {
+  settings: {
     title: "Settings",
     explanation: "Configure the settings for this tool.",
+    netType: "Network Type",
+    useSSS: "Use SSS for signatures",
+    secret: "Private Key",
   },
   message: {
     loading: "Now Loading...",

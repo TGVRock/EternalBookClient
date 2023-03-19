@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { RouterLink } from "vue-router";
+import { NetworkType } from "symbol-sdk";
 import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
-import NetworkTypeMenuComponent from "@/components/header/NetworkTypeMenuComponent.vue";
 import { useEnvironmentStore } from "@/stores/environment";
 
 // Stores
@@ -10,6 +10,9 @@ const envStore = useEnvironmentStore();
 
 // Reactives
 const isShow = ref(false);
+const netType = computed(() => {
+  return envStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
+});
 
 /**
  * 閉じるクリックイベント
@@ -34,7 +37,7 @@ function onClickToggle(): void {
         v-bind:to="{ name: 'home' }"
         v-on:click="onClickClose"
       >
-        EternalBookClient
+        {{ $t(`home.title`) }}
       </RouterLink>
       <div class="navbar-toggler" v-on:click.stop="onClickToggle">
         <span class="navbar-toggler-icon"></span>
@@ -57,9 +60,17 @@ function onClickToggle(): void {
           >
             {{ $t(`viewer.title`) }}
           </RouterLink>
+          <RouterLink
+            v-if="envStore.isAvailable"
+            class="nav-link ps-2"
+            v-bind:to="{ name: 'Settings' }"
+            v-on:click="onClickClose"
+          >
+            {{ $t(`settings.title`) }}
+          </RouterLink>
         </div>
         <div class="d-flex">
-          <NetworkTypeMenuComponent class="me-2" />
+          <p class="me-2 my-auto">{{ $t(`networkTypes.` + netType) }}</p>
           <LocaleMenuComponent class="me-2" />
         </div>
       </div>

@@ -32,6 +32,10 @@ export default {
     entire: "全体",
     predictFee: "合計手数料\n(予測値)",
   },
+  networkTypes: {
+    main: "メインネット",
+    test: "テストネット",
+  },
   home: {
     title: "EternalBookClient",
     explanation:
@@ -78,9 +82,12 @@ export default {
       "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
     readData: "データ読み込み",
   },
-  setting: {
+  settings: {
     title: "設定",
     explanation: "本ツールの設定を行います。",
+    netType: "ネットワークタイプ",
+    useSSS: "署名にSSSを利用する",
+    secret: "秘密鍵",
   },
   message: {
     loading: "読み込み中...",
