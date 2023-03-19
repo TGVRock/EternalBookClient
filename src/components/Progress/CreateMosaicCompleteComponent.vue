@@ -4,12 +4,12 @@ import { useRouter } from "vue-router";
 import type { MosaicInfo } from "symbol-sdk";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import ProcessingComponent from "./ProcessingComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSettingsStore } from "@/stores/settings";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMosaicInfo } from "@/apis/mosaic";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 // Router
 const router = useRouter();
@@ -20,14 +20,14 @@ const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
 // モザイク情報の取得
 getMosaicInfo(writeOnChainDataStore.relatedMosaicIdStr)
   .then((value) => {
-    envStore.logger.debug(
+    settingsStore.logger.debug(
       "create mosaic complete:",
       "get mosaic info complete."
     );
     mosaicInfo.value = value;
   })
   .catch((error) => {
-    envStore.logger.error(
+    settingsStore.logger.error(
       "create mosaic complete:",
       "get mosaic info failed.",
       error

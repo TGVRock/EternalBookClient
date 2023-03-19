@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores/settings";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
 import NetworkTypeAreaComponent from "@/components/settings/NetworkTypeAreaComponent.vue";
 import PrivateKeyAreaComponent from "@/components/settings/PrivateKeyAreaComponent.vue";
 
 // Stores
 const settingsStore = useSettingsStore();
-const envStore = useEnvironmentStore();
+const chainStore = useChainStore();
 </script>
 
 <template>
   <section class="container animate__animated animate__fadeIn">
-    <NetworkTypeAreaComponent v-model:value="envStore.networkType" />
+    <NetworkTypeAreaComponent v-model:value="chainStore.networkType" />
     <div class="row my-2">
       <label class="col-md-6 col-form-label">{{ $t("settings.useSSS") }}</label>
       <div class="col-md-6">

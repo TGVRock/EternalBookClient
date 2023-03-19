@@ -12,9 +12,8 @@ import {
   type NetworkRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { ConsoleLogger } from "@/utils/consolelogger";
 import { FeeKind } from "@/models/enums/FeeKind";
-import { UnavailableReason } from "@/models/enums/UnavailableReason";
+import { useSettingsStore } from "./settings";
 
 /** ノードリスト */
 const nodeList = new Map<NetworkType, Array<string>>([
@@ -36,15 +35,12 @@ const nodeList = new Map<NetworkType, Array<string>>([
   ],
 ]);
 
-// TODO: 命名考える（ブロックチェーン？ネットワーク？そうなるとロガーとかも移動する？）
 /**
- * 環境情報ストア
+ * チェーン情報ストア
  */
-export const useEnvironmentStore = defineStore("environment", () => {
-  /** ツール利用可否 */
-  const isAvailable = ref(true);
-  /** ツール利用不可時の理由 */
-  const unavailableReason = ref(UnavailableReason.Bug);
+export const useChainStore = defineStore("chain", () => {
+  // Other Stores
+  const settingsStore = useSettingsStore();
 
   /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
@@ -72,19 +68,16 @@ export const useEnvironmentStore = defineStore("environment", () => {
   /** ネットワークリポジトリ */
   const networkRepo = ref<NetworkRepository | undefined>(undefined);
 
-  /** ロガー */
-  const logger = new ConsoleLogger();
-
   // Watch
   watch(
     networkType,
     (): void => {
       const logTitle = "env store watch:";
-      logger.debug(logTitle, "start", networkType.value);
+      settingsStore.logger.debug(logTitle, "start", networkType.value);
 
       // ネットワークタイプ確認
       if (!nodeList.has(networkType.value)) {
-        logger.error(logTitle, "invalid network type.");
+        settingsStore.logger.error(logTitle, "invalid network type.");
         wsEndpoint.value = "";
         generationHash.value = CONSTS.STR_NA;
         epochAdjustment.value = 0;
@@ -115,41 +108,13 @@ export const useEnvironmentStore = defineStore("environment", () => {
       accountRepo.value = repo.createAccountRepository();
       multisigRepo.value = repo.createMultisigRepository();
       networkRepo.value = repo.createNetworkRepository();
-      logger.debug(logTitle, "end");
+      settingsStore.logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
 
-  // ツール利用可否の設定
-  try {
-    fetch("https://tgvrock.github.io/SymbolOnChainDataViewer/", {
-      method: "GET",
-    })
-      .then(() => {})
-      .catch(() => {
-        isAvailable.value = false;
-        unavailableReason.value = UnavailableReason.Bug;
-      });
-  } catch (error) {
-    isAvailable.value = false;
-    unavailableReason.value = UnavailableReason.Bug;
-  }
-  // TODO: 暫定で特定時間を利用不可とする
-  const nowDate = new Date();
-  if (nowDate.getMinutes() >= 0 && nowDate.getMinutes() < 5) {
-    if (nowDate.getHours() === 0) {
-      isAvailable.value = false;
-      unavailableReason.value = UnavailableReason.Error;
-    } else if (nowDate.getHours() === 4) {
-      isAvailable.value = false;
-      unavailableReason.value = UnavailableReason.Maintainance;
-    }
-  }
-
   // Exports
   return {
-    isAvailable,
-    unavailableReason,
     networkType,
     generationHash,
     epochAdjustment,
@@ -162,6 +127,5 @@ export const useEnvironmentStore = defineStore("environment", () => {
     accountRepo,
     multisigRepo,
     networkRepo,
-    logger,
   };
 });

@@ -18,11 +18,13 @@ import {
   RawMessage,
   TransactionAnnounceResponse,
 } from "symbol-sdk";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 import CONSTS from "@/utils/consts";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 /**
  * Txアナウンス
@@ -33,14 +35,16 @@ export async function announceTx(
   signedTx: SignedTransaction
 ): Promise<TransactionAnnounceResponse | undefined> {
   const logTitle = "announce tx:";
-  if (typeof envStore.txRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.txRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
   if (signedTx.type === TransactionType.AGGREGATE_BONDED) {
-    return await envStore.txRepo.announceAggregateBonded(signedTx).toPromise();
+    return await chainStore.txRepo
+      .announceAggregateBonded(signedTx)
+      .toPromise();
   }
-  return await envStore.txRepo.announce(signedTx).toPromise();
+  return await chainStore.txRepo.announce(signedTx).toPromise();
 }
 
 /**
@@ -52,11 +56,11 @@ export async function getTransactionInfo(
   txHash: string
 ): Promise<Transaction | undefined> {
   const logTitle = "get tx info:";
-  if (typeof envStore.txRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.txRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return await envStore.txRepo
+  return await chainStore.txRepo
     .getTransaction(txHash, TransactionGroup.Confirmed)
     .toPromise();
 }
@@ -95,19 +99,19 @@ async function searchTransactions(
   criteria: TransactionSearchCriteria
 ): Promise<Transaction[]> {
   const logTitle = "search txes:";
-  envStore.logger.debug(
+  settingsStore.logger.debug(
     logTitle,
     "start",
     "page:",
     criteria.pageNumber || CONSTS.STR_NA
   );
-  if (typeof envStore.txRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.txRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return [];
   }
-  const pageTxes = await envStore.txRepo.search(criteria).toPromise();
+  const pageTxes = await chainStore.txRepo.search(criteria).toPromise();
   if (typeof pageTxes === "undefined") {
-    envStore.logger.error(logTitle, "search failed.");
+    settingsStore.logger.error(logTitle, "search failed.");
     return [];
   }
   // 最終ページの場合は結果を返却する
@@ -131,11 +135,11 @@ export function createTxTransferPlainMessage(
   message: string
 ): TransferTransaction {
   return TransferTransaction.create(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     accountInfo.address,
     [],
     PlainMessage.create(message),
-    envStore.networkType
+    chainStore.networkType
   );
 }
 
@@ -150,11 +154,11 @@ export function createTxTransferData(
   data: Uint8Array
 ): TransferTransaction {
   return TransferTransaction.create(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     accountInfo.address,
     [],
     RawMessage.create(data),
-    envStore.networkType
+    chainStore.networkType
   );
 }
 
@@ -169,14 +173,14 @@ export function createTxHashLock(
   fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): HashLockTransaction {
   return HashLockTransaction.create(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     new Mosaic(
       new NamespaceId(CONSTS.TX_XYM_ALIAS),
       UInt64.fromUint(CONSTS.TX_HASHLOCK_COST)
     ),
     UInt64.fromUint(480),
     signedTx,
-    envStore.networkType
+    chainStore.networkType
   ).setMaxFee(fee) as HashLockTransaction;
 }
 
@@ -191,9 +195,9 @@ export function createTxAggregateBonded(
   fee: number = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
   return AggregateTransaction.createBonded(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     txList,
-    envStore.networkType,
+    chainStore.networkType,
     []
   ).setMaxFeeForAggregate(fee, 0);
 }
@@ -209,9 +213,9 @@ export function createTxAggregateComplete(
   fee: number | undefined = CONSTS.TX_FEE_MULTIPLIER_DEFAULT
 ): AggregateTransaction {
   return AggregateTransaction.createComplete(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     txList,
-    envStore.networkType,
+    chainStore.networkType,
     []
   ).setMaxFeeForAggregate(fee, 0);
 }

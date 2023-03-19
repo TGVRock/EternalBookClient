@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import WriteOnChainCompleteComponent from "@/components/Progress/WriteOnChainCompleteComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSettingsStore } from "@/stores/settings";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import CONSTS from "@/utils/consts";
 import { WriteProgress } from "@/models/enums/WriteProgress";
@@ -12,7 +12,7 @@ import { WriteProgress } from "@/models/enums/WriteProgress";
 const i18n = useI18n();
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
 // Reactives
@@ -23,9 +23,13 @@ watch(
   [() => writeOnChainDataStore.progress, i18n.locale],
   () => {
     const logTitle = "write data progress watch:";
-    envStore.logger.debug(logTitle, "start", writeOnChainDataStore.progress);
+    settingsStore.logger.debug(
+      logTitle,
+      "start",
+      writeOnChainDataStore.progress
+    );
     message.value = getWriteProgressMessage(writeOnChainDataStore.progress);
-    envStore.logger.debug(logTitle, "end", message.value);
+    settingsStore.logger.debug(logTitle, "end", message.value);
   },
   {
     immediate: true,

@@ -3,15 +3,17 @@ import { ref, computed } from "vue";
 import { RouterLink } from "vue-router";
 import { NetworkType } from "symbol-sdk";
 import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 // Reactives
 const isShow = ref(false);
 const netType = computed(() => {
-  return envStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
+  return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
 
 /**
@@ -45,7 +47,7 @@ function onClickToggle(): void {
       <div class="collapse navbar-collapse" v-bind:class="{ show: isShow }">
         <div class="navbar-nav me-auto my-2 my-lg-0 ms-2 ms-lg-0">
           <RouterLink
-            v-if="envStore.isAvailable"
+            v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:to="{ name: 'WriterTop' }"
             v-on:click="onClickClose"
@@ -53,7 +55,7 @@ function onClickToggle(): void {
             {{ $t(`writer.title`) }}
           </RouterLink>
           <RouterLink
-            v-if="envStore.isAvailable"
+            v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:to="{ name: 'ViewerTop' }"
             v-on:click="onClickClose"
@@ -61,7 +63,7 @@ function onClickToggle(): void {
             {{ $t(`viewer.title`) }}
           </RouterLink>
           <RouterLink
-            v-if="envStore.isAvailable"
+            v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:to="{ name: 'Settings' }"
             v-on:click="onClickClose"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
 import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 import CONSTS from "@/utils/consts";
 
-const envStore = useEnvironmentStore();
+const chainStore = useChainStore();
 const mosaicId = ref("");
 const linkMosaicId = computed((): string => {
   return "" !== mosaicId.value ? mosaicId.value : CONSTS.STR_NA;
@@ -26,7 +26,7 @@ const linkMosaicId = computed((): string => {
       v-bind:next-route-name="`ViewerResult`"
       v-bind:item-name="$t(`viewer.readData`)"
       v-bind:params="{
-        netType: envStore.networkType,
+        netType: chainStore.networkType,
         mosaicId: linkMosaicId,
       }"
     />

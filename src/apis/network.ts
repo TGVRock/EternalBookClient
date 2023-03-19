@@ -1,11 +1,13 @@
 import type { TransactionFees } from "symbol-sdk";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 import CONSTS from "@/utils/consts";
 import { ConvertFee } from "@/utils/converter";
 import type { FeeKind } from "@/models/enums/FeeKind";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 /**
  * Tx手数料取得
@@ -13,11 +15,11 @@ const envStore = useEnvironmentStore();
  */
 export async function getTxFees(): Promise<TransactionFees | undefined> {
   const logTitle = "get tx fees:";
-  if (typeof envStore.networkRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.networkRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return await envStore.networkRepo.getTransactionFees().toPromise();
+  return await chainStore.networkRepo.getTransactionFees().toPromise();
 }
 
 /**
@@ -31,7 +33,7 @@ export async function getTxFee(feeKind: FeeKind): Promise<number> {
   // Tx手数料取得
   const txFees = await getTxFees();
   if (typeof txFees === "undefined") {
-    envStore.logger.error(logTitle, "get tx fees failed.");
+    settingsStore.logger.error(logTitle, "get tx fees failed.");
     return CONSTS.TX_FEE_MULTIPLIER_DEFAULT;
   }
   return ConvertFee(txFees, feeKind);

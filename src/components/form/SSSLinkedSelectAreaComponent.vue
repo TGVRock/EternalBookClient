@@ -2,13 +2,13 @@
 import { ref, watch } from "vue";
 import { getMultisigAddresses } from "@/apis/account";
 import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
-import { useEnvironmentStore } from "@/stores/environment";
-import { useSSSStore } from "@/stores/sss";
+import { useSettingsStore } from "@/stores/settings";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
+import { useSSSStore } from "@/stores/sss";
 import SelectboxComponent from "./SelectboxComponent.vue";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 
@@ -20,7 +20,7 @@ watch(
   () => sssStore.sssLinked,
   async (): Promise<void> => {
     const logTitle = "sss linked selectbox area watch:";
-    envStore.logger.debug(logTitle, "start", sssStore.sssLinked);
+    settingsStore.logger.debug(logTitle, "start", sssStore.sssLinked);
 
     // SSS 連携アドレスを追加
     addresses.value.push({
@@ -38,7 +38,7 @@ watch(
         display: "(multisig) " + multisigAddresses[idx].plain(),
       });
     }
-    envStore.logger.debug(logTitle, "end");
+    settingsStore.logger.debug(logTitle, "end");
   },
   {
     immediate: true,

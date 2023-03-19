@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import HeaderComponent from "./components/header/HeaderComponent.vue";
-import { useEnvironmentStore } from "./stores/environment";
+import { useChainStore } from "./stores/chain";
+import { useSettingsStore } from "./stores/settings";
 import { useSSSStore } from "./stores/sss";
 
 // Initialize Stores
-useEnvironmentStore();
+useSettingsStore();
+useChainStore();
 useSSSStore();
 </script>
 
