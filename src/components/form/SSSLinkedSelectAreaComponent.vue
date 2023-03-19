@@ -2,7 +2,6 @@
 import { ref, watch } from "vue";
 import { getMultisigAddresses } from "@/apis/account";
 import type { SelectboxItemModel } from "@/models/interfaces/SelectboxItemModel";
-import type { SelectboxAttributeModel } from "@/models/interfaces/SelectboxAttributeModel";
 import { useEnvironmentStore } from "@/stores/environment";
 import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
@@ -15,9 +14,6 @@ const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
 const addresses = ref<Array<SelectboxItemModel>>([]);
-const attributes = ref<SelectboxAttributeModel>({
-  ariaLabel: "address",
-});
 
 // Watch
 watch(
@@ -58,7 +54,9 @@ watch(
     <div class="col-md-9">
       <SelectboxComponent
         v-model:value="writeMosaicStore.ownerAddress"
-        v-bind:attributes="attributes"
+        v-bind:attributes="{
+          ariaLabel: 'address',
+        }"
         v-bind:items="addresses"
       />
     </div>
