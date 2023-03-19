@@ -10,6 +10,8 @@ const USE_SSS_OFF = "off";
 const props = defineProps<{
   /** 値 */
   value: boolean;
+  /** 無効かどうか */
+  disabled: boolean;
 }>();
 
 // Emits
@@ -44,6 +46,7 @@ const onChange = (): void => {
         v-on:change="onChange"
         v-bind:attributes="{
           ariaLabel: 'use-sss',
+          disabled: disabled,
         }"
         v-bind:items="[
           {

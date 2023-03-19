@@ -84,7 +84,7 @@ export default {
   },
   settings: {
     title: "設定",
-    explanation: "本ツールの設定を行います。",
+    explanation: "本ツールの設定を行います。\nまずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
     netType: "ネットワークタイプ",
     netTypeSupplement: "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",
     useSSS: "署名にSSSを利用する",
@@ -97,6 +97,12 @@ export default {
     secretSupplement: "SSSを利用しない場合は秘密鍵の入力が必須となります。",
     secretInmpotant: "入力された秘密鍵を本ツールで保存することはありません。",
     apply: "適用",
+    errorTitle: "設定エラー",
+    errorMessage: {
+      networkTypeInvalid: "ネットワークタイプが不正です。",
+      useSSSInvalid: "SSS連携されていないため、SSSによる署名は利用できません。",
+      privateKeyInvalid: "秘密鍵が不正です。",
+    },
   },
   message: {
     loading: "読み込み中...",

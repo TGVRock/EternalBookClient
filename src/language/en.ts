@@ -84,7 +84,7 @@ export default {
   },
   settings: {
     title: "Settings",
-    explanation: "Configure the settings for this tool.",
+    explanation: "Configure the settings for this tool.\nFirst, please set up your signature method in the settings.\nThe default is signature by SSS (size limited).",
     netType: "Network Type",
     netTypeSupplement: "If SSS is used, it will be the network type of the SSS-linked account.",
     useSSS: "Use SSS for signatures",
@@ -97,6 +97,12 @@ export default {
     secretSupplement: "If you do not use SSS, you must enter your private key.",
     secretInmpotant: "The entered private key is not stored by this tool.",
     apply: "Apply",
+    errorTitle: "Setting Error",
+    errorMessage: {
+      networkTypeInvalid: "The network type is invalid.",
+      useSSSInvalid: "Signature by SSS is not available since it is not SSS-linked.",
+      privateKeyInvalid: "The private key is invalid.",
+    },
   },
   message: {
     loading: "Now Loading...",

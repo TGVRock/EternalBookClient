@@ -1,4 +1,4 @@
-import { AccountInfo, Address, MultisigAccountInfo } from "symbol-sdk";
+import { Account, AccountInfo, Address, MultisigAccountInfo, NetworkType } from "symbol-sdk";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -13,6 +13,24 @@ const chainStore = useChainStore();
  */
 export function isValidAddress(rawAddress: string): boolean {
   return Address.isValidRawAddress(rawAddress);
+}
+
+/**
+ * 秘密鍵からアカウントを作成する
+ * @param privateKey 秘密鍵
+ * @param netType ネットワークタイプ
+ * @returns アカウント
+ */
+export function createAccountFromPrivateKey(
+  privateKey: string,
+  netType: NetworkType
+): Account | undefined {
+  try {
+    return Account.createFromPrivateKey(privateKey, netType);
+  } catch (error) {
+    /* empty */
+  }
+  return undefined;
 }
 
 /**

@@ -86,7 +86,7 @@ export const useSSSStore = defineStore("sss", () => {
    * @returns アクティブアドレス
    */
   function getAddress(): string {
-    return window.SSS.activeAddress || "";
+    return window.SSS?.activeAddress || "";
   }
 
   /**
@@ -94,7 +94,7 @@ export const useSSSStore = defineStore("sss", () => {
    * @returns アクティブネットワークタイプ
    */
   function getNetworkType(): number {
-    return window.SSS.activeNetworkType || CONSTS.NETWORKTYPE_INVALID;
+    return window.SSS?.activeNetworkType || CONSTS.NETWORKTYPE_INVALID;
   }
 
   /**
@@ -182,6 +182,7 @@ export const useSSSStore = defineStore("sss", () => {
       settingsStore.logger.debug(logTitle, "start", sssLinked.value);
       if (sssLinked.value) {
         chainStore.networkType = getNetworkType();
+        settingsStore.useSSS = sssLinked.value;
       }
       address.value = getAddress();
       networkType.value = getNetworkType();

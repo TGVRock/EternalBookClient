@@ -67,6 +67,11 @@ watch(
     </section>
     <TopLinkAreaComponent
       v-if="settingsStore.isAvailable"
+      v-bind:next-route-name="`Settings`"
+      v-bind:function-name="`settings`"
+    />
+    <TopLinkAreaComponent
+      v-if="settingsStore.isAvailable"
       v-bind:next-route-name="`WriterTop`"
       v-bind:function-name="`writer`"
     />
@@ -74,11 +79,6 @@ watch(
       v-if="settingsStore.isAvailable"
       v-bind:next-route-name="`ViewerTop`"
       v-bind:function-name="`viewer`"
-    />
-    <TopLinkAreaComponent
-      v-if="settingsStore.isAvailable"
-      v-bind:next-route-name="`Settings`"
-      v-bind:function-name="`settings`"
     />
   </article>
 </template>
