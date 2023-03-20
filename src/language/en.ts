@@ -32,6 +32,10 @@ export default {
     entire: "Entire",
     predictFee: "Total Fee\n(Predict)",
   },
+  networkTypes: {
+    main: "Main net",
+    test: "Test net",
+  },
   home: {
     title: "EternalBookClient",
     explanation:
@@ -41,9 +45,24 @@ export default {
       "It is also possible to write data to an existing mosaic, as long as it is a mosaic of which you are the owner.",
       "Multiple data can be written to a single mosaic.",
     ],
-    bugInfo: "Bug Information",
-    bugInfoDetail:
-      "This tool is currently unavailable due to a fight between Mameshiba's Aruji and Darling'pi.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi make peace with each other.",
+    info: "{kind} Information",
+    infoDetail:
+      "This tool is currently unavailable due to Mameshiba's Aruji and Darling'pi being in the middle of a {cause}.\nPlease wait for a while until Mameshiba's Aruji and Darling'pi {until}.",
+    bug: {
+      kind: "Bug",
+      cause: "fight",
+      until: "make peace with each other",
+    },
+    error: {
+      kind: "Error",
+      cause: "Gabunyan",
+      until: "return",
+    },
+    maintainance: {
+      kind: "Maintainance",
+      cause: "Gonyogonyo",
+      until: "return",
+    },
   },
   writer: {
     title: "Writer",
@@ -63,9 +82,27 @@ export default {
       "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
     readData: "Data Loading",
   },
-  setting: {
+  settings: {
     title: "Settings",
-    explanation: "Configure the settings for this tool.",
+    explanation: "Configure the settings for this tool.\nFirst, please set up your signature method in the settings.\nThe default is signature by SSS (size limited).",
+    netType: "Network Type",
+    netTypeSupplement: "If SSS is used, it will be the network type of the SSS-linked account.",
+    useSSS: "Use SSS for signatures",
+    useSSSOn: "On",
+    useSSSOff: "Off",
+    useSSSSupplement: "Although SSS can be used to sign without requiring a private key, since this tool performs consecutive signatures, it may fail to sign using SSS, resulting in a write failure.",
+    useSSSInmpotant: "If you want to write data surely, please sign with a private key without using SSS. However, use at your own risk!",
+    secret: "Private Key",
+    secretSSSOn: "If you use SSS, you do not need to enter your private key",
+    secretSupplement: "If you do not use SSS, you must enter your private key.",
+    secretInmpotant: "The entered private key is not stored by this tool.",
+    apply: "Apply",
+    errorTitle: "Setting Error",
+    errorMessage: {
+      networkTypeInvalid: "The network type is invalid.",
+      useSSSInvalid: "Signature by SSS is not available since it is not SSS-linked.",
+      privateKeyInvalid: "The private key is invalid.",
+    },
   },
   message: {
     loading: "Now Loading...",

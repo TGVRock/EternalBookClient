@@ -1,8 +1,10 @@
 import { type Address, Listener } from "symbol-sdk";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 /**
  * 特定Txのリスナーオープン
@@ -26,31 +28,31 @@ export async function openTxListener(
   errorCallback?: (...params: any) => void
 ): Promise<Listener | undefined> {
   const logTitle = "open listener:";
-  envStore.logger.debug(logTitle, key, "start");
+  settingsStore.logger.debug(logTitle, key, "start");
 
   // リポジトリチェック
-  if (typeof envStore.namespaceRepo === "undefined") {
-    envStore.logger.error(logTitle, key, "repository undefined.");
+  if (typeof chainStore.namespaceRepo === "undefined") {
+    settingsStore.logger.error(logTitle, key, "repository undefined.");
     return undefined;
   }
 
   // リスナー設定
   const txListener = new Listener(
-    envStore.wsEndpoint,
-    envStore.namespaceRepo,
+    chainStore.wsEndpoint,
+    chainStore.namespaceRepo,
     WebSocket
   );
   await txListener
     .open()
     .then(() => {
-      envStore.logger.debug(logTitle, key, "listener opened.");
+      settingsStore.logger.debug(logTitle, key, "listener opened.");
 
       // 切断軽減のためのブロック生成検知
       txListener.newBlock();
 
       // Txステータス
       txListener.status(address, txHash).subscribe((status) => {
-        envStore.logger.error(logTitle, key, "tx status:", status);
+        settingsStore.logger.error(logTitle, key, "tx status:", status);
         if (typeof errorCallback !== "undefined") {
           errorCallback();
         }
@@ -60,7 +62,7 @@ export async function openTxListener(
 
       // アグリゲートボンデッドTx検知
       txListener.aggregateBondedAdded(address, txHash).subscribe(() => {
-        envStore.logger.debug(logTitle, key, "tx aggregate bonded added");
+        settingsStore.logger.debug(logTitle, key, "tx aggregate bonded added");
         if (typeof bondedCallback !== "undefined") {
           bondedCallback();
         }
@@ -68,7 +70,7 @@ export async function openTxListener(
 
       // Tx未承認検知
       txListener.unconfirmedAdded(address, txHash).subscribe(() => {
-        envStore.logger.debug(logTitle, key, "tx unconfirmed added");
+        settingsStore.logger.debug(logTitle, key, "tx unconfirmed added");
         if (typeof unconfirmedCallback !== "undefined") {
           unconfirmedCallback();
         }
@@ -76,7 +78,7 @@ export async function openTxListener(
 
       // Tx承認検知
       txListener.confirmed(address, txHash).subscribe(async () => {
-        envStore.logger.debug(logTitle, key, "tx confirmed");
+        settingsStore.logger.debug(logTitle, key, "tx confirmed");
         if (typeof confirmedCallback !== "undefined") {
           confirmedCallback();
         }
@@ -85,10 +87,10 @@ export async function openTxListener(
       });
     })
     .catch((error) => {
-      envStore.logger.error(logTitle, key, "failed.", error);
+      settingsStore.logger.error(logTitle, key, "failed.", error);
       return undefined;
     });
 
-  envStore.logger.debug(logTitle, key, "end");
+  settingsStore.logger.debug(logTitle, key, "end");
   return txListener;
 }

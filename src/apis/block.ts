@@ -1,9 +1,11 @@
 import type { UInt64, BlockInfo } from "symbol-sdk";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 import { ConvertRealTimestampFromTxTimestamp } from "@/utils/converter";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 /**
  * ブロック情報取得
@@ -14,11 +16,11 @@ export async function getBlockInfo(
   height: UInt64
 ): Promise<BlockInfo | undefined> {
   const logTitle = "get block info:";
-  if (typeof envStore.blockRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.blockRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return await envStore.blockRepo.getBlockByHeight(height).toPromise();
+  return await chainStore.blockRepo.getBlockByHeight(height).toPromise();
 }
 
 /**
@@ -30,17 +32,17 @@ export async function getBlockTimestamp(
   height: UInt64
 ): Promise<number | undefined> {
   const logTitle = "get block timestamp:";
-  if (typeof envStore.blockRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.blockRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
   const mosaicBlockInfo = await getBlockInfo(height);
   if (typeof mosaicBlockInfo === "undefined") {
-    envStore.logger.error(logTitle, "get block info failed.");
+    settingsStore.logger.error(logTitle, "get block info failed.");
     return undefined;
   }
   return ConvertRealTimestampFromTxTimestamp(
-    envStore.epochAdjustment,
+    chainStore.epochAdjustment,
     mosaicBlockInfo.timestamp
   );
 }

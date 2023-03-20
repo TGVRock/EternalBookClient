@@ -11,10 +11,12 @@ import {
   UInt64,
   type InnerTransaction,
 } from "symbol-sdk";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 /**
  * モザイクIDとして有効かチェック
@@ -40,16 +42,16 @@ export async function getMosaicInfo(
   mosaicIdStr: string
 ): Promise<MosaicInfo | undefined> {
   const logTitle = "get mosaic info:";
-  if (typeof envStore.mosaicRepo === "undefined") {
-    envStore.logger.error(logTitle, "repository undefined.");
+  if (typeof chainStore.mosaicRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
   if (!isValidMosaicId(mosaicIdStr)) {
-    envStore.logger.error(logTitle, "invalid mosaic.", mosaicIdStr);
+    settingsStore.logger.error(logTitle, "invalid mosaic.", mosaicIdStr);
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
-  return await envStore.mosaicRepo.getMosaic(mosaicId).toPromise();
+  return await chainStore.mosaicRepo.getMosaic(mosaicId).toPromise();
 }
 
 /**
@@ -67,22 +69,22 @@ export function createInnerTxForMosaic(
   // モザイク定義
   const nonce = MosaicNonce.createRandom();
   const mosaicDefTx = MosaicDefinitionTransaction.create(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     nonce,
     MosaicId.createFromNonce(nonce, accountInfo.address),
     mosaicFlags,
     0,
     UInt64.fromUint(0),
-    envStore.networkType
+    chainStore.networkType
   );
 
   // モザイク数量設定
   const mosaicChangeTx = MosaicSupplyChangeTransaction.create(
-    Deadline.create(envStore.epochAdjustment),
+    Deadline.create(chainStore.epochAdjustment),
     mosaicDefTx.mosaicId,
     MosaicSupplyChangeAction.Increase,
     UInt64.fromUint(amount),
-    envStore.networkType
+    chainStore.networkType
   );
 
   // InnerTransaction[] 返却

@@ -5,7 +5,7 @@ import {
   type MosaicInfo,
 } from "symbol-sdk";
 import { decryptHeader, getHash } from "./crypto";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
 import CONSTS from "./consts";
 import { ConsoleLogger } from "./consolelogger";
 import { getMimeFromBase64 } from "./mime";
@@ -166,9 +166,9 @@ export async function getEBPOnChainData(
     }
 
     // Txタイムスタンプから書き込み時刻を取得
-    const envStore = useEnvironmentStore();
+    const chainStore = useChainStore();
     const timestamp = ConvertRealTimestampFromTxTimestamp(
-      envStore.epochAdjustment,
+      chainStore.epochAdjustment,
       lastData.aggregateTx.transactionInfo.timestamp
     );
     const dateTime = new Date(timestamp);

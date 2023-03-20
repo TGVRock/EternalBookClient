@@ -32,6 +32,10 @@ export default {
     entire: "全体",
     predictFee: "合計手数料\n(予測値)",
   },
+  networkTypes: {
+    main: "メインネット",
+    test: "テストネット",
+  },
   home: {
     title: "EternalBookClient",
     explanation:
@@ -41,9 +45,24 @@ export default {
       "自身が所有者であるモザイクに限り、既存のモザイクに対してデータを書き込むことも可能です。",
       "1つのモザイクに対し複数のデータを書き込むことが可能です。",
     ],
-    bugInfo: "不具合情報",
-    bugInfoDetail:
-      "ただいまあるじとだーりんピがケンカ中につき、本ツールは利用できません。\nあるじとだーりんピが仲直りするまで、今しばらくお待ちください。",
+    info: "{kind}情報",
+    infoDetail:
+      "ただいまあるじとだーりんピが{cause}中につき、本ツールは利用できません。\nあるじとだーりんピが{until}まで、今しばらくお待ちください。",
+    bug: {
+      kind: "不具合",
+      cause: "ケンカ",
+      until: "仲直りする",
+    },
+    error: {
+      kind: "エラー",
+      cause: "がぶにゃん",
+      until: "戻る",
+    },
+    maintainance: {
+      kind: "メンテナンス",
+      cause: "ごにょごにょ",
+      until: "戻る",
+    },
   },
   writer: {
     title: "データ書き込み",
@@ -63,9 +82,27 @@ export default {
       "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
     readData: "データ読み込み",
   },
-  setting: {
+  settings: {
     title: "設定",
-    explanation: "本ツールの設定を行います。",
+    explanation: "本ツールの設定を行います。\nまずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
+    netType: "ネットワークタイプ",
+    netTypeSupplement: "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",
+    useSSS: "署名にSSSを利用する",
+    useSSSOn: "オン",
+    useSSSOff: "オフ",
+    useSSSSupplement: "SSSを利用することで秘密鍵を必要とせず署名できますが、本ツールでは連続して署名を行うため、SSSによる署名ができずに書き込み失敗する場合があります。",
+    useSSSInmpotant: "確実にデータを書き込みたい場合、SSSを利用せずに秘密鍵による署名を行ってください。ただし、ご利用は自己責任で！",
+    secret: "秘密鍵",
+    secretSSSOn: "SSSを利用する場合は秘密鍵の入力は不要です",
+    secretSupplement: "SSSを利用しない場合は秘密鍵の入力が必須となります。",
+    secretInmpotant: "入力された秘密鍵を本ツールで保存することはありません。",
+    apply: "適用",
+    errorTitle: "設定エラー",
+    errorMessage: {
+      networkTypeInvalid: "ネットワークタイプが不正です。",
+      useSSSInvalid: "SSS連携されていないため、SSSによる署名は利用できません。",
+      privateKeyInvalid: "秘密鍵が不正です。",
+    },
   },
   message: {
     loading: "読み込み中...",

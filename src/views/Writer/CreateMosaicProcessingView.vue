@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import WriteCompleteComponent from "@/components/Progress/CreateMosaicCompleteComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSettingsStore } from "@/stores/settings";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { WriteProgress } from "@/models/enums/WriteProgress";
 
@@ -11,7 +11,7 @@ import { WriteProgress } from "@/models/enums/WriteProgress";
 const i18n = useI18n();
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
@@ -22,9 +22,9 @@ watch(
   [() => writeMosaicStore.progress, i18n.locale],
   () => {
     const logTitle = "create mosaic progress watch:";
-    envStore.logger.debug(logTitle, "start", writeMosaicStore.progress);
-    message.value = getWriteProgreassMessage(writeMosaicStore.progress);
-    envStore.logger.debug(logTitle, "end", message.value);
+    settingsStore.logger.debug(logTitle, "start", writeMosaicStore.progress);
+    message.value = getWriteProgressMessage(writeMosaicStore.progress);
+    settingsStore.logger.debug(logTitle, "end", message.value);
   },
   {
     immediate: true,
@@ -39,7 +39,7 @@ writeMosaicStore.createMosaic();
  * @param progress 書き込み状況
  * @returns 対応メッセージ
  */
-function getWriteProgreassMessage(progress: WriteProgress): string {
+function getWriteProgressMessage(progress: WriteProgress): string {
   switch (progress) {
     case WriteProgress.Preprocess:
       return i18n.t("message.processing");

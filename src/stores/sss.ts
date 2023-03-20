@@ -1,7 +1,8 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
 import type { SSSWindow } from "sss-module";
-import { useEnvironmentStore } from "./environment";
+import { useChainStore } from "./chain";
+import { useSettingsStore } from "@/stores/settings";
 import CONSTS from "@/utils/consts";
 import type { SignedTransaction, Transaction } from "symbol-sdk";
 import { SSSState } from "@/models/enums/SSSState";
@@ -12,12 +13,15 @@ declare const window: SSSWindow;
  */
 export const useSSSStore = defineStore("sss", () => {
   // Other Stores
-  const envStore = useEnvironmentStore();
+  const chainStore = useChainStore();
+  const settingsStore = useSettingsStore();
 
   /** SSS連携 */
   const sssLinked = ref(isSSSEnable());
   /** 連携アドレス */
   const address = ref(getAddress());
+  /** 連携ネットワークタイプ */
+  const networkType = ref(getNetworkType());
   /** ステータス */
   const state = ref<SSSState>(SSSState.Unlinked);
 
@@ -82,7 +86,7 @@ export const useSSSStore = defineStore("sss", () => {
    * @returns アクティブアドレス
    */
   function getAddress(): string {
-    return window.SSS.activeAddress || "";
+    return window.SSS?.activeAddress || "";
   }
 
   /**
@@ -90,7 +94,7 @@ export const useSSSStore = defineStore("sss", () => {
    * @returns アクティブネットワークタイプ
    */
   function getNetworkType(): number {
-    return window.SSS.activeNetworkType || CONSTS.NETWORKTYPE_INVALID;
+    return window.SSS?.activeNetworkType || CONSTS.NETWORKTYPE_INVALID;
   }
 
   /**
@@ -102,9 +106,9 @@ export const useSSSStore = defineStore("sss", () => {
     tx: Transaction
   ): Promise<SignedTransaction | undefined> {
     const logTitle = "sss request sign:";
-    envStore.logger.debug(logTitle, "start", sssLinked.value);
+    settingsStore.logger.debug(logTitle, "start", sssLinked.value);
     if (!sssLinked.value) {
-      envStore.logger.error(logTitle, "sss not enables.");
+      settingsStore.logger.error(logTitle, "sss not enables.");
       return undefined;
     }
 
@@ -114,19 +118,19 @@ export const useSSSStore = defineStore("sss", () => {
       const logTitle = "sss signing wait:";
       // 未連携状態の場合は即時終了
       if (state.value === SSSState.Unlinked) {
-        envStore.logger.error(logTitle, "sss unlinked.");
+        settingsStore.logger.error(logTitle, "sss unlinked.");
         resolve(false);
         return;
       }
       // 既にスタンバイ状態の場合は終了
       if (isStanby()) {
-        envStore.logger.debug(logTitle, "already standby.");
+        settingsStore.logger.debug(logTitle, "already standby.");
         resolve(true);
         return;
       }
       // 定周期で状態を監視し、スタンバイ状態になったら終了する
       const stateChecker = setInterval(() => {
-        envStore.logger.debug(logTitle, "interval:", state.value);
+        settingsStore.logger.debug(logTitle, "interval:", state.value);
         if (isStanby()) {
           clearTimeout(roopChecker);
           clearInterval(stateChecker);
@@ -135,13 +139,13 @@ export const useSSSStore = defineStore("sss", () => {
       }, 1000);
       // 無限待ちを避けるため、SSSで署名されずにrejectされる時間が経ったら終了
       const roopChecker = setTimeout(() => {
-        envStore.logger.error(logTitle, "not set standby.", state.value);
+        settingsStore.logger.error(logTitle, "not set standby.", state.value);
         clearInterval(stateChecker);
         resolve(false);
       }, CONSTS.SSS_SIGN_REJECT_WAIT_MSEC);
     });
     if (!waitResult) {
-      envStore.logger.error(logTitle, "signing wait error.");
+      settingsStore.logger.error(logTitle, "signing wait error.");
       return undefined;
     }
 
@@ -150,7 +154,7 @@ export const useSSSStore = defineStore("sss", () => {
     window.SSS.setTransaction(tx);
     return await window.SSS.requestSign()
       .then((value) => {
-        envStore.logger.debug(logTitle, "success.", value);
+        settingsStore.logger.debug(logTitle, "success.", value);
         // 状態更新、一定時間後にスタンバイ状態に戻す
         updateState(SSSState.Complete);
         setTimeout((): void => {
@@ -160,7 +164,7 @@ export const useSSSStore = defineStore("sss", () => {
       })
       .catch((error) => {
         // TODO: SSSウィンドウが表示されない場合の対処
-        envStore.logger.error(logTitle, "failed.", error);
+        settingsStore.logger.error(logTitle, "failed.", error);
         // 状態更新、一定時間後にスタンバイ状態に戻す
         updateState(SSSState.Failed);
         setTimeout((): void => {
@@ -175,13 +179,15 @@ export const useSSSStore = defineStore("sss", () => {
     sssLinked,
     (): void => {
       const logTitle = "sss store watch:";
-      envStore.logger.debug(logTitle, "start", sssLinked.value);
+      settingsStore.logger.debug(logTitle, "start", sssLinked.value);
       if (sssLinked.value) {
-        envStore.networkType = getNetworkType();
+        chainStore.networkType = getNetworkType();
+        settingsStore.useSSS = sssLinked.value;
       }
       address.value = getAddress();
+      networkType.value = getNetworkType();
       updateState(SSSState.Standby);
-      envStore.logger.debug(logTitle, "end");
+      settingsStore.logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
@@ -190,6 +196,7 @@ export const useSSSStore = defineStore("sss", () => {
   return {
     sssLinked,
     address,
+    networkType,
     requestTxSign,
   };
 });

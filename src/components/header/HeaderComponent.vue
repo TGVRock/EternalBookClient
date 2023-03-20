@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { RouterLink } from "vue-router";
+import { NetworkType } from "symbol-sdk";
 import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
-import NetworkTypeMenuComponent from "@/components/header/NetworkTypeMenuComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useChainStore } from "@/stores/chain";
+import { useSettingsStore } from "@/stores/settings";
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
+const chainStore = useChainStore();
 
 // Reactives
 const isShow = ref(false);
+const netType = computed(() => {
+  return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
+});
 
 /**
  * 閉じるクリックイベント
@@ -34,7 +39,7 @@ function onClickToggle(): void {
         v-bind:to="{ name: 'home' }"
         v-on:click="onClickClose"
       >
-        EternalBookClient
+        {{ $t(`home.title`) }}
       </RouterLink>
       <div class="navbar-toggler" v-on:click.stop="onClickToggle">
         <span class="navbar-toggler-icon"></span>
@@ -42,7 +47,7 @@ function onClickToggle(): void {
       <div class="collapse navbar-collapse" v-bind:class="{ show: isShow }">
         <div class="navbar-nav me-auto my-2 my-lg-0 ms-2 ms-lg-0">
           <RouterLink
-            v-if="envStore.isAvailable"
+            v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:to="{ name: 'WriterTop' }"
             v-on:click="onClickClose"
@@ -50,16 +55,24 @@ function onClickToggle(): void {
             {{ $t(`writer.title`) }}
           </RouterLink>
           <RouterLink
-            v-if="envStore.isAvailable"
+            v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:to="{ name: 'ViewerTop' }"
             v-on:click="onClickClose"
           >
             {{ $t(`viewer.title`) }}
           </RouterLink>
+          <RouterLink
+            v-if="settingsStore.isAvailable"
+            class="nav-link ps-2"
+            v-bind:to="{ name: 'Settings' }"
+            v-on:click="onClickClose"
+          >
+            {{ $t(`settings.title`) }}
+          </RouterLink>
         </div>
         <div class="d-flex">
-          <NetworkTypeMenuComponent class="me-2" />
+          <p class="me-2 my-auto">{{ $t(`networkTypes.` + netType) }}</p>
           <LocaleMenuComponent class="me-2" />
         </div>
       </div>

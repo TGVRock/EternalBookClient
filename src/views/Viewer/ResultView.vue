@@ -4,7 +4,7 @@ import type { MosaicInfo, NetworkType } from "symbol-sdk";
 import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSettingsStore } from "@/stores/settings";
 import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import { getMosaicInfo } from "@/apis/mosaic";
 import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
@@ -12,7 +12,7 @@ import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
 // FIXME: ネットワークタイプ指定できない
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 
 // Props
 const props = defineProps<{
@@ -27,33 +27,37 @@ const onChainDataList = ref<OnChainData[] | undefined>(undefined);
 // モザイク情報の取得
 getMosaicInfo(props.mosaicId)
   .then((value) => {
-    envStore.logger.debug("viewer result:", "get mosaic info complete.");
+    settingsStore.logger.debug("viewer result:", "get mosaic info complete.");
     mosaicInfo.value = value;
   })
   .catch((error) => {
-    envStore.logger.error("viewer result:", "get mosaic info failed.", error);
+    settingsStore.logger.error(
+      "viewer result:",
+      "get mosaic info failed.",
+      error
+    );
   });
 
 // Watch
 watch(mosaicInfo, async (): Promise<void> => {
   const logTitle = "viewer result watch:";
-  envStore.logger.debug(logTitle, "start", mosaicInfo.value);
+  settingsStore.logger.debug(logTitle, "start", mosaicInfo.value);
 
   // モザイクに紐づいたオンチェーンデータを取得
   if (typeof mosaicInfo.value === "undefined") {
-    envStore.logger.error(logTitle, "not exist mosaic info.");
+    settingsStore.logger.error(logTitle, "not exist mosaic info.");
     onChainDataList.value = undefined;
     return;
   }
   getEBPOnChainData(mosaicInfo.value as MosaicInfo)
     .then((value) => {
-      envStore.logger.debug(logTitle, "get on chain data complete.");
+      settingsStore.logger.debug(logTitle, "get on chain data complete.");
       onChainDataList.value = value;
     })
     .catch((error) => {
-      envStore.logger.error(logTitle, "get on chain data failed.", error);
+      settingsStore.logger.error(logTitle, "get on chain data failed.", error);
     });
-  envStore.logger.debug(logTitle, "end");
+  settingsStore.logger.debug(logTitle, "end");
 });
 </script>
 

@@ -3,13 +3,13 @@ import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import TopLinkAreaComponent from "@/components/home/TopLinkAreaComponent.vue";
 import CONSTS from "@/utils/consts";
-import { useEnvironmentStore } from "@/stores/environment";
+import { useSettingsStore } from "@/stores/settings";
 
 // Locale
 const i18n = useI18n();
 
 // Stores
-const envStore = useEnvironmentStore();
+const settingsStore = useSettingsStore();
 
 // Reactives
 const messageList = ref<Array<string>>([]);
@@ -47,18 +47,36 @@ watch(
     </section>
     <section
       class="row my-2 text-center text-danger"
-      v-if="!envStore.isAvailable"
+      v-if="!settingsStore.isAvailable"
     >
-      <h4 class="my-2">{{ $t(`home.bugInfo`) }}</h4>
-      <p>{{ $t(`home.bugInfoDetail`) }}</p>
+      <h4 class="my-2">
+        {{
+          $t(`home.info`, {
+            kind: $t("home." + settingsStore.unavailableReason + ".kind"),
+          })
+        }}
+      </h4>
+      <p>
+        {{
+          $t(`home.infoDetail`, {
+            cause: $t("home." + settingsStore.unavailableReason + ".cause"),
+            until: $t("home." + settingsStore.unavailableReason + ".until"),
+          })
+        }}
+      </p>
     </section>
     <TopLinkAreaComponent
-      v-if="envStore.isAvailable"
+      v-if="settingsStore.isAvailable"
+      v-bind:next-route-name="`Settings`"
+      v-bind:function-name="`settings`"
+    />
+    <TopLinkAreaComponent
+      v-if="settingsStore.isAvailable"
       v-bind:next-route-name="`WriterTop`"
       v-bind:function-name="`writer`"
     />
     <TopLinkAreaComponent
-      v-if="envStore.isAvailable"
+      v-if="settingsStore.isAvailable"
       v-bind:next-route-name="`ViewerTop`"
       v-bind:function-name="`viewer`"
     />

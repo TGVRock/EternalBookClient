@@ -41,6 +41,11 @@ const router = createRouter({
       name: "WriteOnChainData",
       component: () => import("../views/Writer/OnChainDataProcessingView.vue"),
     },
+    {
+      path: "/settings",
+      name: "Settings",
+      component: () => import("../views/Settings/TopView.vue"),
+    },
   ],
 });
 

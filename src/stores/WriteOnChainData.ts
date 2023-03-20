@@ -1,7 +1,8 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
 import { type InnerTransaction, type MosaicInfo, Address } from "symbol-sdk";
-import { useEnvironmentStore } from "./environment";
+import { useChainStore } from "./chain";
+import { useSettingsStore } from "./settings";
 import { useSSSStore } from "./sss";
 import { FetchState } from "@/models/enums/FetchState";
 import { WriteProgress } from "@/models/enums/WriteProgress";
@@ -25,7 +26,8 @@ import { getTxFee } from "@/apis/network";
  */
 export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
   // Other Stores
-  const envStore = useEnvironmentStore();
+  const settingsStore = useSettingsStore();
+  const chainStore = useChainStore();
   const sssStore = useSSSStore();
 
   /** タイトル */
@@ -52,7 +54,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     relatedMosaicIdStr,
     (): void => {
       const logTitle = "write data store watch:";
-      envStore.logger.debug(logTitle, "start", relatedMosaicIdStr.value);
+      settingsStore.logger.debug(logTitle, "start", relatedMosaicIdStr.value);
 
       // 有効なモザイクIDかチェック
       if (!isValidMosaicId(relatedMosaicIdStr.value)) {
@@ -67,16 +69,24 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       // モザイク情報の取得
       getMosaicInfo(relatedMosaicIdStr.value)
         .then((value): void => {
-          envStore.logger.debug(logTitle, "get mosaic info complete.", value);
+          settingsStore.logger.debug(
+            logTitle,
+            "get mosaic info complete.",
+            value
+          );
           relatedMosaicInfo.value = value;
           infoFetchState.value = FetchState.Complete;
         })
         .catch((error) => {
-          envStore.logger.debug(logTitle, "get account info failed.", error);
+          settingsStore.logger.debug(
+            logTitle,
+            "get account info failed.",
+            error
+          );
           relatedMosaicInfo.value = undefined;
           infoFetchState.value = FetchState.Failed;
         });
-      envStore.logger.debug(logTitle, "end");
+      settingsStore.logger.debug(logTitle, "end");
     },
     { immediate: true }
   );
@@ -87,7 +97,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
    */
   async function writeOnChain(): Promise<void> {
     const logTitle = "write data:";
-    envStore.logger.debug(logTitle, "start");
+    settingsStore.logger.debug(logTitle, "start");
 
     // 書き込み状況のチェック
     if (
@@ -95,7 +105,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       progress.value !== WriteProgress.Complete &&
       progress.value !== WriteProgress.Failed
     ) {
-      envStore.logger.error(logTitle, "other processing.");
+      settingsStore.logger.error(logTitle, "other processing.");
       return;
     }
     progress.value = WriteProgress.Preprocess;
@@ -104,13 +114,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     // データ設定チェック
     if (dataBase64.value.length === 0) {
-      envStore.logger.error(logTitle, "data no setting.");
+      settingsStore.logger.error(logTitle, "data no setting.");
       progress.value = WriteProgress.Failed;
       return;
     }
     // TODO: モザイク情報取得中か確認して待つ必要あり
     if (typeof relatedMosaicInfo.value === "undefined") {
-      envStore.logger.error(logTitle, "mosaic info undefined.");
+      settingsStore.logger.error(logTitle, "mosaic info undefined.");
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -121,13 +131,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       relatedMosaicInfo.value.ownerAddress.plain()
     );
     if (typeof multisigInfo === "undefined") {
-      envStore.logger.error(logTitle, "get multisig info failed.");
+      settingsStore.logger.error(logTitle, "get multisig info failed.");
       progress.value = WriteProgress.Failed;
       return;
     }
     const isBonded = multisigInfo.isMultisig();
     writeOnChainOneAggregate(isBonded);
-    envStore.logger.debug(logTitle, "end");
+    settingsStore.logger.debug(logTitle, "end");
   }
 
   /**
@@ -136,13 +146,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
    */
   async function writeOnChainOneAggregate(isBonded: boolean): Promise<void> {
     const logTitle = "write data:";
-    envStore.logger.debug(logTitle, "start");
+    settingsStore.logger.debug(logTitle, "start");
     progress.value = WriteProgress.Preprocess;
 
     // 書き込み済データサイズチェック
-    envStore.logger.debug(logTitle, "processed size", processedSize.value);
+    settingsStore.logger.debug(logTitle, "processed size", processedSize.value);
     if (processedSize.value >= dataBase64.value.length) {
-      envStore.logger.debug(logTitle, "all data proceeded.");
+      settingsStore.logger.debug(logTitle, "all data proceeded.");
       progress.value = WriteProgress.Complete;
       return;
     }
@@ -156,7 +166,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // モザイク設定チェック
     const mosaicInfo = relatedMosaicInfo.value as MosaicInfo;
     if (typeof mosaicInfo === "undefined") {
-      envStore.logger.error(logTitle, "mosaic info undefined.");
+      settingsStore.logger.error(logTitle, "mosaic info undefined.");
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -164,7 +174,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // アカウント情報の取得
     const accountInfo = await getAccountInfo(mosaicInfo.ownerAddress.plain());
     if (typeof accountInfo === "undefined") {
-      envStore.logger.error(logTitle, "account info invalid.");
+      settingsStore.logger.error(logTitle, "account info invalid.");
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -180,7 +190,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     );
     const encodedHeader = encryptHeader(header, mosaicInfo.id.toHex());
     if (typeof encodedHeader === "undefined") {
-      envStore.logger.error(logTitle, "create crypto header failed.");
+      settingsStore.logger.error(logTitle, "create crypto header failed.");
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -210,14 +220,21 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
-      ? createTxAggregateBonded(txList, await getTxFee(envStore.feeKind))
-      : createTxAggregateComplete(txList, await getTxFee(envStore.feeKind));
-    // SSSによる署名
+      ? createTxAggregateBonded(txList, await getTxFee(chainStore.feeKind))
+      : createTxAggregateComplete(txList, await getTxFee(chainStore.feeKind));
+    // 署名
+    if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
+      settingsStore.logger.error(logTitle, "account invalid.");
+      progress.value = WriteProgress.Failed;
+      return;
+    }
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
-    const signedAggTx = await sssStore.requestTxSign(aggTx);
+    const signedAggTx = settingsStore.useSSS
+      ? await sssStore.requestTxSign(aggTx)
+      : settingsStore.account?.sign(aggTx, chainStore.generationHash);
     if (typeof signedAggTx === "undefined") {
-      envStore.logger.error(logTitle, "sss sign failed.");
+      settingsStore.logger.error(logTitle, "sss sign failed.");
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -248,7 +265,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       }
     );
     if (typeof dataTxListener === "undefined") {
-      envStore.logger.error(logTitle, "open create mosaic tx listener failed.");
+      settingsStore.logger.error(
+        logTitle,
+        "open create mosaic tx listener failed."
+      );
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -257,11 +277,11 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     if (!isBonded) {
       progress.value = WriteProgress.TxAnnounced;
       const response = await announceTx(signedAggTx);
-      envStore.logger.debug(logTitle, "aggregate complete tx announced.", [
+      settingsStore.logger.debug(logTitle, "aggregate complete tx announced.", [
         signedAggTx,
         response,
       ]);
-      envStore.logger.debug(logTitle, "aggregate complete end");
+      settingsStore.logger.debug(logTitle, "aggregate complete end");
       return;
     }
     // アグリゲートボンデッドの場合はハッシュロックが必要なため処理継続
@@ -269,19 +289,23 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(
       signedAggTx,
-      await getTxFee(envStore.feeKind)
+      await getTxFee(chainStore.feeKind)
     );
-    // SSSによる署名
+    // 署名
     // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
-    const signedHashLockTx = await sssStore.requestTxSign(hashLockTx);
+    progress.value = WriteProgress.LockSigning;
+    const signedHashLockTx = settingsStore.useSSS
+      ? await sssStore.requestTxSign(hashLockTx)
+      : settingsStore.account?.sign(hashLockTx, chainStore.generationHash);
     if (typeof signedHashLockTx === "undefined") {
-      envStore.logger.error(logTitle, "sss sign failed.");
+      settingsStore.logger.error(logTitle, "sss sign failed.");
+      progress.value = WriteProgress.Failed;
       return;
     }
     // HACK: SSS から返却された SignedTransaction だと getSignerAddress() で取得されるアドレスが不正
     const signerAddress = Address.createFromPublicKey(
       signedHashLockTx.signerPublicKey,
-      envStore.networkType
+      chainStore.networkType
     );
 
     // ハッシュロックTxリスナー設定
@@ -297,7 +321,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
         // アグリゲートTxをアナウンス
         progress.value = WriteProgress.TxAnnounced;
         const response = await announceTx(signedAggTx);
-        envStore.logger.debug(logTitle, "aggregate bonded tx announced.", [
+        settingsStore.logger.debug(logTitle, "aggregate bonded tx announced.", [
           signedAggTx,
           response,
         ]);
@@ -307,7 +331,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       }
     );
     if (typeof hashlockTxlistener === "undefined") {
-      envStore.logger.error(logTitle, "open hash lock tx listener failed.");
+      settingsStore.logger.error(
+        logTitle,
+        "open hash lock tx listener failed."
+      );
       progress.value = WriteProgress.Failed;
       return;
     }
@@ -315,11 +342,11 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // Txアナウンス
     progress.value = WriteProgress.LockAnnounced;
     const response = await announceTx(signedHashLockTx);
-    envStore.logger.debug(logTitle, "hashlock tx announced.", [
+    settingsStore.logger.debug(logTitle, "hashlock tx announced.", [
       signedHashLockTx,
       response,
     ]);
-    envStore.logger.debug(logTitle, "aggregate bonded end");
+    settingsStore.logger.debug(logTitle, "aggregate bonded end");
   }
 
   // Exports
