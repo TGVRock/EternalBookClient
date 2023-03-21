@@ -77,11 +77,11 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     const aggTx = isBonded
       ? createTxAggregateBonded(
           createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
-          await getTxFee(chainStore.feeKind)
+          await getTxFee(settingsStore.feeKind)
         )
       : createTxAggregateComplete(
           createInnerTxForMosaic(accountInfo, amount.value, mosaicFlags.value),
-          await getTxFee(chainStore.feeKind)
+          await getTxFee(settingsStore.feeKind)
         );
     // 署名
     if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
@@ -152,7 +152,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(
       signedAggTx,
-      await getTxFee(chainStore.feeKind)
+      await getTxFee(settingsStore.feeKind)
     );
     // 署名
     // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）

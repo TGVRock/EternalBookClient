@@ -11,6 +11,7 @@ import {
   ConvertHumanReadableByteDataSize,
   ConvertFee,
 } from "@/utils/converter";
+import { useSettingsStore } from "@/stores/settings";
 import { useChainStore } from "@/stores/chain";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMimeFromBase64 } from "@/utils/mime";
@@ -18,6 +19,7 @@ import { FeeKind } from "@/models/enums/FeeKind";
 import { getTxFees } from "@/apis/network";
 
 // Stores
+const settingsStore = useSettingsStore();
 const chainStore = useChainStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
@@ -38,7 +40,7 @@ const predictFee = computed(() => {
       innerTxNum.value * CONSTS.TX_OVERHEAD_SIZE_PER_INNER +
       aggTxNum.value *
         (CONSTS.TX_DATASIZE_PER_TRANSFER + CONSTS.TX_OVERHEAD_SIZE_PER_INNER)) *
-    (fees.get(chainStore.feeKind) || CONSTS.TX_FEE_MULTIPLIER_DEFAULT) *
+    (fees.get(settingsStore.feeKind) || CONSTS.TX_FEE_MULTIPLIER_DEFAULT) *
     Math.pow(10, -1 * CONSTS.TX_XYM_DIVISIBILITY)
   );
 });
@@ -87,7 +89,7 @@ getTxFees().then((txFees) => {
         v-bind:rows="5"
         v-model:value="writeOnChainDataStore.message"
       />
-      <FeeSelectboxComponent v-model:value="chainStore.feeKind" />
+      <FeeSelectboxComponent v-model:value="settingsStore.feeKind" />
       <FileSelectComponent v-model:base64="writeOnChainDataStore.dataBase64" />
       <div class="my-2" v-if="aggTxNum === 0">
         <h6>{{ $t("preview.info") }}</h6>

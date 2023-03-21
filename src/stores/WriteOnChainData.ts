@@ -220,8 +220,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
-      ? createTxAggregateBonded(txList, await getTxFee(chainStore.feeKind))
-      : createTxAggregateComplete(txList, await getTxFee(chainStore.feeKind));
+      ? createTxAggregateBonded(txList, await getTxFee(settingsStore.feeKind))
+      : createTxAggregateComplete(txList, await getTxFee(settingsStore.feeKind));
     // 署名
     if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
       settingsStore.logger.error(logTitle, "account invalid.");
@@ -289,7 +289,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(
       signedAggTx,
-      await getTxFee(chainStore.feeKind)
+      await getTxFee(settingsStore.feeKind)
     );
     // 署名
     // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）

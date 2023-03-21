@@ -50,8 +50,6 @@ export const useChainStore = defineStore("chain", () => {
   const epochAdjustment = ref(-1);
   /** Websocket エンドポイントURI */
   const wsEndpoint = ref("");
-  /** 手数料種別 */
-  const feeKind = ref(FeeKind.Default);
 
   /** Txリポジトリ */
   const txRepo = ref<TransactionRepository | undefined>(undefined);
@@ -72,7 +70,7 @@ export const useChainStore = defineStore("chain", () => {
   watch(
     networkType,
     (): void => {
-      const logTitle = "env store watch:";
+      const logTitle = "chain store watch:";
       settingsStore.logger.debug(logTitle, "start", networkType.value);
 
       // ネットワークタイプ確認
@@ -119,7 +117,6 @@ export const useChainStore = defineStore("chain", () => {
     generationHash,
     epochAdjustment,
     wsEndpoint,
-    feeKind,
     txRepo,
     blockRepo,
     mosaicRepo,
