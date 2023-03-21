@@ -7,7 +7,7 @@ import { useSSSStore } from "./sss";
 import { FetchState } from "@/models/enums/FetchState";
 import { WriteProgress } from "@/models/enums/WriteProgress";
 import { getAccountInfo, getMultisigInfo } from "@/apis/account";
-import { openTxListener } from "@/apis/listner";
+import { openTxListener } from "@/apis/listener";
 import { getMosaicInfo, isValidMosaicId } from "@/apis/mosaic";
 import {
   announceTx,

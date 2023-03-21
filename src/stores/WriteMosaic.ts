@@ -7,7 +7,7 @@ import { useSSSStore } from "./sss";
 import { useWriteOnChainDataStore } from "./WriteOnChainData";
 import { WriteProgress } from "@/models/enums/WriteProgress";
 import { getAccountInfo, getMultisigInfo } from "@/apis/account";
-import { openTxListener } from "@/apis/listner";
+import { openTxListener } from "@/apis/listener";
 import { createInnerTxForMosaic } from "@/apis/mosaic";
 import {
   announceTx,
