@@ -49,6 +49,14 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
+            v-bind:to="{ name: 'Settings' }"
+            v-on:click="onClickClose"
+          >
+            {{ $t(`settings.title`) }}
+          </RouterLink>
+          <RouterLink
+            v-if="settingsStore.isAvailable"
+            class="nav-link ps-2"
             v-bind:to="{ name: 'WriterTop' }"
             v-on:click="onClickClose"
           >
@@ -61,14 +69,6 @@ function onClickToggle(): void {
             v-on:click="onClickClose"
           >
             {{ $t(`viewer.title`) }}
-          </RouterLink>
-          <RouterLink
-            v-if="settingsStore.isAvailable"
-            class="nav-link ps-2"
-            v-bind:to="{ name: 'Settings' }"
-            v-on:click="onClickClose"
-          >
-            {{ $t(`settings.title`) }}
           </RouterLink>
         </div>
         <div class="d-flex">
