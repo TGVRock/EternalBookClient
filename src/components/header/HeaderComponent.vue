@@ -39,7 +39,7 @@ function onClickToggle(): void {
         v-bind:to="{ name: 'home' }"
         v-on:click="onClickClose"
       >
-        {{ $t(`home.title`) }}
+        <img class="logo" src="logo.svg" v-bind:alt="$t(`home.title`)" />
       </RouterLink>
       <div class="navbar-toggler" v-on:click.stop="onClickToggle">
         <span class="navbar-toggler-icon"></span>
@@ -85,5 +85,9 @@ function onClickToggle(): void {
   background-color: rgba(200, 219, 241, 0.678);
   cursor: default;
   pointer-events: none;
+}
+
+.navbar-brand .logo {
+  height: 30px;
 }
 </style>

@@ -36,7 +36,9 @@ watch(
 
 <template>
   <article class="container animate__animated animate__fadeIn">
-    <h2 class="my-4 text-center">{{ $t(`home.title`) }}</h2>
+    <section class="row my-4 justify-content-center">
+      <img class="col-9" src="logo.svg" v-bind:alt="$t(`home.title`)" />
+    </section>
     <section class="row my-2">
       <p>{{ $t(`home.explanation`) }}</p>
       <ul class="ms-4">
