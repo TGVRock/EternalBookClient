@@ -28,7 +28,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
   const sssStore = useSSSStore();
   const writeOnChainDataStore = useWriteOnChainDataStore();
 
-  /** モザイク所有者アドレス */
+  /** モザイク作成者アドレス */
   const ownerAddress = ref("");
   /** モザイクフラグ */
   const mosaicFlags = ref(MosaicFlags.create(false, false, false, false));
@@ -56,7 +56,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     }
     progress.value = WriteProgress.Preprocess;
 
-    // モザイク所有アカウントがマルチシグアカウントか確認
+    // モザイク作成アカウントがマルチシグアカウントか確認
     const multisigInfo = await getMultisigInfo(ownerAddress.value);
     if (typeof multisigInfo === "undefined") {
       settingsStore.logger.error(logTitle, "get multisig info failed.");
@@ -65,7 +65,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     }
     const isBonded = multisigInfo.isMultisig();
 
-    // モザイク所有アカウントのアカウント情報を取得
+    // モザイク作成アカウントのアカウント情報を取得
     const accountInfo = await getAccountInfo(ownerAddress.value);
     if (typeof accountInfo === "undefined") {
       settingsStore.logger.error(logTitle, "get account info failed.");
@@ -89,7 +89,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       progress.value = WriteProgress.Failed;
       return;
     }
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
     const signedAggTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(aggTx)
@@ -155,7 +155,7 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
       await getTxFee(chainStore.feeKind)
     );
     // 署名
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.LockSigning;
     const signedHashLockTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(hashLockTx)

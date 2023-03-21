@@ -125,8 +125,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       return;
     }
 
-    // モザイク所有アカウントがマルチシグアカウントか確認
-    // TODO: モザイク所有者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
+    // モザイク作成アカウントがマルチシグアカウントか確認
+    // TODO: モザイク作成者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
     const multisigInfo = await getMultisigInfo(
       relatedMosaicInfo.value.ownerAddress.plain()
     );
@@ -228,7 +228,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       progress.value = WriteProgress.Failed;
       return;
     }
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
     const signedAggTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(aggTx)
@@ -292,7 +292,7 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       await getTxFee(chainStore.feeKind)
     );
     // 署名
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.LockSigning;
     const signedHashLockTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(hashLockTx)

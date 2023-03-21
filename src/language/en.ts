@@ -42,7 +42,7 @@ export default {
       "This tool is for writing data on the Symbol blockchain and reading the written data.",
     explanationList: [
       "Data is written to the mosaic.",
-      "It is also possible to write data to an existing mosaic, as long as it is a mosaic of which you are the owner.",
+      "Only for mosaics created by the user, it is possible to write data to an existing mosaic.",
       "Multiple data can be written to a single mosaic.",
     ],
     info: "{kind} Information",

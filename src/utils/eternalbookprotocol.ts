@@ -29,7 +29,7 @@ export async function getEBPOnChainData(
   const logTitle = "get EternalBookProtocol data:";
   logger.debug(logTitle, "start");
 
-  // モザイク所有者のアグリゲートTxを全て取得
+  // モザイク作成者のアグリゲートTxを全て取得
   const allAggTxes = await getTransactions(
     mosaicInfo.ownerAddress,
     [TransactionType.AGGREGATE_COMPLETE, TransactionType.AGGREGATE_BONDED],
@@ -76,7 +76,7 @@ export async function getEBPOnChainData(
       continue;
     }
 
-    // インナーTxがすべてモザイク所有者への転送Txではない場合は無効データ
+    // インナーTxがすべてモザイク作成者への転送Txではない場合は無効データ
     const txes = aggTxInfo.innerTransactions.filter(
       (tx) =>
         tx.type === TransactionType.TRANSFER &&
@@ -259,7 +259,7 @@ function getOnChainDataFromAggregateTx(
 /**
  * ヘッダ情報の作成
  * @param mosaicIdStr モザイクID
- * @param ownerAddress 所有者アドレス
+ * @param ownerAddress 作成者アドレス
  * @param title タイトル
  * @param description 説明
  * @param prevTxHash 前のTxハッシュ
