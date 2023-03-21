@@ -4,6 +4,8 @@
 export enum SSSState {
   /** 未連携 */
   Unlinked = "Unlinked",
+  /** 連携待ち */
+  Confirming = "Confirming",
   /** スタンバイ */
   Standby = "Standby",
   /** ユーザーの署名待ち中 */

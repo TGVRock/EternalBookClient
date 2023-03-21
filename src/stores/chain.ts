@@ -14,6 +14,7 @@ import {
 import CONSTS from "@/utils/consts";
 import { FeeKind } from "@/models/enums/FeeKind";
 import { useSettingsStore } from "./settings";
+import { SettingState } from "@/models/enums/SettingState";
 
 /** ノードリスト */
 const nodeList = new Map<NetworkType, Array<string>>([
@@ -41,6 +42,9 @@ const nodeList = new Map<NetworkType, Array<string>>([
 export const useChainStore = defineStore("chain", () => {
   // Other Stores
   const settingsStore = useSettingsStore();
+
+  /** 設定ステータス */
+  const settingState = ref(SettingState.Initialized);
 
   /** ネットワークタイプ */
   const networkType = ref(NetworkType.MAIN_NET);
@@ -70,6 +74,7 @@ export const useChainStore = defineStore("chain", () => {
   watch(
     networkType,
     (): void => {
+      settingState.value = SettingState.Preparation;
       const logTitle = "chain store watch:";
       settingsStore.logger.debug(logTitle, "start", networkType.value);
 
@@ -86,6 +91,7 @@ export const useChainStore = defineStore("chain", () => {
         accountRepo.value = undefined;
         multisigRepo.value = undefined;
         networkRepo.value = undefined;
+        settingState.value = SettingState.Ready;
         return;
       }
 
@@ -106,6 +112,8 @@ export const useChainStore = defineStore("chain", () => {
       accountRepo.value = repo.createAccountRepository();
       multisigRepo.value = repo.createMultisigRepository();
       networkRepo.value = repo.createNetworkRepository();
+      settingState.value = SettingState.Ready;
+
       settingsStore.logger.debug(logTitle, "end");
     },
     { immediate: true }
@@ -113,6 +121,7 @@ export const useChainStore = defineStore("chain", () => {
 
   // Exports
   return {
+    settingState,
     networkType,
     generationHash,
     epochAdjustment,
