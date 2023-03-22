@@ -32,8 +32,6 @@ const constants = {
   /* SSS */
   /** SSS初期化待ち時間(msec) */
   SSS_INIITALIZE_WAIT_MSEC: 10000,
-  /** SSS初期化完了の確認間隔時間(msec) */
-  SSS_CONFIRM_INTERVAL_MSEC: 500,
   /** 1署名後の待ち時間(msec) */
   SSS_AFTER_SIGNED_WAIT_MSEC: 10000,
   /**
@@ -55,6 +53,8 @@ const constants = {
   STR_NA: "N/A",
   /** 不正なネットワークタイプ */
   NETWORKTYPE_INVALID: -1,
+  /** 設定変更時の完了確認間隔時間(msec) */
+  CHANGE_SETTING_CONFIRM_INTERVAL_MSEC: 500,
 };
 
 /** 他の定数から算出される定数 */

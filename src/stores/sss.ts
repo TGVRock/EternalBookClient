@@ -37,7 +37,7 @@ export const useSSSStore = defineStore("sss", () => {
         clearInterval(checkSSSLinked);
         updateState(SSSState.Standby);
       }
-    }, CONSTS.SSS_CONFIRM_INTERVAL_MSEC);
+    }, CONSTS.CHANGE_SETTING_CONFIRM_INTERVAL_MSEC);
     // 一定時間待っても連携されない場合は定周期確認を終了
     setTimeout(() => {
       clearInterval(checkSSSLinked);
