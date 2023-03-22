@@ -87,7 +87,7 @@ export async function getTransactions(
   if (typeof fromHeight != "undefined") {
     criteria.fromHeight = fromHeight;
   }
-  return searchTransactions(criteria);
+  return await searchTransactions(criteria);
 }
 
 /**

@@ -37,6 +37,15 @@ const onModalClose = (): void => {
         <div class="modal-body">
           <p>{{ message }}</p>
         </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-danger"
+            v-on:click="onModalClose"
+          >
+            {{ $t("modal.close") }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

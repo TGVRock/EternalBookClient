@@ -80,18 +80,29 @@ export default {
     title: "Viewer",
     explanation:
       "Read the data written by this tool.\nIf the data is compatible with browser display, it will be displayed on the browser.",
+    modeCreated: "Select from Created Mosaic",
+    modeOwned: "Select from Owned Mosaic",
+    modeArbitrary: "Specify Mosaic",
     readData: "Data Loading",
+    errorTitle: "Inout Error",
+    errorMessage: {
+      mosaicIdInvalid: "Mosaic ID is incorrect.",
+    },
   },
   settings: {
     title: "Settings",
-    explanation: "Configure the settings for this tool.\nFirst, please set up your signature method in the settings.\nThe default is signature by SSS (size limited).",
+    explanation:
+      "Configure the settings for this tool.\nFirst, please set up your signature method in the settings.\nThe default is signature by SSS (size limited).",
     netType: "Network Type",
-    netTypeSupplement: "If SSS is used, it will be the network type of the SSS-linked account.",
+    netTypeSupplement:
+      "If SSS is used, it will be the network type of the SSS-linked account.",
     useSSS: "Use SSS for signatures",
     useSSSOn: "On",
     useSSSOff: "Off",
-    useSSSSupplement: "Although SSS can be used to sign without requiring a private key, since this tool performs consecutive signatures, it may fail to sign using SSS, resulting in a write failure.",
-    useSSSInmpotant: "If you want to write data surely, please sign with a private key without using SSS. However, use at your own risk!",
+    useSSSSupplement:
+      "Although SSS can be used to sign without requiring a private key, since this tool performs consecutive signatures, it may fail to sign using SSS, resulting in a write failure.",
+    useSSSInmpotant:
+      "If you want to write data surely, please sign with a private key without using SSS. However, use at your own risk!",
     secret: "Private Key",
     secretSSSOn: "If you use SSS, you do not need to enter your private key",
     secretSupplement: "If you do not use SSS, you must enter your private key.",
@@ -119,5 +130,8 @@ export default {
     txConfirmed: "Write Tx approval complete",
     complete: "Writing Completed",
     failed: "Write Failure",
+  },
+  modal: {
+    close: "Close",
   },
 };

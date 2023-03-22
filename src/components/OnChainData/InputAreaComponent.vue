@@ -12,7 +12,6 @@ import {
   ConvertFee,
 } from "@/utils/converter";
 import { useSettingsStore } from "@/stores/settings";
-import { useChainStore } from "@/stores/chain";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMimeFromBase64 } from "@/utils/mime";
 import { FeeKind } from "@/models/enums/FeeKind";
@@ -20,7 +19,6 @@ import { getTxFees } from "@/apis/network";
 
 // Stores
 const settingsStore = useSettingsStore();
-const chainStore = useChainStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
 // Reactives

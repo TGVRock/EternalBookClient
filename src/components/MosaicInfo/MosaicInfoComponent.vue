@@ -31,7 +31,7 @@ watch(
     getBlockTimestamp(props.mosaicInfo.startHeight).then((value) => {
       timestamp.value = typeof value !== "undefined" ? value : 0;
     });
-    getMosaicName(props.mosaicInfo.id.toHex()).then((value) => {
+    getMosaicName(props.mosaicInfo.id).then((value) => {
       alias.value = typeof value !== "undefined" ? value : CONSTS.STR_NA;
     });
   },

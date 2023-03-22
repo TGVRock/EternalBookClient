@@ -1,5 +1,6 @@
 import {
   AccountInfo,
+  Address,
   Deadline,
   MosaicDefinitionTransaction,
   MosaicFlags,
@@ -10,9 +11,11 @@ import {
   MosaicSupplyChangeTransaction,
   UInt64,
   type InnerTransaction,
+  type MosaicSearchCriteria,
 } from "symbol-sdk";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const settingsStore = useSettingsStore();
@@ -52,6 +55,56 @@ export async function getMosaicInfo(
   }
   const mosaicId = new MosaicId(mosaicIdStr);
   return await chainStore.mosaicRepo.getMosaic(mosaicId).toPromise();
+}
+
+/**
+ * 対象アドレスが作成したモザイク一覧取得
+ * @param address アドレス
+ * @returns 該当するモザイク一覧
+ */
+export async function getMosaicsAboutCreatedAddress(
+  address: Address
+): Promise<MosaicInfo[]> {
+  const criteria: MosaicSearchCriteria = {
+    ownerAddress: address,
+    pageSize: 100,
+    pageNumber: 1,
+  };
+  return await searchMosaics(criteria);
+}
+
+/**
+ * モザイク検索
+ * @param criteria 検索条件
+ * @returns 検索条件に一致するモザイク一覧
+ */
+async function searchMosaics(
+  criteria: MosaicSearchCriteria
+): Promise<MosaicInfo[]> {
+  const logTitle = "search mosaics:";
+  settingsStore.logger.debug(
+    logTitle,
+    "start",
+    "page:",
+    criteria.pageNumber || CONSTS.STR_NA
+  );
+  if (typeof chainStore.mosaicRepo === "undefined") {
+    settingsStore.logger.error(logTitle, "repository undefined.");
+    return [];
+  }
+  const pageMosaics = await chainStore.mosaicRepo.search(criteria).toPromise();
+  if (typeof pageMosaics === "undefined") {
+    settingsStore.logger.error(logTitle, "search failed.");
+    return [];
+  }
+  // 最終ページの場合は結果を返却する
+  if (pageMosaics.isLastPage) {
+    return pageMosaics.data;
+  }
+  // 再帰実行で次のページを検索し、結果を結合して返却する
+  criteria.pageNumber =
+    typeof criteria.pageNumber === "undefined" ? 2 : criteria.pageNumber + 1;
+  return pageMosaics.data.concat(await searchMosaics(criteria));
 }
 
 /**

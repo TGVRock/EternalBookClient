@@ -12,7 +12,6 @@ import {
   type NetworkRepository,
 } from "symbol-sdk";
 import CONSTS from "@/utils/consts";
-import { FeeKind } from "@/models/enums/FeeKind";
 import { useSettingsStore } from "./settings";
 import { SettingState } from "@/models/enums/SettingState";
 

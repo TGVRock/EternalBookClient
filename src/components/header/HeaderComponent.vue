@@ -39,7 +39,7 @@ function onClickToggle(): void {
         v-bind:to="{ name: 'home' }"
         v-on:click="onClickClose"
       >
-        <img class="logo" src="logo.svg" v-bind:alt="$t(`home.title`)" />
+        <img class="logo" src="/logo.svg" v-bind:alt="$t(`home.title`)" />
       </RouterLink>
       <div class="navbar-toggler" v-on:click.stop="onClickToggle">
         <span class="navbar-toggler-icon"></span>
