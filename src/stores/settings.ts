@@ -15,6 +15,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const unavailableReason = ref(UnavailableReason.Bug);
   /** ロガー */
   const logger = new ConsoleLogger();
+  /** アドレス文字列 */
+  const addressStr = ref("");
 
   /** SSS利用 */
   const useSSS = ref(false);
@@ -56,6 +58,7 @@ export const useSettingsStore = defineStore("settings", () => {
     isAvailable,
     unavailableReason,
     logger,
+    addressStr,
     useSSS,
     privateKey,
     account,

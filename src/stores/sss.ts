@@ -189,6 +189,7 @@ export const useSSSStore = defineStore("sss", () => {
       if (sssLinked.value) {
         chainStore.networkType = getNetworkType();
         settingsStore.useSSS = sssLinked.value;
+        settingsStore.addressStr = getAddress();
       }
       address.value = getAddress();
       networkType.value = getNetworkType();

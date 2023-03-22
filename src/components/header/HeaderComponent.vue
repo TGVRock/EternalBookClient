@@ -15,6 +15,9 @@ const isShow = ref(false);
 const netType = computed(() => {
   return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
+const addressStr = computed(() => {
+  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : "--";
+});
 
 /**
  * 閉じるクリックイベント
@@ -57,6 +60,9 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
+            v-bind:class="{
+              'router-link-disable': addressStr === '--',
+            }"
             v-bind:to="{ name: 'WriterTop' }"
             v-on:click="onClickClose"
           >
@@ -71,8 +77,11 @@ function onClickToggle(): void {
             {{ $t(`viewer.title`) }}
           </RouterLink>
         </div>
-        <div class="d-flex">
+        <div class="navbar-nav small text-break">
           <p class="me-2 my-auto">{{ $t(`networkTypes.` + netType) }}</p>
+          <p class="mx-2 my-auto">
+            {{ addressStr }}
+          </p>
           <LocaleMenuComponent class="me-2" />
         </div>
       </div>
@@ -83,6 +92,12 @@ function onClickToggle(): void {
 <style scoped>
 .navbar-nav .router-link-active {
   background-color: rgba(200, 219, 241, 0.678);
+  cursor: default;
+  pointer-events: none;
+}
+.navbar-nav .router-link-disable {
+  background-color: rgba(230, 230, 230, 0.432);
+  color: #fff;
   cursor: default;
   pointer-events: none;
 }

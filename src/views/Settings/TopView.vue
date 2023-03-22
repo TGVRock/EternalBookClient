@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { NetworkType } from "symbol-sdk";
 import { useSettingsStore } from "@/stores/settings";
 import { useChainStore } from "@/stores/chain";
@@ -9,11 +9,13 @@ import PrivateKeyAreaComponent from "@/components/settings/PrivateKeyAreaCompone
 import UseSSSAreaComponent from "@/components/settings/UseSSSAreaComponent.vue";
 import ModalComponent from "@/components/common/ModalComponent.vue";
 import { createAccountFromPrivateKey } from "@/apis/account";
+import { useAccountStore } from "@/stores/account";
 
 // Stores
 const settingsStore = useSettingsStore();
 const chainStore = useChainStore();
 const sssStore = useSSSStore();
+useAccountStore();
 
 // Reactives
 const netType = ref(chainStore.networkType);
@@ -30,12 +32,19 @@ const isShownErrorModal = ref(false);
 const errorCause = ref("privateKeyInvalid");
 
 /**
- * 表示時に設定を元に戻す
+ * 初期表示は現在の設定
  */
 onMounted(() => {
   netType.value = chainStore.networkType;
   useSSS.value = settingsStore.useSSS;
   privateKey.value = settingsStore.privateKey;
+});
+
+// Watch
+watch(useSSS, () => {
+  if (useSSS.value) {
+    netType.value = sssStore.networkType;
+  }
 });
 
 /**
@@ -94,10 +103,13 @@ const onApply = (): void => {
 
 <template>
   <section class="container animate__animated animate__fadeIn">
-    <NetworkTypeAreaComponent v-model:value="netType" />
     <UseSSSAreaComponent
       v-model:value="useSSS"
       v-bind:disabled="!sssStore.sssLinked"
+    />
+    <NetworkTypeAreaComponent
+      v-model:value="netType"
+      v-bind:disabled="useSSS"
     />
     <PrivateKeyAreaComponent
       v-model:value="privateKey"

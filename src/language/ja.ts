@@ -68,6 +68,7 @@ export default {
     title: "データ書き込み",
     explanation:
       "Symbol ブロックチェーン上にデータを書き込みます。\nデータ書き込みと併せてモザイクの作成も可能です。",
+    annotation: "署名方法を設定した後に書き込みが可能となります。",
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
@@ -92,7 +93,7 @@ export default {
   settings: {
     title: "設定",
     explanation:
-      "本ツールの設定を行います。\nまずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
+      "本ツールの設定を行います。\n書き込みを行う場合、まずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
     netType: "ネットワークタイプ",
     netTypeSupplement:
       "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",

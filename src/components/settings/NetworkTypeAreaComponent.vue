@@ -6,6 +6,8 @@ import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 defineProps<{
   /** 値 */
   value: NetworkType;
+  /** 無効かどうか */
+  disabled: boolean;
 }>();
 
 // Emits
@@ -36,6 +38,7 @@ const onChange = (e: Event): void => {
         v-on:change="onChange"
         v-bind:attributes="{
           ariaLabel: 'network-type',
+          disabled: disabled,
         }"
         v-bind:items="[
           {

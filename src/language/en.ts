@@ -68,6 +68,7 @@ export default {
     title: "Writer",
     explanation:
       "Symbol Writes data on the blockchain.\nMosaics can also be created along with data writing.",
+    annotation: "After setting the signature method, you can write.",
     mosaicFlags: "Mosaic Flags",
     pleaseInputItem: "Please Input {item} ...",
     fileSelect: "Select File",
@@ -92,7 +93,7 @@ export default {
   settings: {
     title: "Settings",
     explanation:
-      "Configure the settings for this tool.\nFirst, please set up your signature method in the settings.\nThe default is signature by SSS (size limited).",
+      "Configure the settings for this tool.\nWhen writing, first set the signature method in the settings.\nThe default is signature by SSS (size limited).",
     netType: "Network Type",
     netTypeSupplement:
       "If SSS is used, it will be the network type of the SSS-linked account.",
