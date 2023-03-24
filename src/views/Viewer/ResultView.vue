@@ -7,14 +7,15 @@ import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.
 import { useSettingsStore } from "@/stores/settings";
 import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import { getMosaicInfo } from "@/apis/mosaic";
-import { getEBPOnChainData } from "@/utils/eternalbookprotocol";
 import { useChainStore } from "@/stores/chain";
 import { SettingState } from "@/models/enums/SettingState";
 import CONSTS from "@/utils/consts";
+import { useEternalBookStore } from "@/stores/eternalbook";
 
 // Stores
 const settingsStore = useSettingsStore();
 const chainStore = useChainStore();
+const eternalBookStore = useEternalBookStore();
 
 // Props
 const props = defineProps<{
@@ -24,7 +25,6 @@ const props = defineProps<{
 
 // Reactives
 const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
-const onChainDataList = ref<OnChainData[] | undefined>(undefined);
 
 // 現在のネットワークタイプを退避
 const beforeNetType = chainStore.networkType;
@@ -91,13 +91,12 @@ watch(mosaicInfo, async (): Promise<void> => {
   // モザイクに紐づいたオンチェーンデータを取得
   if (typeof mosaicInfo.value === "undefined") {
     settingsStore.logger.error(logTitle, "not exist mosaic info.");
-    onChainDataList.value = undefined;
     return;
   }
-  getEBPOnChainData(mosaicInfo.value as MosaicInfo)
-    .then((value) => {
+  eternalBookStore
+    .getEBPOnChainData(chainStore.networkType, mosaicInfo.value as MosaicInfo)
+    .then(() => {
       settingsStore.logger.debug(logTitle, "get on chain data complete.");
-      onChainDataList.value = value;
       // ネットワークタイプ復元
       restoreNetworkType();
     })
@@ -112,12 +111,14 @@ watch(mosaicInfo, async (): Promise<void> => {
 
 <template>
   <ProcessingComponent
-    v-if="typeof onChainDataList === 'undefined'"
+    v-if="eternalBookStore.chainData.size === 0"
     v-bind:message="$t('message.loading')"
   />
   <OnChainDataComponent
     v-else
-    v-bind:onChainDataList="onChainDataList"
+    v-for="[hash, value] in eternalBookStore.chainData"
+    v-bind:key="hash"
+    v-bind:onChainDataList="value"
     class="container animate__animated animate__fadeIn text-break"
   />
   <ProcessingComponent
