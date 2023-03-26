@@ -102,12 +102,12 @@ export default {
     useSSSOff: "Off",
     useSSSSupplement:
       "Although SSS can be used to sign without requiring a private key, since this tool performs consecutive signatures, it may fail to sign using SSS, resulting in a write failure.",
-    useSSSInmpotant:
+    useSSSImportant:
       "If you want to write data surely, please sign with a private key without using SSS. However, use at your own risk!",
     secret: "Private Key",
     secretSSSOn: "If you use SSS, you do not need to enter your private key",
     secretSupplement: "If you do not use SSS, you must enter your private key.",
-    secretInmpotant: "The entered private key is not stored by this tool.",
+    secretImportant: "The entered private key is not stored by this tool.",
     apply: "Apply",
     errorTitle: "Setting Error",
     errorMessage: {

@@ -31,7 +31,7 @@ const onChange = (e: Event): void => {
       {{ $t("settings.secret") }}
       <p class="text-black-50 small">
         {{ $t("settings.secretSupplement") }}<br />
-        <span class="text-danger">{{ $t("settings.secretInmpotant") }}</span>
+        <span class="text-danger">{{ $t("settings.secretImportant") }}</span>
       </p>
     </label>
     <div class="col-md-6">

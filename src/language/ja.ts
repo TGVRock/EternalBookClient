@@ -102,12 +102,12 @@ export default {
     useSSSOff: "オフ",
     useSSSSupplement:
       "SSSを利用することで秘密鍵を必要とせず署名できますが、本ツールでは連続して署名を行うため、SSSによる署名ができずに書き込み失敗する場合があります。",
-    useSSSInmpotant:
+    useSSSImportant:
       "確実にデータを書き込みたい場合、SSSを利用せずに秘密鍵による署名を行ってください。ただし、ご利用は自己責任で！",
     secret: "秘密鍵",
     secretSSSOn: "SSSを利用する場合は秘密鍵の入力は不要です",
     secretSupplement: "SSSを利用しない場合は秘密鍵の入力が必須となります。",
-    secretInmpotant: "入力された秘密鍵を本ツールで保存することはありません。",
+    secretImportant: "入力された秘密鍵を本ツールで保存することはありません。",
     apply: "適用",
     errorTitle: "設定エラー",
     errorMessage: {

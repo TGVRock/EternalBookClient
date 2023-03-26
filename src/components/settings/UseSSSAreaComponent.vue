@@ -37,7 +37,7 @@ const onChange = (): void => {
       {{ $t("settings.useSSS") }}
       <p class="text-black-50 small">
         {{ $t("settings.useSSSSupplement") }}<br />
-        <span class="text-danger">{{ $t("settings.useSSSInmpotant") }}</span>
+        <span class="text-danger">{{ $t("settings.useSSSImportant") }}</span>
       </p>
     </label>
     <div class="col-md-6">
