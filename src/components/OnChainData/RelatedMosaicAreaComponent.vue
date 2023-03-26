@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
+import CreatedMosaicAreaComponent from "../viewer/CreatedMosaicAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
 // Stores
@@ -9,11 +9,7 @@ const writeOnChainDataStore = useWriteOnChainDataStore();
 
 <template>
   <section>
-    <TextAreaComponent
-      v-bind:item-name="$t('mosaicInfo.id')"
-      v-bind:placeholder="
-        $t('writer.pleaseInputItem', { item: $t('mosaicInfo.id') })
-      "
+    <CreatedMosaicAreaComponent
       v-model:value="writeOnChainDataStore.relatedMosaicIdStr"
     />
     <TransitionButtonComponent

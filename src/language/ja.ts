@@ -94,25 +94,31 @@ export default {
     title: "設定",
     explanation:
       "本ツールの設定を行います。\n書き込みを行う場合、まずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
+    selectOn: "オン",
+    selectOff: "オフ",
     netType: "ネットワークタイプ",
     netTypeSupplement:
       "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",
     useSSS: "署名にSSSを利用する",
-    useSSSOn: "オン",
-    useSSSOff: "オフ",
     useSSSSupplement:
       "SSSを利用することで秘密鍵を必要とせず署名できますが、本ツールでは連続して署名を行うため、SSSによる署名ができずに書き込み失敗する場合があります。",
-    useSSSInmpotant:
+    useSSSImportant:
       "確実にデータを書き込みたい場合、SSSを利用せずに秘密鍵による署名を行ってください。ただし、ご利用は自己責任で！",
+    testMode: "テストモード",
+    testModeSupplement:
+      "本ツールの機能をテストするためのモードです。\nテストネットワークのアカウントを新規作成し、作成したアカウントでデータを書き込みます。",
+    testModeImportant: "事前にフォーセットからXYMを取得する必要があります。",
+    accessFaucet: "フォーセットへアクセス",
     secret: "秘密鍵",
     secretSSSOn: "SSSを利用する場合は秘密鍵の入力は不要です",
     secretSupplement: "SSSを利用しない場合は秘密鍵の入力が必須となります。",
-    secretInmpotant: "入力された秘密鍵を本ツールで保存することはありません。",
+    secretImportant: "入力された秘密鍵を本ツールで保存することはありません。",
     apply: "適用",
     errorTitle: "設定エラー",
     errorMessage: {
       networkTypeInvalid: "ネットワークタイプが不正です。",
       useSSSInvalid: "SSS連携されていないため、SSSによる署名は利用できません。",
+      getFausetFailed: "テストモードの場合は先にフォーセットからXYMを取得してください。",
       privateKeyInvalid: "秘密鍵が不正です。",
     },
   },

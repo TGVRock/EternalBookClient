@@ -7,6 +7,8 @@ defineProps<{
   value: string;
   /** 無効かどうか */
   disabled: boolean;
+  /** テストモードかどうか */
+  isTestMode: boolean;
 }>();
 
 // Emits
@@ -31,13 +33,14 @@ const onChange = (e: Event): void => {
       {{ $t("settings.secret") }}
       <p class="text-black-50 small">
         {{ $t("settings.secretSupplement") }}<br />
-        <span class="text-danger">{{ $t("settings.secretInmpotant") }}</span>
+        <span class="text-danger">{{ $t("settings.secretImportant") }}</span>
       </p>
     </label>
     <div class="col-md-6">
       <InputPasswordComponent
         v-if="!disabled"
         v-bind:value="value"
+        v-bind:is-test-mode="isTestMode"
         v-on:change="onChange"
         v-bind:placeholder="
           $t('writer.pleaseInputItem', { item: $t('settings.secret') })

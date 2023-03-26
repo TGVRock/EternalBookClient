@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { Account } from "symbol-sdk";
+import { Account, NetworkType } from "symbol-sdk";
 import { ConsoleLogger } from "@/utils/consolelogger";
 import { UnavailableReason } from "@/models/enums/UnavailableReason";
 import { FeeKind } from "@/models/enums/FeeKind";
@@ -20,12 +20,16 @@ export const useSettingsStore = defineStore("settings", () => {
 
   /** SSS利用 */
   const useSSS = ref(false);
+  /** テストモード */
+  const isTestMode = ref(false);
   /** 秘密鍵 */
   const privateKey = ref("");
   /** アカウント */
   const account = ref<Account | undefined>(undefined);
   /** 手数料種別 */
   const feeKind = ref(FeeKind.Default);
+  /** テストアカウント */
+  const testAccount = ref(Account.generateNewAccount(NetworkType.TEST_NET));
 
   // ツール利用可否の設定
   try {
@@ -60,8 +64,10 @@ export const useSettingsStore = defineStore("settings", () => {
     logger,
     addressStr,
     useSSS,
+    isTestMode,
     privateKey,
     account,
     feeKind,
+    testAccount,
   };
 });

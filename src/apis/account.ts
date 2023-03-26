@@ -4,6 +4,7 @@ import {
   Address,
   MultisigAccountInfo,
   NetworkType,
+  RepositoryFactoryHttp,
 } from "symbol-sdk";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
@@ -37,6 +38,34 @@ export function createAccountFromPrivateKey(
     /* empty */
   }
   return undefined;
+}
+
+/**
+ * テストネットのアカウント情報の取得
+ * @param address 対象アドレス
+ * @returns アカウント情報
+ */
+export async function getTestAccountInfo(
+  address: string
+): Promise<AccountInfo | undefined> {
+  const logTitle = "get test account info:";
+  const repo = new RepositoryFactoryHttp(chainStore.getTestNetNode());
+  const accountRepo = repo.createAccountRepository();
+  if (!isValidAddress(address)) {
+    settingsStore.logger.error(logTitle, "invalid address.", address);
+    return undefined;
+  }
+  const rawAddress = Address.createFromRawAddress(address);
+  return await accountRepo
+    .getAccountInfo(rawAddress)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
