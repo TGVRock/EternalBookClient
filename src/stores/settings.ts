@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import type { Account } from "symbol-sdk";
 import { ConsoleLogger } from "@/utils/consolelogger";
 import { UnavailableReason } from "@/models/enums/UnavailableReason";
+import { FeeKind } from "@/models/enums/FeeKind";
 
 /**
  * 設定情報ストア
@@ -14,6 +15,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const unavailableReason = ref(UnavailableReason.Bug);
   /** ロガー */
   const logger = new ConsoleLogger();
+  /** アドレス文字列 */
+  const addressStr = ref("");
 
   /** SSS利用 */
   const useSSS = ref(false);
@@ -21,6 +24,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const privateKey = ref("");
   /** アカウント */
   const account = ref<Account | undefined>(undefined);
+  /** 手数料種別 */
+  const feeKind = ref(FeeKind.Default);
 
   // ツール利用可否の設定
   try {
@@ -53,8 +58,10 @@ export const useSettingsStore = defineStore("settings", () => {
     isAvailable,
     unavailableReason,
     logger,
+    addressStr,
     useSSS,
     privateKey,
     account,
+    feeKind,
   };
 });

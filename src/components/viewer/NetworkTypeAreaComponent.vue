@@ -6,8 +6,6 @@ import SelectboxComponent from "@/components/form/SelectboxComponent.vue";
 defineProps<{
   /** 値 */
   value: NetworkType;
-  /** 無効かどうか */
-  disabled: boolean;
 }>();
 
 // Emits
@@ -28,17 +26,15 @@ const onChange = (e: Event): void => {
 
 <template>
   <div class="row my-2">
-    <label class="col-md-6 col-form-label">
+    <label class="col-md-3 col-form-label">
       {{ $t("settings.netType") }}
-      <p class="text-black-50 small">{{ $t("settings.netTypeSupplement") }}</p>
     </label>
-    <div class="col-md-6">
+    <div class="col-md-9">
       <SelectboxComponent
         v-bind:value="value"
         v-on:change="onChange"
         v-bind:attributes="{
           ariaLabel: 'network-type',
-          disabled: disabled,
         }"
         v-bind:items="[
           {

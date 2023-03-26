@@ -36,7 +36,9 @@ watch(
 
 <template>
   <article class="container animate__animated animate__fadeIn">
-    <h2 class="my-4 text-center">{{ $t(`home.title`) }}</h2>
+    <section class="row my-4 justify-content-center">
+      <img class="col-lg-9" src="/logo.svg" v-bind:alt="$t(`home.title`)" />
+    </section>
     <section class="row my-2">
       <p>{{ $t(`home.explanation`) }}</p>
       <ul class="ms-4">
@@ -74,6 +76,8 @@ watch(
       v-if="settingsStore.isAvailable"
       v-bind:next-route-name="`WriterTop`"
       v-bind:function-name="`writer`"
+      v-bind:exist-annotation="settingsStore.addressStr.length === 0"
+      v-bind:is-disabled="settingsStore.addressStr.length === 0"
     />
     <TopLinkAreaComponent
       v-if="settingsStore.isAvailable"

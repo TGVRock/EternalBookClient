@@ -26,20 +26,23 @@ export const useSSSStore = defineStore("sss", () => {
   const state = ref<SSSState>(SSSState.Unlinked);
 
   // 初期状態更新
-  updateState(SSSState.Standby);
+  updateState(SSSState.Confirming);
   // アクセス直後はSSS連携が完了していない場合があるため、SSS連携できていない場合は連携状態を一定時間監視する
   if (!sssLinked.value) {
     // 定周期でSSS連携状態を確認
     const checkSSSLinked = setInterval(() => {
       // SSS連携されたら定周期確認を終了
-      if (isSSSEnable()) {
-        sssLinked.value = true;
+      sssLinked.value = isSSSEnable();
+      if (sssLinked.value) {
         clearInterval(checkSSSLinked);
+        updateState(SSSState.Standby);
       }
-    }, CONSTS.SSS_CONFIRM_INTERVAL_MSEC);
+    }, CONSTS.CHANGE_SETTING_CONFIRM_INTERVAL_MSEC);
     // 一定時間待っても連携されない場合は定周期確認を終了
     setTimeout(() => {
       clearInterval(checkSSSLinked);
+      sssLinked.value = isSSSEnable();
+      updateState(SSSState.Standby);
     }, CONSTS.SSS_INIITALIZE_WAIT_MSEC);
   }
 
@@ -48,7 +51,9 @@ export const useSSSStore = defineStore("sss", () => {
    * @returns true: 連携済, false: 未連携
    */
   function isSSSEnable(): boolean {
-    return typeof window.SSS !== "undefined";
+    return (
+      typeof window.SSS !== "undefined" && window.SSS.activeAddress.length > 0
+    );
   }
 
   /**
@@ -68,13 +73,14 @@ export const useSSSStore = defineStore("sss", () => {
    * スタンバイ状態か
    * @returns true: スタンバイ状態, false: 署名中または署名後の待ち
    */
-  function isStanby(): boolean {
+  function isQuiet(): boolean {
     switch (state.value) {
       case SSSState.Signing:
       case SSSState.Failed:
       case SSSState.Complete:
         return false;
       case SSSState.Unlinked:
+      case SSSState.Confirming:
       case SSSState.Standby:
       default:
         return true;
@@ -123,7 +129,7 @@ export const useSSSStore = defineStore("sss", () => {
         return;
       }
       // 既にスタンバイ状態の場合は終了
-      if (isStanby()) {
+      if (isQuiet()) {
         settingsStore.logger.debug(logTitle, "already standby.");
         resolve(true);
         return;
@@ -131,7 +137,7 @@ export const useSSSStore = defineStore("sss", () => {
       // 定周期で状態を監視し、スタンバイ状態になったら終了する
       const stateChecker = setInterval(() => {
         settingsStore.logger.debug(logTitle, "interval:", state.value);
-        if (isStanby()) {
+        if (isQuiet()) {
           clearTimeout(roopChecker);
           clearInterval(stateChecker);
           resolve(true);
@@ -183,6 +189,7 @@ export const useSSSStore = defineStore("sss", () => {
       if (sssLinked.value) {
         chainStore.networkType = getNetworkType();
         settingsStore.useSSS = sssLinked.value;
+        settingsStore.addressStr = getAddress();
       }
       address.value = getAddress();
       networkType.value = getNetworkType();

@@ -15,6 +15,9 @@ const isShow = ref(false);
 const netType = computed(() => {
   return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
+const addressStr = computed(() => {
+  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : "--";
+});
 
 /**
  * 閉じるクリックイベント
@@ -39,7 +42,7 @@ function onClickToggle(): void {
         v-bind:to="{ name: 'home' }"
         v-on:click="onClickClose"
       >
-        {{ $t(`home.title`) }}
+        <img class="logo" src="/logo.svg" v-bind:alt="$t(`home.title`)" />
       </RouterLink>
       <div class="navbar-toggler" v-on:click.stop="onClickToggle">
         <span class="navbar-toggler-icon"></span>
@@ -49,6 +52,17 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
+            v-bind:to="{ name: 'Settings' }"
+            v-on:click="onClickClose"
+          >
+            {{ $t(`settings.title`) }}
+          </RouterLink>
+          <RouterLink
+            v-if="settingsStore.isAvailable"
+            class="nav-link ps-2"
+            v-bind:class="{
+              'router-link-disable': addressStr === '--',
+            }"
             v-bind:to="{ name: 'WriterTop' }"
             v-on:click="onClickClose"
           >
@@ -62,17 +76,12 @@ function onClickToggle(): void {
           >
             {{ $t(`viewer.title`) }}
           </RouterLink>
-          <RouterLink
-            v-if="settingsStore.isAvailable"
-            class="nav-link ps-2"
-            v-bind:to="{ name: 'Settings' }"
-            v-on:click="onClickClose"
-          >
-            {{ $t(`settings.title`) }}
-          </RouterLink>
         </div>
-        <div class="d-flex">
+        <div class="navbar-nav small text-break">
           <p class="me-2 my-auto">{{ $t(`networkTypes.` + netType) }}</p>
+          <p class="mx-2 my-auto">
+            {{ addressStr }}
+          </p>
           <LocaleMenuComponent class="me-2" />
         </div>
       </div>
@@ -85,5 +94,15 @@ function onClickToggle(): void {
   background-color: rgba(200, 219, 241, 0.678);
   cursor: default;
   pointer-events: none;
+}
+.navbar-nav .router-link-disable {
+  background-color: rgba(230, 230, 230, 0.432);
+  color: #fff;
+  cursor: default;
+  pointer-events: none;
+}
+
+.navbar-brand .logo {
+  height: 30px;
 }
 </style>

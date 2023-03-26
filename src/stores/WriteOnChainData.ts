@@ -7,7 +7,7 @@ import { useSSSStore } from "./sss";
 import { FetchState } from "@/models/enums/FetchState";
 import { WriteProgress } from "@/models/enums/WriteProgress";
 import { getAccountInfo, getMultisigInfo } from "@/apis/account";
-import { openTxListener } from "@/apis/listner";
+import { openTxListener } from "@/apis/listener";
 import { getMosaicInfo, isValidMosaicId } from "@/apis/mosaic";
 import {
   announceTx,
@@ -125,8 +125,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       return;
     }
 
-    // モザイク所有アカウントがマルチシグアカウントか確認
-    // TODO: モザイク所有者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
+    // モザイク作成アカウントがマルチシグアカウントか確認
+    // TODO: モザイク作成者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
     const multisigInfo = await getMultisigInfo(
       relatedMosaicInfo.value.ownerAddress.plain()
     );
@@ -220,15 +220,15 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
 
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
-      ? createTxAggregateBonded(txList, await getTxFee(chainStore.feeKind))
-      : createTxAggregateComplete(txList, await getTxFee(chainStore.feeKind));
+      ? createTxAggregateBonded(txList, await getTxFee(settingsStore.feeKind))
+      : createTxAggregateComplete(txList, await getTxFee(settingsStore.feeKind));
     // 署名
     if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
       settingsStore.logger.error(logTitle, "account invalid.");
       progress.value = WriteProgress.Failed;
       return;
     }
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.TxSigning;
     const signedAggTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(aggTx)
@@ -289,10 +289,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // ハッシュロックTx作成
     const hashLockTx = createTxHashLock(
       signedAggTx,
-      await getTxFee(chainStore.feeKind)
+      await getTxFee(settingsStore.feeKind)
     );
     // 署名
-    // FIXME: SSS署名者チェックは必要？（署名者<>所有者、署名者がマルチシグ、所有者がマルチシグで署名者が連署者じゃない、etc..）
+    // FIXME: SSS署名者チェックは必要？（署名者<>作成者、署名者がマルチシグ、作成者がマルチシグで署名者が連署者じゃない、etc..）
     progress.value = WriteProgress.LockSigning;
     const signedHashLockTx = settingsStore.useSSS
       ? await sssStore.requestTxSign(hashLockTx)

@@ -5,16 +5,15 @@ import OnChainDataRowComponent from "./flagments/OnChainDataRowComponent.vue";
 // Props
 defineProps<{
   /** オンチェーンデータリスト */
-  onChainDataList: OnChainData[];
+  onChainDataList: OnChainData;
 }>();
 </script>
 
 <template>
   <article class="container">
     <OnChainDataRowComponent
-      v-for="data in onChainDataList"
-      v-bind:key="`chain-data-${data.date}`"
-      v-bind:data="data"
+      v-bind:key="`chain-data-${onChainDataList.date}`"
+      v-bind:data="onChainDataList"
     />
   </article>
 </template>

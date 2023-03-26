@@ -42,7 +42,7 @@ export default {
       "本ツールは Symbol ブロックチェーン上へのデータ書き込み、書き込んだデータの読み込みを行うためのツールです。",
     explanationList: [
       "データはモザイクに対して書き込まれます。",
-      "自身が所有者であるモザイクに限り、既存のモザイクに対してデータを書き込むことも可能です。",
+      "自身が作成したモザイクに限り、既存のモザイクに対してデータを書き込むことも可能です。",
       "1つのモザイクに対し複数のデータを書き込むことが可能です。",
     ],
     info: "{kind}情報",
@@ -68,6 +68,7 @@ export default {
     title: "データ書き込み",
     explanation:
       "Symbol ブロックチェーン上にデータを書き込みます。\nデータ書き込みと併せてモザイクの作成も可能です。",
+    annotation: "署名方法を設定した後に書き込みが可能となります。",
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
@@ -80,18 +81,29 @@ export default {
     title: "ビューアー",
     explanation:
       "本ツールで書き込んだデータを読み込みます。\nブラウザ表示対応データの場合はブラウザ上に表示されます。",
+    modeCreated: "作成モザイクから選択",
+    modeOwned: "所有モザイクから選択",
+    modeArbitrary: "モザイクを指定",
     readData: "データ読み込み",
+    errorTitle: "入力エラー",
+    errorMessage: {
+      mosaicIdInvalid: "モザイクIDが不正です。",
+    },
   },
   settings: {
     title: "設定",
-    explanation: "本ツールの設定を行います。\nまずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
+    explanation:
+      "本ツールの設定を行います。\n書き込みを行う場合、まずは設定から署名方法を設定してください。\nデフォルトはSSSによる署名(サイズ制限あり)です。",
     netType: "ネットワークタイプ",
-    netTypeSupplement: "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",
+    netTypeSupplement:
+      "SSSを利用する場合はSSS連携されているアカウントのネットワークタイプとなります。",
     useSSS: "署名にSSSを利用する",
     useSSSOn: "オン",
     useSSSOff: "オフ",
-    useSSSSupplement: "SSSを利用することで秘密鍵を必要とせず署名できますが、本ツールでは連続して署名を行うため、SSSによる署名ができずに書き込み失敗する場合があります。",
-    useSSSInmpotant: "確実にデータを書き込みたい場合、SSSを利用せずに秘密鍵による署名を行ってください。ただし、ご利用は自己責任で！",
+    useSSSSupplement:
+      "SSSを利用することで秘密鍵を必要とせず署名できますが、本ツールでは連続して署名を行うため、SSSによる署名ができずに書き込み失敗する場合があります。",
+    useSSSInmpotant:
+      "確実にデータを書き込みたい場合、SSSを利用せずに秘密鍵による署名を行ってください。ただし、ご利用は自己責任で！",
     secret: "秘密鍵",
     secretSSSOn: "SSSを利用する場合は秘密鍵の入力は不要です",
     secretSupplement: "SSSを利用しない場合は秘密鍵の入力が必須となります。",
@@ -119,5 +131,8 @@ export default {
     txConfirmed: "書き込みTx承認完了",
     complete: "書き込み完了",
     failed: "書き込み失敗",
+  },
+  modal: {
+    close: "閉じる",
   },
 };

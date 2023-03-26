@@ -7,7 +7,7 @@ export interface EternalBookProtocolHeader {
   version: string;
   /** モザイクID */
   mosaicId: string;
-  /** 所有者アドレス */
+  /** 作成者アドレス */
   address: string;
   /** 前のTxハッシュ */
   prevTx: string | null;
