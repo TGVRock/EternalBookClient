@@ -14,6 +14,7 @@ export default defineConfig({
       protocolImports: true,
     }),
   ],
+  base: "/EternalBookClient",
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
