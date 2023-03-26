@@ -69,7 +69,7 @@ export const useEternalBookStore = defineStore("eternalbook", () => {
       }
 
       // Txをさかのぼってデータを復元
-      let fragment: DataFragment | undefined = undefined;
+      let fragment: DataFragment | undefined = lastFragment;
       let data = lastFragment.data;
       let prevHash = lastFragment.header.prevTx;
       while (prevHash !== null && prevHash.length > 0) {
