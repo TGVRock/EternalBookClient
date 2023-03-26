@@ -69,6 +69,15 @@ export const useChainStore = defineStore("chain", () => {
   /** ネットワークリポジトリ */
   const networkRepo = ref<NetworkRepository | undefined>(undefined);
 
+  /**
+   * テストネットノードURL取得
+   * @returns テストネットノードURL
+   */
+  function getTestNetNode() {
+    const nodes = nodeList.get(NetworkType.TEST_NET)!;
+    return nodes[0];
+  }
+
   // Watch
   watch(
     networkType,
@@ -132,5 +141,6 @@ export const useChainStore = defineStore("chain", () => {
     accountRepo,
     multisigRepo,
     networkRepo,
+    getTestNetNode,
   };
 });

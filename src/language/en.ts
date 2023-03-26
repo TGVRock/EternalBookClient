@@ -94,16 +94,21 @@ export default {
     title: "Settings",
     explanation:
       "Configure the settings for this tool.\nWhen writing, first set the signature method in the settings.\nThe default is signature by SSS (size limited).",
+    selectOn: "On",
+    selectOff: "Off",
     netType: "Network Type",
     netTypeSupplement:
       "If SSS is used, it will be the network type of the SSS-linked account.",
     useSSS: "Use SSS for signatures",
-    useSSSOn: "On",
-    useSSSOff: "Off",
     useSSSSupplement:
       "Although SSS can be used to sign without requiring a private key, since this tool performs consecutive signatures, it may fail to sign using SSS, resulting in a write failure.",
     useSSSImportant:
       "If you want to write data surely, please sign with a private key without using SSS. However, use at your own risk!",
+    testMode: "Test Mode",
+    testModeSupplement:
+      "This mode is used to test the functionality of this tool.\nCreate a new account for the test network and write data with the created account.",
+    testModeImportant: "After the setup is completed, XYM must be obtained from Faucet.",
+    accessFaucet: "Access to Faucet",
     secret: "Private Key",
     secretSSSOn: "If you use SSS, you do not need to enter your private key",
     secretSupplement: "If you do not use SSS, you must enter your private key.",
@@ -113,6 +118,7 @@ export default {
     errorMessage: {
       networkTypeInvalid: "The network type is invalid.",
       useSSSInvalid: "Signature by SSS is not available since it is not SSS-linked.",
+      getFausetFailed: "In test mode, get XYM from the Faucet first.",
       privateKeyInvalid: "The private key is invalid.",
     },
   },

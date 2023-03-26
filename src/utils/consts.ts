@@ -51,6 +51,10 @@ const constants = {
   // その他定数
   /** N/A */
   STR_NA: "N/A",
+  /** オン選択 */
+  STR_SELECT_ON: "on",
+  /** オフ選択 */
+  STR_SELECT_OFF: "off",
   /** 不正なネットワークタイプ */
   NETWORKTYPE_INVALID: -1,
   /** 設定変更時の完了確認間隔時間(msec) */

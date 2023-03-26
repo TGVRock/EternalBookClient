@@ -9,6 +9,8 @@ const props = defineProps<{
   value: string;
   /** 無効かどうか */
   disabled?: boolean;
+  /** テストモードかどうか */
+  isTestMode?: boolean;
 }>();
 
 // Emits
@@ -49,7 +51,7 @@ const onChange = (e: Event): void => {
       autocomplete="off"
       autocorrect="off"
       v-bind:placeholder="placeholder"
-      v-bind:disabled="disabled"
+      v-bind:disabled="disabled || isTestMode"
     />
     <i
       class="bi input-group-text"

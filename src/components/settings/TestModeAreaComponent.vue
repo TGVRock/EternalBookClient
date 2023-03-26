@@ -9,6 +9,8 @@ const props = defineProps<{
   value: boolean;
   /** 無効かどうか */
   disabled: boolean;
+  /** アドレス */
+  address: string;
 }>();
 
 // Emits
@@ -17,7 +19,7 @@ const emit = defineEmits<{
 }>();
 
 // Reactives
-const isUseSSS = ref(
+const isTestMode = ref(
   props.value ? CONSTS.STR_SELECT_ON : CONSTS.STR_SELECT_OFF
 );
 
@@ -26,25 +28,25 @@ const isUseSSS = ref(
  */
 const onChange = (): void => {
   // 値を親コンポーネントへ渡す
-  emit("update:value", isUseSSS.value === CONSTS.STR_SELECT_ON);
+  emit("update:value", isTestMode.value === CONSTS.STR_SELECT_ON);
 };
 </script>
 
 <template>
   <div class="row my-2">
     <label class="col-md-6 col-form-label">
-      {{ $t("settings.useSSS") }}
+      {{ $t("settings.testMode") }}
       <p class="text-black-50 small">
-        {{ $t("settings.useSSSSupplement") }}<br />
-        <span class="text-danger">{{ $t("settings.useSSSImportant") }}</span>
+        {{ $t("settings.testModeSupplement") }}<br />
+        <span class="text-danger">{{ $t("settings.testModeImportant") }}</span>
       </p>
     </label>
     <div class="col-md-6">
       <SelectboxComponent
-        v-model:value="isUseSSS"
+        v-model:value="isTestMode"
         v-on:change="onChange"
         v-bind:attributes="{
-          ariaLabel: 'use-sss',
+          ariaLabel: 'test-mode',
           disabled: disabled,
         }"
         v-bind:items="[
@@ -60,6 +62,22 @@ const onChange = (): void => {
           },
         ]"
       />
+      <div class="text-center">
+        <a
+          type="button"
+          class="btn btn-secondary my-2"
+          v-bind:class="{
+            'btn-success': isTestMode === CONSTS.STR_SELECT_ON,
+            disabled: isTestMode !== CONSTS.STR_SELECT_ON,
+          }"
+          v-bind:href="
+            'https://testnet.symbol.tools/?recipient=' + address + '&amount=100'
+          "
+          target="_blank"
+        >
+          {{ $t("settings.accessFaucet") }}
+        </a>
+      </div>
     </div>
   </div>
 </template>
