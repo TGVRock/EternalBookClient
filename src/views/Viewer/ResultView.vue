@@ -5,12 +5,11 @@ import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
 import { useSettingsStore } from "@/stores/settings";
-import type { OnChainData } from "@/models/interfaces/OnChainDataModel";
 import { getMosaicInfo } from "@/apis/mosaic";
 import { useChainStore } from "@/stores/chain";
+import { useEternalBookStore } from "@/stores/eternalbook";
 import { SettingState } from "@/models/enums/SettingState";
 import CONSTS from "@/utils/consts";
-import { useEternalBookStore } from "@/stores/eternalbook";
 
 // Stores
 const settingsStore = useSettingsStore();
