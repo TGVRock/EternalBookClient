@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import CreatedMosaicAreaComponent from "../viewer/CreatedMosaicAreaComponent.vue";
+import CreatedMosaicAreaComponent from "./flagments/CreatedMosaicAreaComponent.vue";
 import TransitionButtonComponent from "@/components/form/TransitionButtonComponent.vue";
 
 // Stores
