@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useSSSStore } from "@/stores/sss";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import InputAreaComponent from "@/components/OnChainData/InputAreaComponent.vue";
 import RelatedMosaicAreaComponent from "@/components/OnChainData/RelatedMosaicAreaComponent.vue";
 import CreateMosaicAreaComponent from "@/components/MosaicInfo/CreateMosaicAreaComponent.vue";
-import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
 import { WriteMode } from "@/models/enums/WriteMode";
 
 // Stores
-const sssStore = useSSSStore();
 const writeMosaicStore = useWriteMosaicStore();
 
 // Reactives
@@ -36,15 +33,7 @@ function onClickRelateMode() {
   <article class="container animate__animated animate__fadeIn">
     <InputAreaComponent />
     <section class="my-2">
-      <SSSLinkedSelectAreaComponent v-if="sssStore.sssLinked" />
-      <TextAreaComponent
-        v-else
-        v-bind:item-name="$t('mosaicInfo.address')"
-        v-bind:placeholder="
-          $t('writer.pleaseInputItem', { item: $t('mosaicInfo.address') })
-        "
-        v-model:value="writeMosaicStore.ownerAddress"
-      />
+      <SSSLinkedSelectAreaComponent />
     </section>
     <section class="row my-2">
       <div class="col-lg-3 d-lg-grid gap-lg-2 mt-2 mb-auto">
