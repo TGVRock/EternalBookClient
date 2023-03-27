@@ -1,6 +1,11 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import { Address, MosaicFlags, MosaicDefinitionTransaction } from "symbol-sdk";
+import {
+  Address,
+  MosaicFlags,
+  MosaicDefinitionTransaction,
+  AccountInfo,
+} from "symbol-sdk";
 import { useChainStore } from "./chain";
 import { useSettingsStore } from "./settings";
 import { useSSSStore } from "./sss";
@@ -30,6 +35,8 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
   /** モザイク作成者アドレス */
   const ownerAddress = ref("");
+  /** モザイク作成者アカウント情報 */
+  const ownerInfo = ref<AccountInfo | undefined>(undefined);
   /** モザイクフラグ */
   const mosaicFlags = ref(MosaicFlags.create(false, false, false, false));
   /** 数量 */
@@ -66,12 +73,12 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     const isBonded = multisigInfo.isMultisig();
 
     // モザイク作成アカウントのアカウント情報を取得
-    const accountInfo = await getAccountInfo(ownerAddress.value);
-    if (typeof accountInfo === "undefined") {
+    if (typeof ownerInfo.value === "undefined") {
       settingsStore.logger.error(logTitle, "get account info failed.");
       progress.value = WriteProgress.Failed;
       return;
     }
+    const accountInfo = ownerInfo.value as AccountInfo;
 
     // モザイク作成のアグリゲートTx作成
     const aggTx = isBonded
@@ -212,9 +219,35 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
     settingsStore.logger.debug(logTitle, "aggregate bonded end");
   }
 
+  // Watch
+  watch(
+    ownerAddress,
+    (): void => {
+      const logTitle = "write mosaic store watch:";
+      settingsStore.logger.debug(logTitle, "start", ownerAddress);
+
+      // モザイク作成アカウントのアカウント情報を取得
+      getAccountInfo(ownerAddress.value)
+        .then((value) => {
+          ownerInfo.value = value;
+        })
+        .catch((error) => {
+          settingsStore.logger.error(
+            logTitle,
+            "get mosaics info failed.",
+            error
+          );
+          ownerInfo.value = undefined;
+        });
+      settingsStore.logger.debug(logTitle, "end");
+    },
+    { immediate: true }
+  );
+
   // Exports
   return {
     ownerAddress,
+    ownerInfo,
     mosaicFlags,
     amount,
     progress,
