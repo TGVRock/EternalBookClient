@@ -45,17 +45,13 @@ export const useSettingsStore = defineStore("settings", () => {
     isAvailable.value = false;
     unavailableReason.value = UnavailableReason.Bug;
   }
-  // TODO: 暫定で特定時間を利用不可とする
-  const nowDate = new Date();
-  if (nowDate.getMinutes() >= 0 && nowDate.getMinutes() < 5) {
-    if (nowDate.getHours() === 0) {
-      isAvailable.value = false;
-      unavailableReason.value = UnavailableReason.Error;
-    } else if (nowDate.getHours() === 4) {
-      isAvailable.value = false;
-      unavailableReason.value = UnavailableReason.Maintainance;
-    }
-  }
+  // TODO: なんかあった時はこっちを使う
+  // 何かのエラー
+  // isAvailable.value = false;
+  // unavailableReason.value = UnavailableReason.Error;
+  // メンテナンスモード
+  // isAvailable.value = false;
+  // unavailableReason.value = UnavailableReason.Maintainance;
 
   // Exports
   return {

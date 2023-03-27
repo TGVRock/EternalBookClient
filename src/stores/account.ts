@@ -16,6 +16,7 @@ import {
   isValidAddress,
 } from "@/apis/account";
 import { useChainStore } from "./chain";
+import { useSSSStore } from "./sss";
 import type { MosaicItem } from "@/models/interfaces/MosaicItemModel";
 import { getMosaicsAboutCreatedAddress } from "@/apis/mosaic";
 import { getMosaicsNames } from "@/apis/namespace";
@@ -27,6 +28,7 @@ export const useAccountStore = defineStore("account", () => {
   // Other Stores
   const settingsStore = useSettingsStore();
   const chainStore = useChainStore();
+  const sssStore = useSSSStore();
 
   /** アカウント */
   const account = ref<Account | undefined>(undefined);
@@ -47,10 +49,9 @@ export const useAccountStore = defineStore("account", () => {
       settingsStore.logger.debug(logTitle, "start");
 
       // アドレス設定
-      if (
-        settingsStore.useSSS === false &&
-        settingsStore.privateKey.length > 0
-      ) {
+      if (settingsStore.useSSS === true) {
+        settingsStore.addressStr = sssStore.address;
+      } else if (settingsStore.privateKey.length > 0) {
         settingsStore.logger.debug(logTitle, "private key account.");
         account.value = createAccountFromPrivateKey(
           settingsStore.privateKey,
@@ -108,86 +109,91 @@ export const useAccountStore = defineStore("account", () => {
           multisigInfo.value = undefined;
         });
       settingsStore.logger.debug(logTitle, "end");
-    }
+    },
+    { immediate: true }
   );
-  watch(accountInfo, (): void => {
-    const logTitle = "account store watch (account info):";
-    settingsStore.logger.debug(logTitle, "start", accountInfo.value);
+  watch(
+    accountInfo,
+    (): void => {
+      const logTitle = "account store watch (account info):";
+      settingsStore.logger.debug(logTitle, "start", accountInfo.value);
 
-    // アカウント情報の取得
-    createdMosaics.value = [];
-    owendMosaics.value = [];
-    if (typeof accountInfo.value === "undefined") {
-      settingsStore.logger.error(logTitle, "account info invalid.");
-      return;
-    }
-    const address = accountInfo.value.address as Address;
+      // アカウント情報の取得
+      createdMosaics.value = [];
+      owendMosaics.value = [];
+      if (typeof accountInfo.value === "undefined") {
+        settingsStore.logger.error(logTitle, "account info invalid.");
+        return;
+      }
+      const address = accountInfo.value.address as Address;
 
-    // 指定アドレスで作成したモザイク一覧を取得
-    getMosaicsAboutCreatedAddress(address)
-      .then(async (value) => {
-        // 作成モザイク一覧を作成
-        const mosaicIds: Array<MosaicId> = [];
-        value.forEach((info) => {
-          mosaicIds.push(info.id);
-        });
-        getMosaicsNames(mosaicIds)
-          .then((value) => {
-            mosaicIds.forEach((id) => {
-              const name = value.find((name) => name.mosaicId.equals(id));
-              const alias =
-                typeof name === "undefined" || name.names.length === 0
-                  ? ""
-                  : name?.names[0].name;
-              createdMosaics.value.push({
-                id: id,
-                alias: alias,
+      // 指定アドレスで作成したモザイク一覧を取得
+      getMosaicsAboutCreatedAddress(address)
+        .then(async (value) => {
+          // 作成モザイク一覧を作成
+          const mosaicIds: Array<MosaicId> = [];
+          value.forEach((info) => {
+            mosaicIds.push(info.id);
+          });
+          getMosaicsNames(mosaicIds)
+            .then((value) => {
+              mosaicIds.forEach((id) => {
+                const name = value.find((name) => name.mosaicId.equals(id));
+                const alias =
+                  typeof name === "undefined" || name.names.length === 0
+                    ? ""
+                    : name?.names[0].name;
+                createdMosaics.value.push({
+                  id: id,
+                  alias: alias,
+                });
               });
+            })
+            .catch((error) => {
+              settingsStore.logger.error(
+                logTitle,
+                "get mosaics names failed.",
+                error
+              );
+              owendMosaics.value = [];
             });
-          })
-          .catch((error) => {
-            settingsStore.logger.error(
-              logTitle,
-              "get mosaics names failed.",
-              error
-            );
-            owendMosaics.value = [];
-          });
-      })
-      .catch((error) => {
-        settingsStore.logger.error(logTitle, "get mosaics failed.", error);
-        createdMosaics.value = [];
-      });
-
-    // 所有モザイク一覧を作成
-    const mosaicIds: Array<MosaicId> = [];
-    accountInfo.value.mosaics.forEach((info) => {
-      mosaicIds.push((info as Mosaic).id as MosaicId);
-    });
-    getMosaicsNames(mosaicIds)
-      .then((value) => {
-        mosaicIds.forEach((id) => {
-          const name = value.find((name) => name.mosaicId.equals(id));
-          const alias =
-            typeof name === "undefined" || name.names.length === 0
-              ? ""
-              : name?.names[0].name;
-          owendMosaics.value.push({
-            id: id,
-            alias: alias,
-          });
+        })
+        .catch((error) => {
+          settingsStore.logger.error(logTitle, "get mosaics failed.", error);
+          createdMosaics.value = [];
         });
-      })
-      .catch((error) => {
-        settingsStore.logger.error(
-          logTitle,
-          "get mosaics names failed.",
-          error
-        );
-        owendMosaics.value = [];
+
+      // 所有モザイク一覧を作成
+      const mosaicIds: Array<MosaicId> = [];
+      accountInfo.value.mosaics.forEach((info) => {
+        mosaicIds.push((info as Mosaic).id as MosaicId);
       });
-    settingsStore.logger.debug(logTitle, "end");
-  });
+      getMosaicsNames(mosaicIds)
+        .then((value) => {
+          mosaicIds.forEach((id) => {
+            const name = value.find((name) => name.mosaicId.equals(id));
+            const alias =
+              typeof name === "undefined" || name.names.length === 0
+                ? ""
+                : name?.names[0].name;
+            owendMosaics.value.push({
+              id: id,
+              alias: alias,
+            });
+          });
+        })
+        .catch((error) => {
+          settingsStore.logger.error(
+            logTitle,
+            "get mosaics names failed.",
+            error
+          );
+          owendMosaics.value = [];
+        });
+      settingsStore.logger.debug(logTitle, "end");
+    },
+    { immediate: true }
+  );
 
   // Exports
   return {
