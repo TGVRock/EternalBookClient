@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onBeforeMount } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import TopLinkAreaComponent from "@/components/home/TopLinkAreaComponent.vue";
 import CONSTS from "@/utils/consts";
@@ -10,9 +11,29 @@ const i18n = useI18n();
 
 // Stores
 const settingsStore = useSettingsStore();
+// Route
+const route = useRoute();
+// Router
+const router = useRouter();
 
 // Reactives
 const messageList = ref<Array<string>>([]);
+
+// データ表示ページへ直接遷移する
+onBeforeMount(() => {
+  if (
+    typeof route.query.netType !== "undefined" &&
+    typeof route.query.mosaicId !== "undefined"
+  ) {
+    router.push({
+      name: "ViewerResult",
+      params: {
+        netType: route.query.netType?.toString(),
+        mosaicId: route.query.mosaicId?.toString(),
+      },
+    });
+  }
+});
 
 // Watch
 watch(
