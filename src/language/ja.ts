@@ -85,6 +85,7 @@ export default {
     modeOwned: "所有モザイクから選択",
     modeArbitrary: "モザイクを指定",
     readData: "データ読み込み",
+    linkUrl: "リンクURL",
     errorTitle: "入力エラー",
     errorMessage: {
       mosaicIdInvalid: "モザイクIDが不正です。",
