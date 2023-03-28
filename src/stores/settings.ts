@@ -9,6 +9,8 @@ import { FeeKind } from "@/models/enums/FeeKind";
  * 設定情報ストア
  */
 export const useSettingsStore = defineStore("settings", () => {
+  /** ルートURI */
+  const rootUri = ref("");
   /** ツール利用可否 */
   const isAvailable = ref(true);
   /** ツール利用不可時の理由 */
@@ -55,6 +57,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
   // Exports
   return {
+    rootUri,
     isAvailable,
     unavailableReason,
     logger,

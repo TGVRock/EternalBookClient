@@ -85,6 +85,7 @@ export default {
     modeOwned: "Select from Owned Mosaic",
     modeArbitrary: "Specify Mosaic",
     readData: "Data Loading",
+    linkUrl: "URL Link",
     errorTitle: "Inout Error",
     errorMessage: {
       mosaicIdInvalid: "Mosaic ID is incorrect.",
