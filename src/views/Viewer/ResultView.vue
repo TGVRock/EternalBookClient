@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, onUnmounted } from "vue";
 import type { MosaicInfo, NetworkType } from "symbol-sdk";
 import ProcessingComponent from "@/components/Progress/ProcessingComponent.vue";
+import LinkUrlCopyAreaComponent from "@/components/MosaicInfo/LinkUrlCopyAreaComponent.vue";
 import MosaicInfoComponent from "@/components/MosaicInfo/MosaicInfoComponent.vue";
 import OnChainDataComponent from "@/components/OnChainData/OnChainDataComponent.vue";
 import { useSettingsStore } from "@/stores/settings";
@@ -28,6 +29,13 @@ const mosaicInfo = ref<MosaicInfo | undefined>(undefined);
 // 現在のネットワークタイプを退避
 const beforeNetType = chainStore.networkType;
 const logTitle = "viewer result:";
+// リンクURLを設定
+const linkUrl =
+  settingsStore.rootUri +
+  "?netType=" +
+  props.netType +
+  "&mosaicId=" +
+  props.mosaicId;
 
 /**
  * 表示時処理
@@ -109,6 +117,7 @@ watch(mosaicInfo, async (): Promise<void> => {
 </script>
 
 <template>
+  <LinkUrlCopyAreaComponent v-bind:linkUrl="linkUrl" />
   <ProcessingComponent
     v-if="eternalBookStore.chainData.size === 0"
     v-bind:message="$t('message.loading')"
