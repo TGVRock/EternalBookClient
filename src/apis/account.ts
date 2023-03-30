@@ -86,7 +86,16 @@ export async function getAccountInfo(
     return undefined;
   }
   const rawAddress = Address.createFromRawAddress(address);
-  return await chainStore.accountRepo.getAccountInfo(rawAddress).toPromise();
+  return await chainStore.accountRepo
+    .getAccountInfo(rawAddress)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
@@ -109,7 +118,14 @@ export async function getMultisigInfo(
   // マルチシグアカウント情報の取得
   return await chainStore.multisigRepo
     .getMultisigAccountInfo(Address.createFromRawAddress(address))
-    .toPromise();
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**

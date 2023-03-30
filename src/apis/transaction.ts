@@ -42,9 +42,25 @@ export async function announceTx(
   if (signedTx.type === TransactionType.AGGREGATE_BONDED) {
     return await chainStore.txRepo
       .announceAggregateBonded(signedTx)
-      .toPromise();
+      .toPromise()
+      .then((value) => {
+        return value;
+      })
+      .catch((error) => {
+        settingsStore.logger.error(logTitle, "failed.", error);
+        return undefined;
+      });
   }
-  return await chainStore.txRepo.announce(signedTx).toPromise();
+  return await chainStore.txRepo
+    .announce(signedTx)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
@@ -62,7 +78,14 @@ export async function getTransactionInfo(
   }
   return await chainStore.txRepo
     .getTransaction(txHash, TransactionGroup.Confirmed)
-    .toPromise();
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
@@ -109,7 +132,16 @@ async function searchTransactions(
     settingsStore.logger.error(logTitle, "repository undefined.");
     return [];
   }
-  const pageTxes = await chainStore.txRepo.search(criteria).toPromise();
+  const pageTxes = await chainStore.txRepo
+    .search(criteria)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
   if (typeof pageTxes === "undefined") {
     settingsStore.logger.error(logTitle, "search failed.");
     return [];
