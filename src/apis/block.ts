@@ -20,7 +20,16 @@ export async function getBlockInfo(
     settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return await chainStore.blockRepo.getBlockByHeight(height).toPromise();
+  return await chainStore.blockRepo
+    .getBlockByHeight(height)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
