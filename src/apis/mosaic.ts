@@ -54,7 +54,16 @@ export async function getMosaicInfo(
     return undefined;
   }
   const mosaicId = new MosaicId(mosaicIdStr);
-  return await chainStore.mosaicRepo.getMosaic(mosaicId).toPromise();
+  return await chainStore.mosaicRepo
+    .getMosaic(mosaicId)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**
@@ -92,7 +101,16 @@ async function searchMosaics(
     settingsStore.logger.error(logTitle, "repository undefined.");
     return [];
   }
-  const pageMosaics = await chainStore.mosaicRepo.search(criteria).toPromise();
+  const pageMosaics = await chainStore.mosaicRepo
+    .search(criteria)
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
   if (typeof pageMosaics === "undefined") {
     settingsStore.logger.error(logTitle, "search failed.");
     return [];
