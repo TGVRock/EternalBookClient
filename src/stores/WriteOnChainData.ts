@@ -130,12 +130,8 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     const multisigInfo = await getMultisigInfo(
       relatedMosaicInfo.value.ownerAddress.plain()
     );
-    if (typeof multisigInfo === "undefined") {
-      settingsStore.logger.error(logTitle, "get multisig info failed.");
-      progress.value = WriteProgress.Failed;
-      return;
-    }
-    const isBonded = multisigInfo.isMultisig();
+    const isBonded =
+      typeof multisigInfo === "undefined" ? false : multisigInfo.isMultisig();
     writeOnChainOneAggregate(isBonded);
     settingsStore.logger.debug(logTitle, "end");
   }

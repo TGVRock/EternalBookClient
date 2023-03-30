@@ -19,7 +19,16 @@ export async function getTxFees(): Promise<TransactionFees | undefined> {
     settingsStore.logger.error(logTitle, "repository undefined.");
     return undefined;
   }
-  return await chainStore.networkRepo.getTransactionFees().toPromise();
+  return await chainStore.networkRepo
+    .getTransactionFees()
+    .toPromise()
+    .then((value) => {
+      return value;
+    })
+    .catch((error) => {
+      settingsStore.logger.error(logTitle, "failed.", error);
+      return undefined;
+    });
 }
 
 /**

@@ -65,12 +65,8 @@ export const useWriteMosaicStore = defineStore("WriteMosaic", () => {
 
     // モザイク作成アカウントがマルチシグアカウントか確認
     const multisigInfo = await getMultisigInfo(ownerAddress.value);
-    if (typeof multisigInfo === "undefined") {
-      settingsStore.logger.error(logTitle, "get multisig info failed.");
-      progress.value = WriteProgress.Failed;
-      return;
-    }
-    const isBonded = multisigInfo.isMultisig();
+    const isBonded =
+      typeof multisigInfo === "undefined" ? false : multisigInfo.isMultisig();
 
     // モザイク作成アカウントのアカウント情報を取得
     if (typeof ownerInfo.value === "undefined") {
