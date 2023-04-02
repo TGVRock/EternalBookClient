@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { NetworkType } from "symbol-sdk";
+import { NetworkType, UInt64 } from "symbol-sdk";
 import { useSettingsStore } from "@/stores/settings";
 import { useChainStore } from "@/stores/chain";
 import { useSSSStore } from "@/stores/sss";
@@ -12,6 +12,7 @@ import ModalComponent from "@/components/common/ModalComponent.vue";
 import {
   createAccountFromPrivateKey,
   getTestAccountInfo,
+  announceTestAccountPublicKey,
 } from "@/apis/account";
 import { useAccountStore } from "@/stores/account";
 
@@ -117,6 +118,15 @@ const onApply = async (): Promise<void> => {
         isShownErrorModal.value = true;
         errorCause.value = "getFausetFailed";
         return;
+      }
+      // 初回は公開鍵がネットワークに認知されていないため、自身へTx送信して認知させる
+      if (info.publicKeyHeight.equals(UInt64.fromUint(0))) {
+        const result = await announceTestAccountPublicKey(inputAccount);
+        if (!result) {
+          isShownErrorModal.value = true;
+          errorCause.value = "getFausetFailed";
+          return;
+        }
       }
     }
     settingsStore.account = inputAccount;
