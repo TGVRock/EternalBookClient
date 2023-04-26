@@ -8,7 +8,14 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          // ダッシュを含むすべてのタグをカスタム要素として扱う
+          isCustomElement: (tag) => tag.includes("-"),
+        },
+      },
+    }),
     nodePolyfills({
       // Whether to polyfill `node:` protocol imports.
       protocolImports: true,

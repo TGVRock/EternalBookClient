@@ -62,6 +62,9 @@ export function getChainDataType(mime: string): ChainDataType {
     case "video/quicktime": // Apple QuickTime movie
       return ChainDataType.Movie;
 
+    case "model/gltf-binary": // GLB
+      return ChainDataType.Model;
+
     default:
       break;
   }

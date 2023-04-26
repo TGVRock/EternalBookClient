@@ -59,6 +59,13 @@ watch(
     v-bind:type="mime"
     controls="true"
   ></video>
+  <model-viewer
+    v-else-if="dataType === ChainDataType.Model"
+    v-bind:src="dataUri"
+    class="w-100"
+    camera-controls
+    autoplay
+  ></model-viewer>
   <img
     v-else
     class="img-fluid w-100 border border-4 rounded-2 border-light"
@@ -66,3 +73,10 @@ watch(
     alt="No Data"
   />
 </template>
+
+<style scoped>
+model-viewer {
+  height: 50vh;
+  width: 100%;
+}
+</style>

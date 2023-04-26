@@ -10,4 +10,6 @@ export enum ChainDataType {
   Audio = "Audio",
   /** 動画データ */
   Movie = "Movie",
+  /** 3Dモデルデータ */
+  Model = "Model",
 }
