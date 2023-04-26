@@ -66,10 +66,7 @@ getTxFees().then((txFees) => {
 <template>
   <section class="row my-2">
     <div class="col-lg-6 align-self-center text-center">
-      <DataAreaComponent
-        v-bind:base64="writeOnChainDataStore.dataBase64"
-        v-bind:mime="getMimeFromBase64(writeOnChainDataStore.dataBase64)"
-      />
+      <DataAreaComponent v-bind:base64="writeOnChainDataStore.dataBase64" />
     </div>
     <div class="col-lg-6 align-self-center">
       <TextAreaComponent

@@ -1,39 +1,62 @@
 <script setup lang="ts">
-import { isImage, isAudio, isHtml, isMovie } from "@/utils/mime";
+import { ref, watch } from "vue";
+import { isHtml, getChainDataType, getMimeFromDataUrl } from "@/utils/mime";
+import { ChainDataType } from "@/models/enums/ChainDataType";
 
 // Props
-defineProps<{
+const props = defineProps<{
   /** Base64データ */
   base64: string;
-  /** MIMEタイプ */
-  mime: string;
 }>();
+
+// Reactives
+const mime = ref("");
+const dataUri = ref("");
+const dataType = ref(ChainDataType.Unavailable);
+
+// Watch
+watch(
+  () => props.base64,
+  () => {
+    getMimeFromDataUrl(props.base64)
+      .then((value) => {
+        mime.value = value;
+        dataUri.value = props.base64;
+        dataType.value = getChainDataType(value);
+      })
+      .catch(() => {
+        mime.value = "";
+        dataUri.value = "";
+        dataType.value = ChainDataType.Unavailable;
+      });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
   <img
-    v-if="isImage(mime)"
+    v-if="dataType === ChainDataType.Image"
     class="img-fluid w-100 border border-4 rounded-2 border-light"
-    v-bind:src="base64"
+    v-bind:src="dataUri"
     alt="On Chain Data"
   />
   <audio
-    v-else-if="isAudio(mime)"
-    v-bind:src="base64"
+    v-else-if="dataType === ChainDataType.Audio"
+    v-bind:src="dataUri"
     controls="true"
     autoplay="true"
     loop="true"
   ></audio>
   <iframe
     v-else-if="isHtml(mime)"
-    v-bind:src="base64"
+    v-bind:src="dataUri"
     sandbox="allow-scripts allow-popups"
   ></iframe>
   <video
-    v-else-if="isMovie(mime)"
-    v-bind:src="base64"
+    v-else-if="dataType === ChainDataType.Movie"
+    v-bind:src="dataUri"
     v-bind:type="mime"
-    class="w-100"
     controls="true"
   ></video>
   <img
