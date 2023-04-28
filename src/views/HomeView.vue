@@ -60,9 +60,9 @@ watch(
     <section class="row my-4 justify-content-center">
       <img class="col-lg-9" src="/logo.svg" v-bind:alt="$t(`home.title`)" />
     </section>
-    <section class="row my-2">
+    <section class="my-2">
       <p>{{ $t(`home.explanation`) }}</p>
-      <ul class="ms-4">
+      <ul>
         <li v-for="(message, idx) in messageList" v-bind:key="idx">
           {{ message }}
         </li>
