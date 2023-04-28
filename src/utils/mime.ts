@@ -65,6 +65,9 @@ export function getChainDataType(mime: string): ChainDataType {
     case "model/gltf-binary": // GLB
       return ChainDataType.Model;
 
+    case "application/pdf": // PDF
+      return ChainDataType.Pdf;
+
     default:
       break;
   }

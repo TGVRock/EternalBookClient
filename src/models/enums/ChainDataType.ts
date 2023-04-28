@@ -12,4 +12,6 @@ export enum ChainDataType {
   Movie = "Movie",
   /** 3Dモデルデータ */
   Model = "Model",
+  /** PDFデータ */
+  Pdf = "Pdf",
 }

@@ -17,6 +17,7 @@
     "buffer": "^6.0.3",
     "crypto": "^1.0.1",
     "file-type": "^18.2.1",
+    "pdfjs-dist": "^3.5.141",
     "pinia": "^2.0.28",
     "rxjs": "^7.8.0",
     "sss-module": "^1.0.4",
