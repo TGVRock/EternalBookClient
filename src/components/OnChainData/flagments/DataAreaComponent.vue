@@ -106,13 +106,14 @@ function setPdfData() {
     v-bind:type="mime"
     controls="true"
   ></video>
-  <model-viewer
-    v-else-if="dataType === ChainDataType.Model"
-    v-bind:src="dataUri"
-    class="w-100"
-    camera-controls
-    autoplay
-  ></model-viewer>
+  <div v-else-if="dataType === ChainDataType.Model" class="square-wrapper">
+    <model-viewer
+      v-bind:src="dataUri"
+      class="square"
+      camera-controls
+      autoplay
+    ></model-viewer>
+  </div>
   <div
     v-else-if="dataType === ChainDataType.Pdf"
     class="square-wrapper pdf-wrapper"
@@ -128,11 +129,6 @@ function setPdfData() {
 </template>
 
 <style scoped>
-model-viewer {
-  height: 50vh;
-  width: 100%;
-}
-
 .square-wrapper {
   overflow-y: auto;
   position: relative;
