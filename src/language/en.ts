@@ -76,6 +76,7 @@ export default {
     modeRelated: "Writing in existing mosaic",
     createMosaic: "Create Mosaic",
     writeOnChain: "Write On Chain",
+    confirmTitle: "Write with the following information. Are you sure?",
   },
   viewer: {
     title: "Viewer",
@@ -141,5 +142,7 @@ export default {
   },
   modal: {
     close: "Close",
+    ok: "OK",
+    cancel: "Cancel",
   },
 };

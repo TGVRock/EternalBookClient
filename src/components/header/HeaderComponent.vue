@@ -17,7 +17,7 @@ const netType = computed(() => {
   return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
 const addressStr = computed(() => {
-  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : "--";
+  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : CONSTS.STR_NOT_SETTING;
 });
 
 /**
@@ -62,7 +62,7 @@ function onClickToggle(): void {
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:class="{
-              'router-link-disable': addressStr === '--',
+              'router-link-disable': addressStr === CONSTS.STR_NOT_SETTING,
             }"
             v-bind:to="{ name: CONSTS.ROUTENAME_WRITER_TOP }"
             v-on:click="onClickClose"

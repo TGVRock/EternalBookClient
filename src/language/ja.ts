@@ -76,6 +76,7 @@ export default {
     modeRelated: "既存モザイクへの書き込み",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
+    confirmTitle: "以下の内容で書き込みます。よろしいですか？",
   },
   viewer: {
     title: "ビューアー",
@@ -141,5 +142,7 @@ export default {
   },
   modal: {
     close: "閉じる",
+    ok: "OK",
+    cancel: "キャンセル",
   },
 };

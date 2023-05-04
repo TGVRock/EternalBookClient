@@ -67,6 +67,8 @@ const constants = {
   // その他定数
   /** N/A */
   STR_NA: "N/A",
+  /** 設定なし */
+  STR_NOT_SETTING: "--",
   /** オン選択 */
   STR_SELECT_ON: "on",
   /** オフ選択 */
