@@ -5,6 +5,7 @@ import { NetworkType } from "symbol-sdk";
 import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const settingsStore = useSettingsStore();
@@ -52,7 +53,7 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
-            v-bind:to="{ name: 'Settings' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_SETTINGS }"
             v-on:click="onClickClose"
           >
             {{ $t(`settings.title`) }}
@@ -63,7 +64,7 @@ function onClickToggle(): void {
             v-bind:class="{
               'router-link-disable': addressStr === '--',
             }"
-            v-bind:to="{ name: 'WriterTop' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_WRITER_TOP }"
             v-on:click="onClickClose"
           >
             {{ $t(`writer.title`) }}
@@ -71,7 +72,7 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
-            v-bind:to="{ name: 'ViewerTop' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_VIEWER_TOP }"
             v-on:click="onClickClose"
           >
             {{ $t(`viewer.title`) }}

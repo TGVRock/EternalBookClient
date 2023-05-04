@@ -1,5 +1,21 @@
 /** 定数 */
 const constants = {
+  // Vue Router Name
+  /** ホーム */
+  ROUTENAME_HOME: "home",
+  /** Viewer トップ */
+  ROUTENAME_VIEWER_TOP: "ViewerTop",
+  /** Viewer 表示ページ */
+  ROUTENAME_VIEWER_RESULT: "ViewerResult",
+  /** Writer トップ */
+  ROUTENAME_WRITER_TOP: "WriterTop",
+  /** Writer モザイク作成 */
+  ROUTENAME_WRITER_CREATE_MOSAIC: "CreateMosaic",
+  /** Writer オンチェーンデータ書込み */
+  ROUTENAME_WRITER_WRITE_ONCHAIN_DATA: "WriteOnChainData",
+  /** 設定 */
+  ROUTENAME_SETTINGS: "Settings",
+
   // プロトコル
   /** プロトコル名 */
   PROTOCOL_NAME: "eternal-book-protocol",

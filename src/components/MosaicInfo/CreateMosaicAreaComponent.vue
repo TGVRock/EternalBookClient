@@ -3,6 +3,7 @@ import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import MosaicFlagAreaComponent from "../form/MosaicFlagAreaComponent.vue";
 import NumberAreaComponent from "../form/NumberAreaComponent.vue";
 import TransitionButtonComponent from "../form/TransitionButtonComponent.vue";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const writeMosaicStore = useWriteMosaicStore();
@@ -21,7 +22,7 @@ const writeMosaicStore = useWriteMosaicStore();
     />
     <TransitionButtonComponent
       class="text-center"
-      v-bind:next-route-name="`CreateMosaic`"
+      v-bind:next-route-name="CONSTS.ROUTENAME_WRITER_CREATE_MOSAIC"
       v-bind:item-name="$t(`writer.createMosaic`)"
     />
   </section>

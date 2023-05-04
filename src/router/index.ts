@@ -1,23 +1,24 @@
 import type { NetworkType } from "symbol-sdk";
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
+import CONSTS from "@/utils/consts";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      name: "home",
+      name: CONSTS.ROUTENAME_HOME,
       component: HomeView,
     },
     {
       path: "/viewer",
-      name: "ViewerTop",
+      name: CONSTS.ROUTENAME_VIEWER_TOP,
       component: () => import("../views/Viewer/TopView.vue"),
     },
     {
       path: "/viewer/:netType/:mosaicId",
-      name: "ViewerResult",
+      name: CONSTS.ROUTENAME_VIEWER_RESULT,
       component: () => import("../views/Viewer/ResultView.vue"),
       props: (routes) => {
         return {
@@ -28,22 +29,22 @@ const router = createRouter({
     },
     {
       path: "/writer",
-      name: "WriterTop",
+      name: CONSTS.ROUTENAME_WRITER_TOP,
       component: () => import("../views/Writer/TopView.vue"),
     },
     {
       path: "/writer/mosaic",
-      name: "CreateMosaic",
+      name: CONSTS.ROUTENAME_WRITER_CREATE_MOSAIC,
       component: () => import("../views/Writer/CreateMosaicProcessingView.vue"),
     },
     {
       path: "/writer/onchain",
-      name: "WriteOnChainData",
+      name: CONSTS.ROUTENAME_WRITER_WRITE_ONCHAIN_DATA,
       component: () => import("../views/Writer/OnChainDataProcessingView.vue"),
     },
     {
       path: "/settings",
-      name: "Settings",
+      name: CONSTS.ROUTENAME_SETTINGS,
       component: () => import("../views/Settings/TopView.vue"),
     },
   ],
