@@ -17,7 +17,9 @@ const netType = computed(() => {
   return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
 const addressStr = computed(() => {
-  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : CONSTS.STR_NOT_SETTING;
+  return settingsStore.addressStr.length > 0
+    ? settingsStore.addressStr
+    : CONSTS.STR_NOT_SETTING;
 });
 
 /**

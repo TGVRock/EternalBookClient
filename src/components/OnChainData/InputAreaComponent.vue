@@ -13,7 +13,6 @@ import {
 } from "@/utils/converter";
 import { useSettingsStore } from "@/stores/settings";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
-import { getMimeFromBase64 } from "@/utils/mime";
 import { FeeKind } from "@/models/enums/FeeKind";
 import { getTxFees } from "@/apis/network";
 

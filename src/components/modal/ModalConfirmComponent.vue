@@ -6,7 +6,7 @@ defineProps<{
   /** タイトル */
   title: string;
   /** 確認項目 */
-  items: Array<{ key: string, value: string }>;
+  items: Array<{ key: string; value: string }>;
 }>();
 
 // Emits
@@ -58,11 +58,7 @@ const onCancelClick = (): void => {
           </div>
         </div>
         <div class="modal-footer justify-content-evenly">
-          <button
-            type="button"
-            class="btn btn-success"
-            v-on:click="onOkClick"
-          >
+          <button type="button" class="btn btn-success" v-on:click="onOkClick">
             {{ $t("modal.ok") }}
           </button>
           <button
