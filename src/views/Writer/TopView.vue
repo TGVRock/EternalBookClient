@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
@@ -11,6 +12,9 @@ import ModalConfirmComponent from "@/components/modal/ModalConfirmComponent.vue"
 import { WriteMode } from "@/models/enums/WriteMode";
 import CONSTS from "@/utils/consts";
 
+// Locale
+const i18n = useI18n();
+
 // Stores
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
@@ -19,6 +23,7 @@ const writeOnChainDataStore = useWriteOnChainDataStore();
 const mode = ref(WriteMode.CreateMosaic);
 const isShownConfirmModal = ref(false);
 const isConfirmed = ref<boolean | undefined>(undefined);
+const confirmItems = ref<Array<{ key: string; value: string }>>([]);
 
 writeMosaicStore.ownerAddress = "";
 
@@ -42,6 +47,63 @@ onBeforeRouteLeave(async (to) => {
  * 確認ダイアログの表示
  */
 async function displayConfirmDialog(): Promise<boolean> {
+  confirmItems.value = [];
+  confirmItems.value.push({
+    key: i18n.t("preview.title"),
+    value:
+      writeOnChainDataStore.title.length !== 0
+        ? writeOnChainDataStore.title
+        : CONSTS.STR_NOT_SETTING,
+  });
+  confirmItems.value.push({
+    key: i18n.t("preview.message"),
+    value:
+      writeOnChainDataStore.message.length !== 0
+        ? writeOnChainDataStore.message
+        : CONSTS.STR_NOT_SETTING,
+  });
+  confirmItems.value.push({
+    key: i18n.t("mosaicInfo.address"),
+    value: writeMosaicStore.ownerAddress,
+  });
+  confirmItems.value.push({
+    key: i18n.t("writer.writeMode"),
+    value:
+      mode.value === WriteMode.CreateMosaic
+        ? i18n.t("writer.modeCreate")
+        : i18n.t("writer.modeRelated"),
+  });
+  if (mode.value === WriteMode.CreateMosaic) {
+    confirmItems.value.push({
+      key: i18n.t("writer.mosaicFlags"),
+      value:
+        (writeMosaicStore.mosaicFlags.supplyMutable
+          ? i18n.t("mosaicInfo.supplyMutable")
+          : i18n.t("mosaicInfo.supplyImmutable")) +
+        ", " +
+        (writeMosaicStore.mosaicFlags.transferable
+          ? i18n.t("mosaicInfo.transferable")
+          : i18n.t("mosaicInfo.nonTransferable")) +
+        ", " +
+        (writeMosaicStore.mosaicFlags.restrictable
+          ? i18n.t("mosaicInfo.restrictable")
+          : i18n.t("mosaicInfo.nonRestrictable")) +
+        ", " +
+        (writeMosaicStore.mosaicFlags.revokable
+          ? i18n.t("mosaicInfo.revokable")
+          : i18n.t("mosaicInfo.nonRevokable")),
+    });
+    confirmItems.value.push({
+      key: i18n.t("mosaicInfo.supply"),
+      value: writeMosaicStore.amount.toString(),
+    });
+  } else if (mode.value === WriteMode.RelatedMosaic) {
+    confirmItems.value.push({
+      key: i18n.t("mosaicInfo.id"),
+      value: writeOnChainDataStore.relatedMosaicIdStr,
+    });
+  }
+
   isConfirmed.value = undefined;
   isShownConfirmModal.value = true;
   return new Promise((resolve) => {
@@ -70,7 +132,7 @@ function onClickRelateMode() {
  * 確認ダイアログ選択後のコールバック関数
  * @param confirmed 確認選択結果
  */
-function onConfirmed(confirmed: boolean) {
+function onConfirmed(confirmed?: boolean): void {
   isConfirmed.value = confirmed;
 }
 </script>
@@ -113,23 +175,7 @@ function onConfirmed(confirmed: boolean) {
   <ModalConfirmComponent
     v-model:is-shown="isShownConfirmModal"
     v-bind:title="$t('writer.confirmTitle')"
-    v-bind:items="[
-      {
-        key: $t('preview.title'),
-        value:
-          writeOnChainDataStore.title.length !== 0
-            ? writeOnChainDataStore.title
-            : CONSTS.STR_NOT_SETTING,
-      },
-      {
-        key: $t('preview.message'),
-        value:
-          writeOnChainDataStore.message.length !== 0
-            ? writeOnChainDataStore.message
-            : CONSTS.STR_NOT_SETTING,
-      },
-      // TODO: 確認ダイアログに表示する項目の選定、モード別の表示切り分け
-    ]"
+    v-bind:items="confirmItems"
     v-on:confirmed="onConfirmed"
   />
 </template>

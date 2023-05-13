@@ -39,7 +39,7 @@ const onCancelClick = (): void => {
 
 <template>
   <div class="modal fade" v-bind:class="{ show: isShown, 'd-block': isShown }">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ title }}</h5>
