@@ -82,6 +82,8 @@ export default {
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
     confirmTitle: "以下の内容で書き込みます。よろしいですか？",
+    infoContinueTitle: "中断データが存在します",
+    infoContinueMessage: "「ファイル選択」より前回書き込み時と同じデータを選択することで、続きから書き込みすることができます。",
   },
   viewer: {
     title: "ビューアー",

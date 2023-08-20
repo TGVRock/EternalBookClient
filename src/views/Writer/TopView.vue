@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
+import { useSettingsStore } from "@/stores/settings";
 import { useWriteMosaicStore } from "@/stores/WriteMosaic";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import InputAreaComponent from "@/components/OnChainData/InputAreaComponent.vue";
@@ -9,13 +10,16 @@ import RelatedMosaicAreaComponent from "@/components/OnChainData/RelatedMosaicAr
 import CreateMosaicAreaComponent from "@/components/MosaicInfo/CreateMosaicAreaComponent.vue";
 import SSSLinkedSelectAreaComponent from "@/components/form/SSSLinkedSelectAreaComponent.vue";
 import ModalConfirmComponent from "@/components/modal/ModalConfirmComponent.vue";
+import ModalInfoComponent from "@/components/modal/ModalInfoComponent.vue";
 import { WriteMode } from "@/models/enums/WriteMode";
 import CONSTS from "@/utils/consts";
+import { getHash } from "@/utils/crypto";
 
 // Locale
 const i18n = useI18n();
 
 // Stores
+const settingsStore = useSettingsStore();
 const writeMosaicStore = useWriteMosaicStore();
 const writeOnChainDataStore = useWriteOnChainDataStore();
 
@@ -24,8 +28,21 @@ const mode = ref(WriteMode.CreateMosaic);
 const isShownConfirmModal = ref(false);
 const isConfirmed = ref<boolean | undefined>(undefined);
 const confirmItems = ref<Array<{ key: string; value: string }>>([]);
+const isShownInfoModal = ref(false);
 
 writeMosaicStore.ownerAddress = "";
+
+/**
+ * 表示時処理
+ */
+onMounted(() => {
+  if (localStorage.getItem(CONSTS.STORAGEKEY_DATA_HASH) !== null) {
+    // 前回中断データが存在することを通知するメッセージを表示する
+    settingsStore.logger.debug("localStorage");
+    isShownInfoModal.value = true;
+    // TODO: [リトライ対応] 書き込み途中のページ移動を抑制する必要あり
+  }
+});
 
 /**
  * ページ離脱前の処理
@@ -135,6 +152,34 @@ function onClickRelateMode() {
 function onConfirmed(confirmed?: boolean): void {
   isConfirmed.value = confirmed;
 }
+
+// Watch
+watch(
+  () => writeOnChainDataStore.dataBase64,
+  (): void => {
+    // LocalStorage に保存されている前回情報を取得
+    const prevDataHash = localStorage.getItem(CONSTS.STORAGEKEY_DATA_HASH);
+    const targetMosaicId = localStorage.getItem(
+      CONSTS.STORAGEKEY_TARGET_MOSAIC_ID
+    );
+    if (targetMosaicId === null || prevDataHash === null) {
+      return;
+    }
+
+    // 前回と同じデータか確認
+    const dataHash = getHash(writeOnChainDataStore.dataBase64);
+    if (typeof dataHash === "undefined" || dataHash !== prevDataHash) {
+      return;
+    }
+
+    // 前回と同じモザイクを設定する
+    mode.value = WriteMode.RelatedMosaic;
+    writeOnChainDataStore.relatedMosaicIdStr = targetMosaicId;
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>
@@ -177,5 +222,10 @@ function onConfirmed(confirmed?: boolean): void {
     v-bind:title="$t('writer.confirmTitle')"
     v-bind:items="confirmItems"
     v-on:confirmed="onConfirmed"
+  />
+  <ModalInfoComponent
+    v-model:is-shown="isShownInfoModal"
+    v-bind:title="$t('writer.infoContinueTitle')"
+    v-bind:message="$t('writer.infoContinueMessage')"
   />
 </template>

@@ -64,6 +64,16 @@ const constants = {
   /** デフォルトのIV */
   CRYPTO_IV_DEFAULT: "EternalBookProtocol-OnChainData.",
 
+  // LocalStorage キー
+  /** 書き込み対象モザイクID */
+  STORAGEKEY_TARGET_MOSAIC_ID: "TARGET_MOSAIC_ID",
+  /** データハッシュ */
+  STORAGEKEY_DATA_HASH: "DATA_HASH",
+  /** 最終Txハッシュ */
+  STORAGEKEY_PREV_TX_HASH: "PREV_TX_HASH",
+  /** 書き込み済バイトサイズ */
+  STORAGEKEY_PROCESSED_SIZE: "PROCESSED_SIZE",
+
   // その他定数
   /** N/A */
   STR_NA: "N/A",
