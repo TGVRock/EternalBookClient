@@ -260,7 +260,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
       ? createTxAggregateBonded(txList, await getTxFee(settingsStore.feeKind))
-      : createTxAggregateComplete(txList, await getTxFee(settingsStore.feeKind));
+      : createTxAggregateComplete(
+          txList,
+          await getTxFee(settingsStore.feeKind)
+        );
     // 署名
     if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
       settingsStore.logger.error(logTitle, "account invalid.");

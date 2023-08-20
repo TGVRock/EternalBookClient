@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export default {
   lang: "日本語",
   mosaicInfo: {
