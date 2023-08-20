@@ -1,5 +1,21 @@
 /** 定数 */
 const constants = {
+  // Vue Router Name
+  /** ホーム */
+  ROUTENAME_HOME: "home",
+  /** Viewer トップ */
+  ROUTENAME_VIEWER_TOP: "ViewerTop",
+  /** Viewer 表示ページ */
+  ROUTENAME_VIEWER_RESULT: "ViewerResult",
+  /** Writer トップ */
+  ROUTENAME_WRITER_TOP: "WriterTop",
+  /** Writer モザイク作成 */
+  ROUTENAME_WRITER_CREATE_MOSAIC: "CreateMosaic",
+  /** Writer オンチェーンデータ書込み */
+  ROUTENAME_WRITER_WRITE_ONCHAIN_DATA: "WriteOnChainData",
+  /** 設定 */
+  ROUTENAME_SETTINGS: "Settings",
+
   // プロトコル
   /** プロトコル名 */
   PROTOCOL_NAME: "eternal-book-protocol",
@@ -48,9 +64,21 @@ const constants = {
   /** デフォルトのIV */
   CRYPTO_IV_DEFAULT: "EternalBookProtocol-OnChainData.",
 
+  // LocalStorage キー
+  /** 書き込み対象モザイクID */
+  STORAGEKEY_TARGET_MOSAIC_ID: "TARGET_MOSAIC_ID",
+  /** データハッシュ */
+  STORAGEKEY_DATA_HASH: "DATA_HASH",
+  /** 最終Txハッシュ */
+  STORAGEKEY_PREV_TX_HASH: "PREV_TX_HASH",
+  /** 書き込み済バイトサイズ */
+  STORAGEKEY_PROCESSED_SIZE: "PROCESSED_SIZE",
+
   // その他定数
   /** N/A */
   STR_NA: "N/A",
+  /** 設定なし */
+  STR_NOT_SETTING: "--",
   /** オン選択 */
   STR_SELECT_ON: "on",
   /** オフ選択 */

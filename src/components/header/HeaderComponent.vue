@@ -5,6 +5,7 @@ import { NetworkType } from "symbol-sdk";
 import LocaleMenuComponent from "@/components/header/LocaleMenuComponent.vue";
 import { useChainStore } from "@/stores/chain";
 import { useSettingsStore } from "@/stores/settings";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const settingsStore = useSettingsStore();
@@ -16,7 +17,9 @@ const netType = computed(() => {
   return chainStore.networkType === NetworkType.MAIN_NET ? "main" : "test";
 });
 const addressStr = computed(() => {
-  return settingsStore.addressStr.length > 0 ? settingsStore.addressStr : "--";
+  return settingsStore.addressStr.length > 0
+    ? settingsStore.addressStr
+    : CONSTS.STR_NOT_SETTING;
 });
 
 /**
@@ -52,7 +55,7 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
-            v-bind:to="{ name: 'Settings' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_SETTINGS }"
             v-on:click="onClickClose"
           >
             {{ $t(`settings.title`) }}
@@ -61,9 +64,9 @@ function onClickToggle(): void {
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
             v-bind:class="{
-              'router-link-disable': addressStr === '--',
+              'router-link-disable': addressStr === CONSTS.STR_NOT_SETTING,
             }"
-            v-bind:to="{ name: 'WriterTop' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_WRITER_TOP }"
             v-on:click="onClickClose"
           >
             {{ $t(`writer.title`) }}
@@ -71,7 +74,7 @@ function onClickToggle(): void {
           <RouterLink
             v-if="settingsStore.isAvailable"
             class="nav-link ps-2"
-            v-bind:to="{ name: 'ViewerTop' }"
+            v-bind:to="{ name: CONSTS.ROUTENAME_VIEWER_TOP }"
             v-on:click="onClickClose"
           >
             {{ $t(`viewer.title`) }}

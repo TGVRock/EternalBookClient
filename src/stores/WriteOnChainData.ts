@@ -118,12 +118,48 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
       progress.value = WriteProgress.Failed;
       return;
     }
+    const dataHash = getHash(dataBase64.value);
+    if (typeof dataHash === "undefined") {
+      settingsStore.logger.error(logTitle, "data hash calculation failed.");
+      progress.value = WriteProgress.Failed;
+      return;
+    }
     // TODO: モザイク情報取得中か確認して待つ必要あり
     if (typeof relatedMosaicInfo.value === "undefined") {
       settingsStore.logger.error(logTitle, "mosaic info undefined.");
       progress.value = WriteProgress.Failed;
       return;
     }
+
+    // 前回中断時と同じモザイクに同じデータを書き込む場合、 LocalStorage の中断情報を取得する
+    const lastDataHash = localStorage.getItem(CONSTS.STORAGEKEY_DATA_HASH);
+    const lastMosaicId = localStorage.getItem(
+      CONSTS.STORAGEKEY_TARGET_MOSAIC_ID
+    );
+    if (
+      lastDataHash !== null &&
+      lastMosaicId !== null &&
+      lastDataHash === dataHash &&
+      lastMosaicId === relatedMosaicIdStr.value
+    ) {
+      const lastPrevTxHash = localStorage.getItem(
+        CONSTS.STORAGEKEY_PREV_TX_HASH
+      );
+      const lastProcessedSize = localStorage.getItem(
+        CONSTS.STORAGEKEY_PROCESSED_SIZE
+      );
+      if (lastPrevTxHash !== null && lastProcessedSize !== null) {
+        prevTxHash.value = lastPrevTxHash;
+        processedSize.value = Number(lastProcessedSize);
+      }
+    }
+
+    // LocalStorage にモザイクIDとデータハッシュを設定する
+    localStorage.setItem(
+      CONSTS.STORAGEKEY_TARGET_MOSAIC_ID,
+      relatedMosaicIdStr.value
+    );
+    localStorage.setItem(CONSTS.STORAGEKEY_DATA_HASH, dataHash);
 
     // モザイク作成アカウントがマルチシグアカウントか確認
     // TODO: モザイク作成者のみ書き込み可能を制限とし、別のアカウントでの書き込みは別途検討
@@ -144,6 +180,13 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     const logTitle = "write data:";
     settingsStore.logger.debug(logTitle, "start");
     progress.value = WriteProgress.Preprocess;
+
+    // LocalStorage の前回Txハッシュ値と書き込み済サイズを更新
+    localStorage.setItem(CONSTS.STORAGEKEY_PREV_TX_HASH, prevTxHash.value);
+    localStorage.setItem(
+      CONSTS.STORAGEKEY_PROCESSED_SIZE,
+      processedSize.value.toString()
+    );
 
     // 書き込み済データサイズチェック
     settingsStore.logger.debug(logTitle, "processed size", processedSize.value);
@@ -217,7 +260,10 @@ export const useWriteOnChainDataStore = defineStore("WriteOnChainData", () => {
     // オンチェーンデータTxのアグリゲートTx作成
     const aggTx = isBonded
       ? createTxAggregateBonded(txList, await getTxFee(settingsStore.feeKind))
-      : createTxAggregateComplete(txList, await getTxFee(settingsStore.feeKind));
+      : createTxAggregateComplete(
+          txList,
+          await getTxFee(settingsStore.feeKind)
+        );
     // 署名
     if (!settingsStore.useSSS && typeof settingsStore.account === "undefined") {
       settingsStore.logger.error(logTitle, "account invalid.");

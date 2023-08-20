@@ -7,6 +7,7 @@ import ProcessingComponent from "./ProcessingComponent.vue";
 import { useSettingsStore } from "@/stores/settings";
 import { useWriteOnChainDataStore } from "@/stores/WriteOnChainData";
 import { getMosaicInfo } from "@/apis/mosaic";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const settingsStore = useSettingsStore();
@@ -36,7 +37,7 @@ getMosaicInfo(writeOnChainDataStore.relatedMosaicIdStr)
 
 // 一定時間後にオンチェーンデータ書き込みに移行する
 setTimeout(() => {
-  router.push({ name: "WriteOnChainData" });
+  router.push({ name: CONSTS.ROUTENAME_WRITER_WRITE_ONCHAIN_DATA });
 }, 10 * 1000);
 </script>
 

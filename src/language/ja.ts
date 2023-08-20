@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export default {
   lang: "日本語",
   mosaicInfo: {
@@ -12,9 +13,13 @@ export default {
     date: "日付",
     expired: "ブロック以内に期限切れ",
     supplyMutable: "供給可変",
+    supplyImmutable: "供給変更不可",
     transferable: "転送可能",
+    nonTransferable: "転送不可",
     restrictable: "制限可能",
+    nonRestrictable: "制限不可",
     revokable: "取消可能",
+    nonRevokable: "取消不可",
   },
   preview: {
     title: "タイトル",
@@ -72,10 +77,14 @@ export default {
     mosaicFlags: "モザイクフラグ",
     pleaseInputItem: "{item}を入力してください...",
     fileSelect: "ファイル選択",
+    writeMode: "書き込みモード",
     modeCreate: "モザイクを作成して書き込み",
     modeRelated: "既存モザイクへの書き込み",
     createMosaic: "モザイク作成",
     writeOnChain: "オンチェーン書き込み",
+    confirmTitle: "以下の内容で書き込みます。よろしいですか？",
+    infoContinueTitle: "中断データが存在します",
+    infoContinueMessage: "「ファイル選択」より前回書き込み時と同じデータを選択することで、続きから書き込みすることができます。",
   },
   viewer: {
     title: "ビューアー",
@@ -141,5 +150,7 @@ export default {
   },
   modal: {
     close: "閉じる",
+    ok: "OK",
+    cancel: "キャンセル",
   },
 };

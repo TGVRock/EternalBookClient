@@ -26,7 +26,7 @@ onBeforeMount(() => {
     typeof route.query.mosaicId !== "undefined"
   ) {
     router.push({
-      name: "ViewerResult",
+      name: CONSTS.ROUTENAME_VIEWER_RESULT,
       params: {
         netType: route.query.netType?.toString(),
         mosaicId: route.query.mosaicId?.toString(),
@@ -90,19 +90,19 @@ watch(
     </section>
     <TopLinkAreaComponent
       v-if="settingsStore.isAvailable"
-      v-bind:next-route-name="`Settings`"
+      v-bind:next-route-name="CONSTS.ROUTENAME_SETTINGS"
       v-bind:function-name="`settings`"
     />
     <TopLinkAreaComponent
       v-if="settingsStore.isAvailable"
-      v-bind:next-route-name="`WriterTop`"
+      v-bind:next-route-name="CONSTS.ROUTENAME_WRITER_TOP"
       v-bind:function-name="`writer`"
       v-bind:exist-annotation="settingsStore.addressStr.length === 0"
       v-bind:is-disabled="settingsStore.addressStr.length === 0"
     />
     <TopLinkAreaComponent
       v-if="settingsStore.isAvailable"
-      v-bind:next-route-name="`ViewerTop`"
+      v-bind:next-route-name="CONSTS.ROUTENAME_VIEWER_TOP"
       v-bind:function-name="`viewer`"
     />
   </article>

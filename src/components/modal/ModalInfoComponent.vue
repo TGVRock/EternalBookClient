@@ -40,10 +40,10 @@ const onModalClose = (): void => {
         <div class="modal-footer justify-content-evenly">
           <button
             type="button"
-            class="btn btn-danger"
+            class="btn btn-primary"
             v-on:click="onModalClose"
           >
-            {{ $t("modal.close") }}
+            {{ $t("modal.ok") }}
           </button>
         </div>
       </div>

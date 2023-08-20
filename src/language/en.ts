@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export default {
   lang: "English",
   mosaicInfo: {
@@ -12,9 +13,13 @@ export default {
     date: "Date",
     expired: "Expired In Block",
     supplyMutable: "Supply Mutable",
+    supplyImmutable: "Supply Immutable",
     transferable: "Transferable",
+    nonTransferable: "Non Transferable",
     restrictable: "Restrictable",
+    nonRestrictable: "Non Restrictable",
     revokable: "Revokable",
+    nonRevokable: "Non Revokable",
   },
   preview: {
     title: "Title",
@@ -72,10 +77,14 @@ export default {
     mosaicFlags: "Mosaic Flags",
     pleaseInputItem: "Please Input {item} ...",
     fileSelect: "Select File",
+    writeMode: "Write mode",
     modeCreate: "Create a mosaic and write",
     modeRelated: "Writing in existing mosaic",
     createMosaic: "Create Mosaic",
     writeOnChain: "Write On Chain",
+    confirmTitle: "Write with the following information. Are you sure?",
+    infoContinueTitle: "Interrupted data exists.",
+    infoContinueMessage: "By selecting the same data from the \"Select File\" menu, you can start writing from the previous time.",
   },
   viewer: {
     title: "Viewer",
@@ -141,5 +150,7 @@ export default {
   },
   modal: {
     close: "Close",
+    ok: "OK",
+    cancel: "Cancel",
   },
 };

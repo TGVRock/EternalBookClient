@@ -10,6 +10,7 @@ import TextAreaComponent from "@/components/form/TextAreaComponent.vue";
 import ModalComponent from "@/components/common/ModalComponent.vue";
 import { ReadMode } from "@/models/enums/ReadMode";
 import { isValidMosaicId } from "@/apis/mosaic";
+import CONSTS from "@/utils/consts";
 
 // Stores
 const chainStore = useChainStore();
@@ -52,7 +53,7 @@ function onClickViewerResult() {
     return;
   }
   router.push({
-    name: "ViewerResult",
+    name: CONSTS.ROUTENAME_VIEWER_RESULT,
     params: {
       netType: netType.value,
       mosaicId: mosaicId.value,
